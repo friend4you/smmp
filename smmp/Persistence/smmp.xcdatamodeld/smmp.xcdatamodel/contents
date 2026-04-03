@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="25D2128" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Comment" representedClassName="Comment" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES"/>
+        <attribute name="id" optional="YES"/>
+        <attribute name="text" optional="YES"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User"/>
+        <relationship name="postId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Post"/>
+    </entity>
+    <entity name="Post" representedClassName="Post" syncable="YES" codeGenerationType="class">
+        <attribute name="cachedAt" optional="YES"/>
+        <attribute name="createdAt" optional="YES"/>
+        <attribute name="id" optional="YES"/>
+        <attribute name="imageURL" optional="YES"/>
+        <attribute name="likeCount" optional="YES"/>
+        <attribute name="text" optional="YES"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User"/>
+    </entity>
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="bio" optional="YES"/>
+        <attribute name="cachedAt" optional="YES"/>
+        <attribute name="displayName" optional="YES"/>
+        <attribute name="id" optional="YES"/>
+        <attribute name="photoURL" optional="YES"/>
+    </entity>
+</model>
