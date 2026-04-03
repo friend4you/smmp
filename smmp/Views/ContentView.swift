@@ -12,9 +12,9 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \User.displayName, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \CDUser.displayName, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<User>
+    private var items: FetchedResults<CDUser>
 
     var body: some View {
         NavigationView {
@@ -44,7 +44,7 @@ struct ContentView: View {
 
     private func addItem() {
         withAnimation {
-            let newItem = User(context: viewContext)
+            let newItem = CDUser(context: viewContext)
             newItem.displayName = "New name"
 
             do {
@@ -75,5 +75,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
 }

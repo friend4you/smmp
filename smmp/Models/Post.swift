@@ -5,3 +5,6 @@
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
+struct Post {
+    
+}

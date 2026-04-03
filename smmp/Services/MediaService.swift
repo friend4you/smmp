@@ -1,10 +1,10 @@
 //
-//  User.swift
+//  MediaService.swift
 //  smmp
 //
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
-struct User {
+class MediaService: MediaServiceProtocol {
     
 }

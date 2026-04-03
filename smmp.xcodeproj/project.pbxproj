@@ -34,9 +34,30 @@
 		AAC3AB3D2F7FB9C1005BCCCC /* smmpUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smmpUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AAC3AC052F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AAC3AB322F7FB9C1005BCCCC /* smmpTests */;
+		};
+		AAC3AC062F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AAC3AB3C2F7FB9C1005BCCCC /* smmpUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AAC3AB232F7FB9BE005BCCCC /* smmp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AAC3AC052F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpTests" target */,
+				AAC3AC062F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpUITests" target */,
+			);
 			path = smmp;
 			sourceTree = "<group>";
 		};
@@ -409,7 +430,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = H7A8S5HDP4;
+				DEVELOPMENT_TEAM = CA72S227QC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -441,7 +462,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = H7A8S5HDP4;
+				DEVELOPMENT_TEAM = CA72S227QC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
