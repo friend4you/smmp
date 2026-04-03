@@ -18,11 +18,13 @@ extension User {
         return NSFetchRequest<User>(entityName: "User")
     }
 
-    @NSManaged public var id: NSObject?
-    @NSManaged public var displayName: NSObject?
-    @NSManaged public var bio: NSObject?
-    @NSManaged public var photoURL: NSObject?
-    @NSManaged public var cachedAt: NSObject?
+    @NSManaged public var id: String?
+    @NSManaged public var displayName: String?
+    @NSManaged public var bio: String?
+    @NSManaged public var photoURL: String?
+    @NSManaged public var cachedAt: Date?
+    @NSManaged public var postId: Post?
+    @NSManaged public var commentId: Comment?
 
 }
 

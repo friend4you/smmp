@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="25D2128" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Comment" representedClassName="Comment" syncable="YES" codeGenerationType="class">
-        <attribute name="createdAt" optional="YES"/>
-        <attribute name="id" optional="YES"/>
-        <attribute name="text" optional="YES"/>
-        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User"/>
-        <relationship name="postId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Post"/>
+    <entity name="Comment" representedClassName="Comment" syncable="YES">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="text" optional="YES" attributeType="String"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="commentId" inverseEntity="User"/>
+        <relationship name="postId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Post" inverseName="commentId" inverseEntity="Post"/>
     </entity>
-    <entity name="Post" representedClassName="Post" syncable="YES" codeGenerationType="class">
-        <attribute name="cachedAt" optional="YES"/>
-        <attribute name="createdAt" optional="YES"/>
-        <attribute name="id" optional="YES"/>
-        <attribute name="imageURL" optional="YES"/>
-        <attribute name="likeCount" optional="YES"/>
-        <attribute name="text" optional="YES"/>
-        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User"/>
+    <entity name="Post" representedClassName="Post" syncable="YES">
+        <attribute name="cachedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
+        <attribute name="likeCount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="text" optional="YES" attributeType="String"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="postId" inverseEntity="User"/>
+        <relationship name="commentId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="postId" inverseEntity="Comment"/>
     </entity>
-    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
-        <attribute name="bio" optional="YES"/>
-        <attribute name="cachedAt" optional="YES"/>
-        <attribute name="displayName" optional="YES"/>
-        <attribute name="id" optional="YES"/>
-        <attribute name="photoURL" optional="YES"/>
+    <entity name="User" representedClassName="User" syncable="YES">
+        <attribute name="bio" optional="YES" attributeType="String"/>
+        <attribute name="cachedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="displayName" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="photoURL" optional="YES" attributeType="String"/>
+        <relationship name="commentId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="authorId" inverseEntity="Comment"/>
+        <relationship name="postId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Post" inverseName="authorId" inverseEntity="Post"/>
     </entity>
 </model>

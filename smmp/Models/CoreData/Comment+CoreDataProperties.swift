@@ -18,9 +18,9 @@ extension Comment {
         return NSFetchRequest<Comment>(entityName: "Comment")
     }
 
-    @NSManaged public var id: NSObject?
-    @NSManaged public var text: NSObject?
-    @NSManaged public var createdAt: NSObject?
+    @NSManaged public var id: String?
+    @NSManaged public var text: String?
+    @NSManaged public var createdAt: Date?
     @NSManaged public var authorId: User?
     @NSManaged public var postId: Post?
 

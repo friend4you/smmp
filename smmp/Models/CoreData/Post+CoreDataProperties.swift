@@ -18,13 +18,14 @@ extension Post {
         return NSFetchRequest<Post>(entityName: "Post")
     }
 
-    @NSManaged public var id: NSObject?
-    @NSManaged public var text: NSObject?
-    @NSManaged public var imageURL: NSObject?
-    @NSManaged public var likeCount: NSObject?
-    @NSManaged public var createdAt: NSObject?
-    @NSManaged public var cachedAt: NSObject?
+    @NSManaged public var id: String?
+    @NSManaged public var text: String?
+    @NSManaged public var imageURL: String?
+    @NSManaged public var likeCount: Int64
+    @NSManaged public var createdAt: Date?
+    @NSManaged public var cachedAt: Date?
     @NSManaged public var authorId: User?
+    @NSManaged public var commentId: Comment?
 
 }
 
