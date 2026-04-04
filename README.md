@@ -297,15 +297,15 @@ The plan is broken into **6 phases**, each delivering a working vertical slice. 
 Use this checklist to track implementation status. Items map 1-to-1 with the Development Plan above.
 
 ### Phase 1 — Project Foundation
-- [ ] Xcode project created with SwiftUI lifecycle
-- [ ] Swift Package dependencies added (Firebase, SDWebImageSwiftUI)
-- [ ] Firebase project configured (Auth, Firestore, Storage)
-- [ ] Folder structure set up
-- [ ] Swift model structs defined (`User`, `Post`, `Comment`)
-- [ ] `AppDependencies` container implemented
-- [ ] CoreData model defined (all entities and attributes)
-- [ ] `PersistenceController` implemented
-- [ ] `NetworkMonitor` implemented
+- [x] Xcode project created with SwiftUI lifecycle
+- [x] Swift Package dependencies added (Firebase, SDWebImageSwiftUI)
+- [x] Firebase project configured (Auth, Firestore, Storage)
+- [x] Folder structure set up
+- [x] Swift model structs defined (`User`, `Post`, `Comment`)
+- [x] `AppDependencies` container implemented
+- [x] CoreData model defined (all entities and attributes)
+- [x] `PersistenceController` implemented
+- [x] `NetworkMonitor` implemented
 - [ ] Unit tests for model parsing written
 
 ### Phase 2 — Authentication
