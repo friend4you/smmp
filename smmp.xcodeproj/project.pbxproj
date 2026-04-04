@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AAC3AB952F7FC5DB005BCCCC /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AAC3AB942F7FC5DB005BCCCC /* FirebaseAuth */; };
+		AAC3AB972F7FC5DB005BCCCC /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AAC3AB962F7FC5DB005BCCCC /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AAC3AB342F7FB9C1005BCCCC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +34,30 @@
 		AAC3AB3D2F7FB9C1005BCCCC /* smmpUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smmpUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AAC3AC052F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AAC3AB322F7FB9C1005BCCCC /* smmpTests */;
+		};
+		AAC3AC062F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AAC3AB3C2F7FB9C1005BCCCC /* smmpUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AAC3AB232F7FB9BE005BCCCC /* smmp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AAC3AC052F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpTests" target */,
+				AAC3AC062F7FE9DE005BCCCC /* Exceptions for "smmp" folder in "smmpUITests" target */,
+			);
 			path = smmp;
 			sourceTree = "<group>";
 		};
@@ -52,6 +78,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAC3AB952F7FC5DB005BCCCC /* FirebaseAuth in Frameworks */,
+				AAC3AB972F7FC5DB005BCCCC /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +140,8 @@
 			);
 			name = smmp;
 			packageProductDependencies = (
+				AAC3AB942F7FC5DB005BCCCC /* FirebaseAuth */,
+				AAC3AB962F7FC5DB005BCCCC /* FirebaseFirestore */,
 			);
 			productName = smmp;
 			productReference = AAC3AB212F7FB9BE005BCCCC /* smmp.app */;
@@ -195,6 +225,9 @@
 			);
 			mainGroup = AAC3AB182F7FB9BE005BCCCC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AAC3AB932F7FC5DB005BCCCC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAC3AB222F7FB9BE005BCCCC /* Products */;
 			projectDirPath = "";
@@ -397,7 +430,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = H7A8S5HDP4;
+				DEVELOPMENT_TEAM = CA72S227QC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -429,7 +462,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = H7A8S5HDP4;
+				DEVELOPMENT_TEAM = CA72S227QC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -578,6 +611,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AAC3AB932F7FC5DB005BCCCC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AAC3AB942F7FC5DB005BCCCC /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC3AB932F7FC5DB005BCCCC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		AAC3AB962F7FC5DB005BCCCC /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAC3AB932F7FC5DB005BCCCC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AAC3AB192F7FB9BE005BCCCC /* Project object */;
 }

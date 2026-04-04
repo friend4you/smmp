@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="25D2128" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CDComment" representedClassName="CDComment" syncable="YES">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="text" optional="YES" attributeType="String"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDUser" inverseName="commentId" inverseEntity="CDUser"/>
+        <relationship name="postId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDPost" inverseName="commentId" inverseEntity="CDPost"/>
+    </entity>
+    <entity name="CDPost" representedClassName="CDPost" syncable="YES">
+        <attribute name="cachedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
+        <attribute name="likeCount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="text" optional="YES" attributeType="String"/>
+        <relationship name="authorId" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDUser" inverseName="postId" inverseEntity="CDUser"/>
+        <relationship name="commentId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDComment" inverseName="postId" inverseEntity="CDComment"/>
+    </entity>
+    <entity name="CDUser" representedClassName="CDUser" syncable="YES">
+        <attribute name="bio" optional="YES" attributeType="String"/>
+        <attribute name="cachedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="displayName" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="photoURL" optional="YES" attributeType="String"/>
+        <relationship name="commentId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDComment" inverseName="authorId" inverseEntity="CDComment"/>
+        <relationship name="postId" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPost" inverseName="authorId" inverseEntity="CDPost"/>
+    </entity>
+</model>
