@@ -19,6 +19,12 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
+                Spacer()
+                Image(.logo)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(.horizontal, 24)
+                Spacer()
                 TextField(text: $loginViewModel.email, prompt: Text("Email"), label: {})
                     .textFieldStyle(.roundedBorder)
                 TextField(text: $loginViewModel.password, prompt: Text("Password"), label: {})
@@ -33,8 +39,18 @@ struct LoginView: View {
                 NavigationLink("Register") {
                     RegistrationView(viewModel: RegistrationViewModel(authRepository: deps.authRepository, localRepository: deps.localRepository))
                 }
-                
+                Spacer()
 
+                Text("Or login with other methods")
+                HStack {
+                    Image(.googleIcon)
+                        .resizable()
+                        .scaledToFit()
+                    Image(.appleIcon)
+                        .resizable()
+                        .scaledToFit()
+                }
+                .frame(height: 40)
             }
             .padding()
         }

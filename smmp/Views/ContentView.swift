@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import FirebaseAuth
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -37,9 +38,21 @@ struct ContentView: View {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        logout()
+                    } label: {
+                        Label("Logout", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+
+                }
             }
             Text("Select an item")
         }
+    }
+    
+    private func logout() {
+        try? Auth.auth().signOut()
     }
 
     private func addItem() {
