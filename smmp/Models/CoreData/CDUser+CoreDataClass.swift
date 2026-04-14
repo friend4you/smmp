@@ -14,4 +14,10 @@ public typealias CDUserCoreDataClassSet = NSSet
 @objc(CDUser)
 public class CDUser: NSManagedObject {
 
+    func update(user: User) {
+        id = user.id
+        photoURL = user.photoURL
+        displayName = user.displayName
+        bio = user.bio
+    }
 }

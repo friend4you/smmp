@@ -38,3 +38,31 @@ struct PersistenceController {
         backgroundContext.undoManager = nil
     }
 }
+
+extension PersistenceController {
+    func write(_ block: @escaping (NSManagedObjectContext) throws -> Void) async throws {
+        try await backgroundContext.perform {
+            try block(self.backgroundContext)
+            guard self.backgroundContext.hasChanges else { return }
+            try self.backgroundContext.save()
+        }
+    }
+    
+    func fetch<T: NSManagedObject>(_ request: NSFetchRequest<T>) async throws -> [T] {
+        try await backgroundContext.perform {
+            try self.backgroundContext.fetch(request)
+        }
+    }
+    
+    func fetchOnMain<T: NSManagedObject>(_ request: NSFetchRequest<T>) throws -> [T] {
+        try viewContext.fetch(request)
+    }
+    
+    func deleteAll<T: NSManagedObject>(_ request: NSFetchRequest<T>) async throws {
+        try await write { context in
+            let objects = try context.fetch(request)
+            objects.forEach(context.delete)
+        }
+    }
+    
+}

@@ -34,8 +34,15 @@ final class SessionService: ObservableObject {
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, firebaseUser in
             guard let self else { return }
             Task { @MainActor in
-                self.currentUser = User()
-                self.isResolvingSession = false
+                defer {
+                    self.isResolvingSession = false
+                }
+                
+                guard let user = firebaseUser else {
+                    self.currentUser = nil
+                     return
+                }
+                self.currentUser = User(firebaseUser: user)
             }
         }
     }
