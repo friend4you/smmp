@@ -6,5 +6,5 @@
 import Foundation
 
 enum Tab: Hashable {
-    case feed, search, newPost
+    case feed, search, newPost, profile
 }

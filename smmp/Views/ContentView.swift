@@ -21,6 +21,9 @@ struct ContentView: View {
             NewPostView()
                 .tabItem { Label("Post", systemImage: "plus.square") }
                 .tag(Tab.newPost)
+            ProfileView()
+                .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+                .tag(Tab.profile)
         }
     }
 }
