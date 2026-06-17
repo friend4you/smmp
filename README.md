@@ -175,11 +175,11 @@ The project follows **MVVM (Model–View–ViewModel)** with a clear separation 
 
 | Entity | Attributes | Purpose |
 |---|---|---|
-| `CDUser` | `uid`, `displayName`, `bio`, `photoURL`, `cachedAt` | Profile offline cache |
-| `CDPost` | `pid`, `authorId`, `text`, `imageURL`, `likeCount`, `createdAt`, `cachedAt` | Feed offline cache |
-| `CDComment` | `cid`, `postId`, `authorId`, `text`, `createdAt` | Comment offline cache |
+| `CDUser` | `id`, `displayName`, `bio`, `photoURL`, `cachedAt` | Profile offline cache (`id` maps to Firestore `users/{uid}`) |
+| `CDPost` | `id`, `authorId`, `text`, `imageURL`, `likeCount`, `commentCount`, `createdAt`, `cachedAt` | Feed offline cache |
+| `CDComment` | `id`, `postId`, `authorId`, `text`, `createdAt` | Comment offline cache |
 
-CoreData entities mirror the Firestore schema fields that the UI actually renders. Fields used only for server-side logic (e.g., sub-collection counts managed by Cloud Functions) are not persisted locally.
+CoreData entities use **flat string IDs** that mirror the Firestore schema. Foreign keys (`authorId`, `postId`) are stored as attributes, not CoreData relationships — this keeps the mapping layer straightforward when syncing remote documents to local cache.
 
 ### 3.4 Data Flow
 
@@ -212,9 +212,14 @@ CoreData entities mirror the Firestore schema fields that the UI actually render
 
 Firestore `addSnapshotListener` is attached at the Repository level, not in Views. Listeners are stored in a `ListenerRegistration` dictionary keyed by scope (e.g., `"feed"`, `"post-\(pid)"`). On sign-out all listeners are removed to prevent data leaks.
 
-### 3.7 Dependency Injection
+### 3.7 Dependency Injection & Session
 
 A lightweight `AppDependencies` container is instantiated at app entry and injected into the root View via SwiftUI's `.environmentObject`. ViewModels receive concrete service instances through their initializers, making them swappable with mocks during testing.
+
+**Auth split (pragmatic):**
+- `AuthRepository` — sign-in, register, sign-out, password reset (wraps `AuthService`)
+- `SessionService` — observes Firebase auth state, publishes `currentUser` and routes the app (Login vs. main tabs)
+- `LoginViewModel` / `RegistrationViewModel` — per-screen form state and validation (replaces a single shared `AuthViewModel`)
 
 ---
 
@@ -233,30 +238,34 @@ The plan is broken into **6 phases**, each delivering a working vertical slice. 
 7. Configure `CoreData` model (`.xcdatamodeld`) with all entities and attributes.
 8. Implement `PersistenceController` (singleton with background context for writes).
 9. Implement `NetworkMonitor` using `NWPathMonitor`.
-10. Write unit tests for model parsing.
+10. Write unit tests for the foundation layer (`LocalRepository`, `User` mapping, in-memory `PersistenceController`).
+
+> **Pragmatic note:** Firestore document parsing tests move to Phase 3 when `PostRepository` implements real mapping. Firebase Storage and SDWebImageSwiftUI are added when feed/media work begins (Phase 3), not upfront.
 
 ### Phase 2 — Authentication
 
 1. Build Login screen (email/password fields, validation, error alerts).
 2. Build Register screen (display name, email, password, strength indicator).
 3. Implement `AuthService` wrapping `Firebase Auth` (sign-in, register, sign-out, password reset).
-4. Implement `AuthRepository` publishing `currentUser` state.
-5. Implement `AuthViewModel` driving both screens.
-6. Add session persistence: app re-opens to Feed if already logged in.
-7. Write unit tests for `AuthViewModel` with a mock `AuthService`.
+4. Implement `AuthRepository` wrapping `AuthService`.
+5. Implement `SessionService` for auth-state observation and app routing.
+6. Implement `LoginViewModel` and `RegistrationViewModel` (per-screen form state).
+7. Add session persistence: app re-opens to Feed if already logged in.
+8. Write unit tests for login/register ViewModels with a mock `AuthService`.
 
 ### Phase 3 — Feed & Posts
 
-1. Implement `PostRepository` with Firestore listener, CoreData write, and offline fallback.
-2. Build `FeedViewModel` (pagination, refresh, real-time append).
-3. Build `PostCardView` (avatar, name, text, image, like button, comment count).
-4. Build `FeedScreen` with `LazyVStack`, pull-to-refresh, offline banner, and "New posts" banner.
-5. Implement like/unlike toggle (optimistic UI update with rollback on error).
-6. Build `CreatePostScreen` (text input, image picker, upload progress, character counter).
-7. Implement image upload to Firebase Storage via `MediaService`.
-8. Build `PostDetailScreen` with comments list and inline comment composer.
-9. Implement `CommentRepository` (fetch, add, delete).
-10. Write integration tests for `PostRepository` offline path.
+1. Add Firebase Storage + SDWebImageSwiftUI dependencies.
+2. Implement `PostRepository` with Firestore listener, CoreData write, and offline fallback.
+3. Build `FeedViewModel` (pagination, refresh, real-time append).
+4. Build `PostCardView` (avatar, name, text, image, like button, comment count).
+5. Build `FeedScreen` with `LazyVStack`, pull-to-refresh, offline banner, and "New posts" banner.
+6. Implement like/unlike toggle (optimistic UI update with rollback on error).
+7. Build `CreatePostScreen` (text input, image picker, upload progress, character counter).
+8. Implement image upload to Firebase Storage via `MediaService`.
+9. Build `PostDetailScreen` with comments list and inline comment composer.
+10. Implement `CommentRepository` (fetch, add, delete).
+11. Write unit tests for Firestore → model parsing and integration tests for `PostRepository` offline path.
 
 ### Phase 4 — Profiles & Social Graph
 
@@ -294,30 +303,33 @@ The plan is broken into **6 phases**, each delivering a working vertical slice. 
 
 ## 5. Progress Tracker
 
-Use this checklist to track implementation status. Items map 1-to-1 with the Development Plan above.
+Use this checklist to track implementation status. Items map to the Development Plan above, adjusted for the pragmatic path.
 
 ### Phase 1 — Project Foundation
 - [x] Xcode project created with SwiftUI lifecycle
-- [x] Swift Package dependencies added (Firebase, SDWebImageSwiftUI)
+- [x] Swift Package dependencies added (Firebase Auth, Firestore)
+- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3)*
 - [x] Firebase project configured (Auth, Firestore, Storage)
 - [x] Folder structure set up
 - [x] Swift model structs defined (`User`, `Post`, `Comment`)
 - [x] `AppDependencies` container implemented
-- [x] CoreData model defined (all entities and attributes)
+- [x] CoreData model defined (flat string IDs matching Firestore)
 - [x] `PersistenceController` implemented
 - [x] `NetworkMonitor` implemented
-- [ ] Unit tests for model parsing written
+- [ ] Unit tests for foundation layer written
 
 ### Phase 2 — Authentication
-- [ ] Login screen built
-- [ ] Register screen built
-- [ ] `AuthService` implemented
-- [ ] `AuthRepository` implemented
-- [ ] `AuthViewModel` implemented
-- [ ] Session persistence working
-- [ ] Unit tests for `AuthViewModel` written
+- [x] Login screen built *(basic — validation & error UX still thin)*
+- [x] Register screen built *(basic — no display name or password strength yet)*
+- [x] `AuthService` implemented
+- [x] `AuthRepository` implemented
+- [x] `LoginViewModel` / `RegistrationViewModel` implemented *(replaces single `AuthViewModel`)*
+- [x] Session persistence working (`SessionService` → Feed when logged in)
+- [ ] Sign-out and password reset
+- [ ] Unit tests for login/register ViewModels
 
 ### Phase 3 — Feed & Posts
+- [ ] Firebase Storage + SDWebImageSwiftUI added
 - [ ] `PostRepository` implemented (Firestore + CoreData + offline)
 - [ ] `FeedViewModel` implemented
 - [ ] `PostCardView` built
@@ -327,6 +339,7 @@ Use this checklist to track implementation status. Items map 1-to-1 with the Dev
 - [ ] Image upload via `MediaService` implemented
 - [ ] `PostDetailScreen` built
 - [ ] `CommentRepository` implemented
+- [ ] Unit tests for Firestore → model parsing
 - [ ] Integration tests for offline path written
 
 ### Phase 4 — Profiles & Social Graph
@@ -360,4 +373,4 @@ Use this checklist to track implementation status. Items map 1-to-1 with the Dev
 
 ---
 
-> **Last updated:** April 2026
+> **Last updated:** June 2026

@@ -18,7 +18,7 @@ struct User {
         self.id = firebaseUser.uid
         self.displayName = firebaseUser.displayName
         self.photoURL = firebaseUser.photoURL?.absoluteString
-        self.bio = firebaseUser.email
+        self.bio = nil
     }
     
     init(id: String) {
