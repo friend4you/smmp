@@ -8,41 +8,67 @@
 import Combine
 import Foundation
 
+@MainActor
 class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
-    
+
     @Published var isEmailValid: Bool = true
     @Published var isPasswordValid: Bool = true
     @Published var shouldShowErrorMessage: Bool = false
-    @Published var errorMessage: String = "Error"
-    
+    @Published var errorMessage: String = ""
+    @Published var isSubmitting: Bool = false
+
     private let authRepository: AuthRepository
     private let localRepository: LocalRepositoryProtocol
-    
+
     init(authRepository: AuthRepository, localRepository: LocalRepositoryProtocol) {
         self.authRepository = authRepository
         self.localRepository = localRepository
     }
-    
-    @MainActor
+
     func login() async {
-        guard isEmailValid, isPasswordValid else {
+        shouldShowErrorMessage = false
+
+        guard validateInputs() else {
             shouldShowErrorMessage = true
             return
         }
 
-        try? await authRepository.login(email: email, password: password) { result in
-            switch result {
-            case .success(let user):
+        isSubmitting = true
+        defer { isSubmitting = false }
+
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        do {
+            let user = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<User, Error>) in
                 Task {
-                    try? await self.localRepository.saveUser(user: user)
+                    try? await authRepository.login(email: normalizedEmail, password: password) { result in
+                        continuation.resume(with: result)
+                    }
                 }
-            case .failure(let error):
-                self.errorMessage = error.localizedDescription
-                self.shouldShowErrorMessage = true
-                return
             }
+            try await localRepository.saveUser(user: user)
+        } catch {
+            errorMessage = AuthErrorMapper.message(for: error)
+            shouldShowErrorMessage = true
         }
+    }
+
+    @discardableResult
+    private func validateInputs() -> Bool {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        isEmailValid = FormValidation.isValidEmail(normalizedEmail)
+        isPasswordValid = !password.isEmpty
+
+        if !isEmailValid {
+            errorMessage = "Please enter a valid email address."
+            return false
+        }
+        if !isPasswordValid {
+            errorMessage = "Please enter your password."
+            return false
+        }
+        return true
     }
 }

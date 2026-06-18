@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct LoginView: View {
-    
+
     @EnvironmentObject private var deps: AppDependencies
     @StateObject private var loginViewModel: LoginViewModel
-    
+
     init(loginViewModel: LoginViewModel) {
         _loginViewModel = StateObject(wrappedValue: loginViewModel)
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -25,38 +25,86 @@ struct LoginView: View {
                     .scaledToFit()
                     .padding(.horizontal, 24)
                 Spacer()
-                TextField(text: $loginViewModel.email, prompt: Text("Email"), label: {})
-                    .textFieldStyle(.roundedBorder)
-                TextField(text: $loginViewModel.password, prompt: Text("Password"), label: {})
-                    .textFieldStyle(.roundedBorder)
-                Button("Login") {
+
+                VStack(alignment: .leading, spacing: 4) {
+                    TextField(text: $loginViewModel.email, prompt: Text("Email"), label: {})
+                        .textFieldStyle(.roundedBorder)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .disabled(loginViewModel.isSubmitting)
+
+                    if !loginViewModel.isEmailValid {
+                        Text("Please enter a valid email address.")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    SecureField("Password", text: $loginViewModel.password)
+                        .textFieldStyle(.roundedBorder)
+                        .textContentType(.password)
+                        .disabled(loginViewModel.isSubmitting)
+
+                    if !loginViewModel.isPasswordValid {
+                        Text("Please enter your password.")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                HStack {
+                    Spacer()
+                    NavigationLink("Forgot password?") {
+                        ForgotPasswordView()
+                    }
+                    .font(.subheadline)
+                    .disabled(loginViewModel.isSubmitting)
+                }
+
+                Button {
                     Task {
                         await loginViewModel.login()
                     }
+                } label: {
+                    Group {
+                        if loginViewModel.isSubmitting {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text("Login")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                        .buttonStyle(.glassProminent)
-                
-                NavigationLink("Register") {
-                    RegistrationView(viewModel: RegistrationViewModel(authRepository: deps.authRepository, localRepository: deps.localRepository))
-                }
-                Spacer()
+                .buttonStyle(.glassProminent)
+                .disabled(loginViewModel.isSubmitting)
 
-                Text("Or login with other methods")
-                HStack {
-                    Image(.googleIcon)
-                        .resizable()
-                        .scaledToFit()
-                    Image(.appleIcon)
-                        .resizable()
-                        .scaledToFit()
+                NavigationLink("Register") {
+                    RegistrationView(viewModel: RegistrationViewModel(
+                        authRepository: deps.authRepository,
+                        localRepository: deps.localRepository
+                    ))
                 }
-                .frame(height: 40)
+                .disabled(loginViewModel.isSubmitting)
+
+                Spacer()
             }
             .padding()
+            .alert("Error", isPresented: $loginViewModel.shouldShowErrorMessage) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(loginViewModel.errorMessage)
+            }
         }
     }
 }
 
 #Preview {
-    LoginView(loginViewModel: LoginViewModel(authRepository: AuthRepository(authService: AuthService()), localRepository: LocalRepository(persistence: PersistenceController())))
+    LoginView(loginViewModel: LoginViewModel(
+        authRepository: AuthRepository(authService: AuthService()),
+        localRepository: LocalRepository(persistence: PersistenceController())
+    ))
 }
