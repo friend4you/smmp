@@ -316,7 +316,7 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] CoreData model defined (flat string IDs matching Firestore)
 - [x] `PersistenceController` implemented
 - [x] `NetworkMonitor` implemented
-- [ ] Unit tests for foundation layer written
+- [x] Unit tests for foundation layer written
 
 ### Phase 2 — Authentication
 - [x] Login screen built *(basic — validation & error UX still thin)*
