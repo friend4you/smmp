@@ -12,7 +12,7 @@ struct FeedView: View {
                 Color(.blue)
                     .opacity(0.5)
                     .ignoresSafeArea()
-                Text("Feed")
+                Text(.feedTitle)
             }
         }
     }

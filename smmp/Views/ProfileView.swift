@@ -17,7 +17,7 @@ struct ProfileView: View {
                     .foregroundStyle(.secondary)
 
                 if let user = sessionService.currentUser {
-                    Text(user.displayName ?? "User")
+                    Text(user.displayName ?? String(localized: .commonUser))
                         .font(.title2.bold())
 
                     if let bio = user.bio {
@@ -29,15 +29,17 @@ struct ProfileView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Edit") {
+                    Button {
                         // TODO: Edit profile
+                    } label: {
+                        Text(.profileEdit)
                     }
                 }
                 ToolbarItem(placement: .secondaryAction) {
                     Button {
                         logout()
                     } label: {
-                        Label("Logout", systemImage: "rectangle.portrait.and.arrow.right")
+                        Label(.profileLogout, systemImage: "rectangle.portrait.and.arrow.right")
                     }
                 }
             }

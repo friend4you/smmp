@@ -13,16 +13,16 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             FeedView()
-                .tabItem { Label("Home", systemImage: "house") }
+                .tabItem { Label(.tabHome, systemImage: "house") }
                 .tag(Tab.feed)
             SearchView()
-                .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                .tabItem { Label(.tabSearch, systemImage: "magnifyingglass") }
                 .tag(Tab.search)
             NewPostView()
-                .tabItem { Label("Post", systemImage: "plus.square") }
+                .tabItem { Label(.tabPost, systemImage: "plus.square") }
                 .tag(Tab.newPost)
             ProfileView()
-                .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+                .tabItem { Label(.tabProfile, systemImage: "person.crop.circle.fill") }
                 .tag(Tab.profile)
         }
     }

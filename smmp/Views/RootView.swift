@@ -15,8 +15,8 @@ struct RootView: View {
     var body: some View {
         Group {
             if sessionService.isResolvingSession {
-                Text("Resolving authentication...")
-                //TODO: SplashView()
+                Text(.sessionResolving)
+                // TODO: SplashView()
             } else if sessionService.isAuthenticated {
                 ContentView()
             } else {

@@ -62,11 +62,11 @@ class LoginViewModel: ObservableObject {
         isPasswordValid = !password.isEmpty
 
         if !isEmailValid {
-            errorMessage = "Please enter a valid email address."
+            errorMessage = String(localized: .authValidationEmailInvalid)
             return false
         }
         if !isPasswordValid {
-            errorMessage = "Please enter your password."
+            errorMessage = String(localized: .authValidationPasswordRequired)
             return false
         }
         return true

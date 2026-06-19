@@ -32,7 +32,7 @@ class LocalRepository: LocalRepositoryProtocol {
             return
         }
         
-        try await persistence.write { context in
+        try await persistence.write { _ in
             cdUser.update(user: user)
         }
     }

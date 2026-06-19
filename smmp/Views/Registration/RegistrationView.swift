@@ -17,16 +17,18 @@ struct RegistrationView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            TextField(text: $viewModel.email, prompt: Text("Email"), label: {})
+            TextField(text: $viewModel.email, prompt: Text(.authLoginEmail), label: {})
                 .textFieldStyle(.roundedBorder)
-            TextField(text: $viewModel.password, prompt: Text("Password"), label: {})
+            TextField(text: $viewModel.password, prompt: Text(.authLoginPassword), label: {})
                 .textFieldStyle(.roundedBorder)
-            TextField(text: $viewModel.repeatPassword, prompt: Text("Repeat password"), label: {})
+            TextField(text: $viewModel.repeatPassword, prompt: Text(.authLoginRepeatPassword), label: {})
                 .textFieldStyle(.roundedBorder)
-            Button("Register") {
+            Button {
                 Task {
                     await viewModel.register()
                 }
+            } label: {
+                Text(.authRegisterSubmit)
             }
             .buttonStyle(.bordered)
         }

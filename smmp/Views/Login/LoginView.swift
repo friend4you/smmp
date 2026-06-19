@@ -23,33 +23,40 @@ struct LoginView: View {
                 Image(.logo)
                     .resizable()
                     .scaledToFit()
+                    .frame(maxHeight: 200)
                     .padding(.horizontal, 24)
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 4) {
-                    TextField(text: $loginViewModel.email, prompt: Text("Email"), label: {})
+                    TextField(text: $loginViewModel.email, prompt: Text(.authLoginEmail), label: {})
                         .textFieldStyle(.roundedBorder)
                         .textContentType(.emailAddress)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .disabled(loginViewModel.isSubmitting)
+                        .onChange(of: loginViewModel.email) {
+                            loginViewModel.isEmailValid = true
+                        }
 
                     if !loginViewModel.isEmailValid {
-                        Text("Please enter a valid email address.")
+                        Text(.authValidationEmailInvalid)
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    SecureField("Password", text: $loginViewModel.password)
+                    SecureField(.authLoginPassword, text: $loginViewModel.password)
                         .textFieldStyle(.roundedBorder)
                         .textContentType(.password)
                         .disabled(loginViewModel.isSubmitting)
+                        .onChange(of: loginViewModel.password) {
+                            loginViewModel.isPasswordValid = true
+                        }
 
                     if !loginViewModel.isPasswordValid {
-                        Text("Please enter your password.")
+                        Text(.authValidationPasswordRequired)
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
@@ -57,8 +64,10 @@ struct LoginView: View {
 
                 HStack {
                     Spacer()
-                    NavigationLink("Forgot password?") {
+                    NavigationLink {
                         ForgotPasswordView()
+                    } label: {
+                        Text(.authLoginForgotPassword)
                     }
                     .font(.subheadline)
                     .disabled(loginViewModel.isSubmitting)
@@ -74,7 +83,7 @@ struct LoginView: View {
                             ProgressView()
                                 .tint(.white)
                         } else {
-                            Text("Login")
+                            Text(.authLoginSubmit)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -82,19 +91,21 @@ struct LoginView: View {
                 .buttonStyle(.glassProminent)
                 .disabled(loginViewModel.isSubmitting)
 
-                NavigationLink("Register") {
+                NavigationLink {
                     RegistrationView(viewModel: RegistrationViewModel(
                         authRepository: deps.authRepository,
                         localRepository: deps.localRepository
                     ))
+                } label: {
+                    Text(.authRegisterSubmit)
                 }
                 .disabled(loginViewModel.isSubmitting)
 
                 Spacer()
             }
             .padding()
-            .alert("Error", isPresented: $loginViewModel.shouldShowErrorMessage) {
-                Button("OK", role: .cancel) {}
+            .alert(String(localized: .commonErrorTitle), isPresented: $loginViewModel.shouldShowErrorMessage) {
+                Button(String(localized: .commonOk), role: .cancel) {}
             } message: {
                 Text(loginViewModel.errorMessage)
             }

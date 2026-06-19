@@ -9,7 +9,7 @@ import SwiftUI
 import Firebase
 
 @main
-struct smmpApp: App {
+struct SMMPApp: App {
     let dependencies: AppDependencies
     let sessionService: SessionService
     

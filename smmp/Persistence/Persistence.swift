@@ -5,7 +5,7 @@
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
-import CoreData
+@preconcurrency import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
@@ -22,7 +22,7 @@ struct PersistenceController {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
         
-        container.loadPersistentStores { description, error in
+        container.loadPersistentStores { _, error in
             if let error {
                 fatalError("CoreData failed to load: \(error.localizedDescription)")
             }

@@ -17,7 +17,6 @@ class RegistrationViewModel: ObservableObject {
     private let authRepository: AuthRepositoryProtocol
     private let localRepository: LocalRepositoryProtocol
 
-    
     init(authRepository: AuthRepositoryProtocol,
          localRepository: LocalRepositoryProtocol) {
         self.authRepository = authRepository

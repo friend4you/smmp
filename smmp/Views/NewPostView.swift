@@ -8,7 +8,7 @@ import SwiftUI
 struct NewPostView: View {
     var body: some View {
         NavigationStack {
-            Text("New Post")
+            Text(.postNewTitle)
         }
     }
 }

@@ -33,9 +33,17 @@ final class AppDependencies: ObservableObject {
 
         self.localRepository = LocalRepository(persistence: persistence)
         self.authRepository = AuthRepository(authService: auth)
-        self.postRepository = PostRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.profileRepository = ProfileRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.followRepository = FollowRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.commentRepository = CommentRepository(networkMonitor: network, persistence: persistence, mediaService: media)
+        self.postRepository = PostRepository(networkMonitor: network,
+                                             persistence: persistence,
+                                             mediaService: media)
+        self.profileRepository = ProfileRepository(networkMonitor: network,
+                                                   persistence: persistence,
+                                                   mediaService: media)
+        self.followRepository = FollowRepository(networkMonitor: network,
+                                                 persistence: persistence,
+                                                 mediaService: media)
+        self.commentRepository = CommentRepository(networkMonitor: network,
+                                                   persistence: persistence,
+                                                   mediaService: media)
     }
 }

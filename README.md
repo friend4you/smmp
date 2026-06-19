@@ -212,7 +212,13 @@ CoreData entities use **flat string IDs** that mirror the Firestore schema. Fore
 
 Firestore `addSnapshotListener` is attached at the Repository level, not in Views. Listeners are stored in a `ListenerRegistration` dictionary keyed by scope (e.g., `"feed"`, `"post-\(pid)"`). On sign-out all listeners are removed to prevent data leaks.
 
-### 3.7 Dependency Injection & Session
+### 3.7 Localization
+
+User-facing copy lives in `smmp/Resources/Localizable.xcstrings`. Keys use semantic dot-notation (`auth.login.submit`, `tab.home`, `common.ok`). Production code references Xcode-generated symbols (e.g. `Text(.authLoginSubmit)`, `String(localized: .authValidationEmailInvalid)`), not inline English literals. SwiftLint's `hardcoded_ui_string` rule enforces this in `smmp/` sources.
+
+**Convention for new work (including Phase 2 auth):** add strings to the catalog under `auth.*` or `common.*` prefixes and use generated symbols in views and ViewModels.
+
+### 3.8 Dependency Injection & Session
 
 A lightweight `AppDependencies` container is instantiated at app entry and injected into the root View via SwiftUI's `.environmentObject`. ViewModels receive concrete service instances through their initializers, making them swappable with mocks during testing.
 

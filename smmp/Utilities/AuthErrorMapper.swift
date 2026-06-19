@@ -18,15 +18,15 @@ enum AuthErrorMapper {
 
         switch code {
         case .invalidEmail:
-            return "Please enter a valid email address."
+            return String(localized: .authValidationEmailInvalid)
         case .wrongPassword, .invalidCredential:
-            return "Incorrect email or password."
+            return String(localized: .authErrorWrongPassword)
         case .userNotFound:
-            return "No account found with this email."
+            return String(localized: .authErrorUserNotFound)
         case .networkError:
-            return "Network error. Check your connection and try again."
+            return String(localized: .authErrorNetwork)
         case .tooManyRequests:
-            return "Too many attempts. Please try again later."
+            return String(localized: .authErrorTooManyRequests)
         default:
             return error.localizedDescription
         }

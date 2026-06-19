@@ -5,7 +5,6 @@
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
-// SessionStore.swift
 import Foundation
 import Combine
 import FirebaseAuth
@@ -13,7 +12,7 @@ import FirebaseAuth
 @MainActor
 final class SessionService: ObservableObject {
 
-    @Published private(set) var currentUser: User? = nil
+    @Published private(set) var currentUser: User?
     @Published private(set) var isResolvingSession: Bool = true
 
     var isAuthenticated: Bool { currentUser != nil }

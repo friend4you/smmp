@@ -10,13 +10,13 @@ import SwiftUI
 struct ForgotPasswordView: View {
     var body: some View {
         VStack(spacing: 16) {
-            Text("Enter your email and we'll send you a link to reset your password.")
+            Text(.authForgotPasswordInstructions)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Spacer()
         }
         .padding()
-        .navigationTitle("Forgot Password")
+        .navigationTitle(.authForgotPasswordTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
