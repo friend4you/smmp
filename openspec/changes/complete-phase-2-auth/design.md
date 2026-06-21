@@ -58,30 +58,47 @@ Stack: SwiftUI, Firebase Auth + Firestore, CoreData local cache, MVVM + Reposito
 
 ### 2. Registration flow with rollback
 
-**Decision:** Sequential steps with compensating delete on failure.
+**Decision:** Sequential steps with compensating delete on failure. Orchestrated by `AuthRepository.register(displayName:email:password:)`.
 
 ```
 Register tap
     │
     ▼
-① Firebase Auth createUser(email, password)
+AuthRepository.register(displayName:email:password:)
     │
-    ▼
-② Auth profile update: displayName
+    ├─① authService.register(displayName, email, password)
+    │     └── createUser + set Auth displayName internally (not a separate protocol method)
     │
-    ▼
-③ Firestore setData users/{uid}
+    ├─② profileRepository.createProfile(uid, displayName, email, ...)
     │
-    ├── success → ④ LocalRepository.saveUser → done
+    ├── success → ③ LocalRepository.saveUser (includes email) → done
     │
-    └── failure → delete Firebase Auth user → show error
+    └── failure → authService.deleteCurrentUser() [concrete AuthService only] → show error
 ```
 
-Implement in `AuthRepository.register(displayName:email:password:)` coordinating `AuthService` + a new `UserBootstrapService` (or minimal method on `ProfileRepository`).
+Firestore profile writes live on `ProfileRepository.createProfile` — the single home for `users/{uid}` document writes (registration bootstrap now; profile edits in Phase 4).
 
 ### 3. Auth API shape: async/await only
 
-**Decision:** `AuthServiceProtocol` methods return `async throws -> User` (or `Void` for signOut/reset). Wrap Firebase callbacks once inside `AuthService`. Remove completion-handler hybrid from `AuthRepository`.
+**Decision:** `AuthServiceProtocol` exposes only user-facing Firebase Auth operations. Methods return `async throws -> User` (or `Void` for signOut/reset). Wrap Firebase callbacks once inside `AuthService`. Remove completion-handler hybrid from `AuthRepository`.
+
+**Protocol surface (Phase 2):**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `login(email:password:)` | `User` | |
+| `register(displayName:email:password:)` | `User` | Sets Auth `displayName` inside implementation after `createUser` |
+| `signOut()` | `Void` | |
+| `sendPasswordReset(email:)` | `Void` | |
+
+**Not on protocol:**
+
+| Method | Where | Why |
+|---|---|---|
+| `deleteCurrentUser()` | Concrete `AuthService` only | Compensating rollback for failed Firestore bootstrap — not a user-facing auth feature |
+| `updateProfile(...)` | `ProfileRepository` (Phase 4) | Firestore profile fields; Auth `displayName`/`photoURL` synced from repository when editing |
+
+`MockAuthService` conforms to the four protocol methods only. ViewModel unit tests do not need rollback behavior.
 
 ### 4. Firestore user document fields
 
@@ -109,7 +126,25 @@ Update README Firestore table when archiving this change.
 
 ### 7. Dependency injection for testability
 
-**Decision:** Change `AuthRepository` to depend on `AuthServiceProtocol`, not concrete `AuthService`. Inject mock in tests.
+**Decision:** `AuthRepository` calls `AuthServiceProtocol` for `login`, `register`, `signOut`, and `sendPasswordReset`. Inject `MockAuthService` in ViewModel tests.
+
+For registration rollback, `AuthRepository` calls `deleteCurrentUser()` on the concrete `AuthService` instance passed at init (production DI wires `AuthService`; rollback is not part of the mockable protocol contract).
+
+### 8. Local `User` model includes `email`
+
+**Decision:** Add `email` to the `User` struct and `CDUser` CoreData entity. Populated at registration and cached locally alongside `displayName`, `bio`, and `photoURL`.
+
+**Rationale:** Firestore bootstrap stores `email` for Phase 4 search; caching it locally avoids an extra fetch for profile display and keeps the local model aligned with the remote document.
+
+### 9. Profile editing deferred to Phase 4
+
+**Decision:** `updateProfile` is **not** part of `AuthServiceProtocol` or Phase 2 scope. Phase 4 adds `ProfileRepository.updateProfile(...) -> User` for Edit Profile (README 2.7).
+
+**Future shape (Phase 4, not implemented now):**
+
+- Firestore fields (`bio`, etc.) written via `ProfileRepository`
+- `displayName` and `photoURL` updates sync to **both** Firebase Auth and Firestore to keep data consistent
+- Additional fields (gender, birth date, etc.) and a `UserProfilePatch` struct are deferred until Edit Profile is scoped
 
 ## Risks / Trade-offs
 
@@ -126,4 +161,5 @@ No production migration. Existing Auth-only users (if any test accounts exist) l
 
 ## Open Questions
 
-- None blocking implementation. Search by display name + email is deferred to Phase 4 per user decision.
+- None blocking Phase 2 implementation.
+- Phase 4: `ProfileRepository.updateProfile` API shape (`UserProfilePatch` vs optional parameters) and additional Firestore fields (gender, birth date) to be decided when Edit Profile is scoped.

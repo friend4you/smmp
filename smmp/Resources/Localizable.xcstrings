@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "auth.error.emailInUse" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An account with this email already exists."
+          }
+        }
+      }
+    },
     "auth.error.network" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -34,6 +45,17 @@
         }
       }
     },
+    "auth.error.weakPassword" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password must be at least 6 characters."
+          }
+        }
+      }
+    },
     "auth.error.wrongPassword" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -52,6 +74,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enter your email and we'll send you a link to reset your password."
+          }
+        }
+      }
+    },
+    "auth.forgotPassword.submit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send reset link"
+          }
+        }
+      }
+    },
+    "auth.forgotPassword.successMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check your email for a link to reset your password."
+          }
+        }
+      }
+    },
+    "auth.forgotPassword.successTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email sent"
           }
         }
       }
@@ -122,6 +177,50 @@
         }
       }
     },
+    "auth.passwordStrength.ok" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password strength: OK"
+          }
+        }
+      }
+    },
+    "auth.passwordStrength.strong" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password strength: Strong"
+          }
+        }
+      }
+    },
+    "auth.passwordStrength.weak" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password strength: Weak"
+          }
+        }
+      }
+    },
+    "auth.register.displayName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display name"
+          }
+        }
+      }
+    },
     "auth.register.submit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -129,6 +228,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Register"
+          }
+        }
+      }
+    },
+    "auth.validation.displayNameRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please enter a display name."
           }
         }
       }
@@ -144,6 +254,17 @@
         }
       }
     },
+    "auth.validation.passwordMismatch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwords do not match."
+          }
+        }
+      }
+    },
     "auth.validation.passwordRequired" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -151,6 +272,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Please enter your password."
+          }
+        }
+      }
+    },
+    "auth.validation.passwordTooShort" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password must be at least 6 characters."
+          }
+        }
+      }
+    },
+    "common.accessibility.hidePassword" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide password"
+          }
+        }
+      }
+    },
+    "common.accessibility.showPassword" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show password"
           }
         }
       }

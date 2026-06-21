@@ -325,14 +325,17 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] Unit tests for foundation layer written
 
 ### Phase 2 — Authentication
-- [x] Login screen built *(basic — validation & error UX still thin)*
-- [x] Register screen built *(basic — no display name or password strength yet)*
-- [x] `AuthService` implemented
-- [x] `AuthRepository` implemented
-- [x] `LoginViewModel` / `RegistrationViewModel` implemented *(replaces single `AuthViewModel`)*
+- [x] Login screen built (validation, SecureField, loading state, error alerts)
+- [x] Register screen built (display name, SecureField, validation, password strength)
+- [x] Forgot Password screen and flow
+- [x] `AuthService` implemented (async/await, signOut, password reset)
+- [x] `AuthRepository` implemented (Firestore bootstrap, rollback on failure)
+- [x] `ProfileRepository.createProfile` for registration bootstrap
+- [x] `LoginViewModel` / `RegistrationViewModel` / `ForgotPasswordViewModel` implemented
 - [x] Session persistence working (`SessionService` → Feed when logged in)
-- [ ] Sign-out and password reset
-- [ ] Unit tests for login/register ViewModels
+- [x] Splash screen during session resolution
+- [x] Sign-out routed through `AuthRepository`
+- [x] Unit tests for login/register ViewModels and `SessionService`
 
 ### Phase 3 — Feed & Posts
 - [ ] Firebase Storage + SDWebImageSwiftUI added

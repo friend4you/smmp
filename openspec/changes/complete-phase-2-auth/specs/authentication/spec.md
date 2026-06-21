@@ -26,7 +26,7 @@ The system SHALL allow a new user to register with display name, email, password
 #### Scenario: Successful registration
 
 - **WHEN** the user provides a valid display name, email, matching strong-enough passwords, and taps Register
-- **THEN** the system creates a Firebase Auth account, sets `displayName` on the Auth profile, bootstraps the Firestore user document, caches locally, and routes to the main app
+- **THEN** the system calls `AuthService.register(displayName:email:password:)` (which creates the Auth account and sets `displayName` internally), bootstraps the Firestore user document via `ProfileRepository.createProfile`, caches locally including `email`, and routes to the main app
 
 #### Scenario: Password mismatch
 
@@ -76,9 +76,13 @@ The system SHALL restore an authenticated session on cold start when a valid Fir
 - **WHEN** the app launches with no Firebase Auth session
 - **THEN** the system routes to Login after session resolution completes
 
+### Requirement: Auth service exposes a testable protocol
+
+The system SHALL define `AuthServiceProtocol` with `async throws` methods: `login(email:password:)`, `register(displayName:email:password:)`, `signOut()`, and `sendPasswordReset(email:)`. Compensating `deleteCurrentUser()` and profile editing (`updateProfile`) are out of scope for the protocol — rollback uses concrete `AuthService`; profile edits are Phase 4 `ProfileRepository`.
+
 ### Requirement: Auth layer is unit tested
 
-The system SHALL include unit tests for login and registration ViewModels and session state transitions using a mock `AuthServiceProtocol`.
+The system SHALL include unit tests for login and registration ViewModels and session state transitions using a mock `AuthServiceProtocol` (four methods only).
 
 #### Scenario: LoginViewModel validation test
 

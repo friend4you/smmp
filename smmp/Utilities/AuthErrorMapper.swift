@@ -23,6 +23,10 @@ enum AuthErrorMapper {
             return String(localized: .authErrorWrongPassword)
         case .userNotFound:
             return String(localized: .authErrorUserNotFound)
+        case .emailAlreadyInUse:
+            return String(localized: .authErrorEmailInUse)
+        case .weakPassword:
+            return String(localized: .authErrorWeakPassword)
         case .networkError:
             return String(localized: .authErrorNetwork)
         case .tooManyRequests:

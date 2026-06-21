@@ -18,6 +18,7 @@ public class CDUser: NSManagedObject {
         id = user.id
         photoURL = user.photoURL
         displayName = user.displayName
+        email = user.email
         bio = user.bio
     }
 }

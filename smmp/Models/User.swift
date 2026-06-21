@@ -8,19 +8,21 @@
 import FirebaseAuth
 
 struct User {
-    
+
     var id: String
     var displayName: String?
+    var email: String?
     var bio: String?
     var photoURL: String?
-    
+
     init(firebaseUser: FirebaseAuth.User) {
         self.id = firebaseUser.uid
         self.displayName = firebaseUser.displayName
+        self.email = firebaseUser.email
         self.photoURL = firebaseUser.photoURL?.absoluteString
         self.bio = nil
     }
-    
+
     init(id: String) {
         self.id = id
     }

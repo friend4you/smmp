@@ -47,13 +47,13 @@ struct LoginView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    SecureField(.authLoginPassword, text: $loginViewModel.password)
-                        .textFieldStyle(.roundedBorder)
-                        .textContentType(.password)
-                        .disabled(loginViewModel.isSubmitting)
-                        .onChange(of: loginViewModel.password) {
-                            loginViewModel.isPasswordValid = true
-                        }
+                    PasswordField(
+                        text: $loginViewModel.password,
+                        prompt: .authLoginPassword,
+                        isDisabled: loginViewModel.isSubmitting
+                    ) {
+                        loginViewModel.isPasswordValid = true
+                    }
 
                     if !loginViewModel.isPasswordValid {
                         Text(.authValidationPasswordRequired)
@@ -65,7 +65,7 @@ struct LoginView: View {
                 HStack {
                     Spacer()
                     NavigationLink {
-                        ForgotPasswordView()
+                        ForgotPasswordView(authRepository: deps.authRepository)
                     } label: {
                         Text(.authLoginForgotPassword)
                     }
@@ -115,7 +115,9 @@ struct LoginView: View {
 
 #Preview {
     LoginView(loginViewModel: LoginViewModel(
-        authRepository: AuthRepository(authService: AuthService()),
+        authRepository: AuthRepository(
+            authService: AuthService()
+        ),
         localRepository: LocalRepository(persistence: PersistenceController())
     ))
 }

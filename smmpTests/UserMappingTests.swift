@@ -19,6 +19,7 @@ struct UserMappingTests {
 
             #expect(cdUser.id == user.id)
             #expect(cdUser.displayName == user.displayName)
+            #expect(cdUser.email == user.email)
             #expect(cdUser.bio == user.bio)
             #expect(cdUser.photoURL == user.photoURL)
         }
@@ -29,6 +30,7 @@ struct UserMappingTests {
 
         #expect(user.id == "x")
         #expect(user.displayName == nil)
+        #expect(user.email == nil)
         #expect(user.bio == nil)
         #expect(user.photoURL == nil)
     }

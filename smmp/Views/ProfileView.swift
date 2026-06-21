@@ -4,10 +4,10 @@
 //
 
 import SwiftUI
-import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject private var sessionService: SessionService
+    @EnvironmentObject private var deps: AppDependencies
 
     var body: some View {
         NavigationStack {
@@ -37,7 +37,9 @@ struct ProfileView: View {
                 }
                 ToolbarItem(placement: .secondaryAction) {
                     Button {
-                        logout()
+                        Task {
+                            try? await deps.authRepository.signOut()
+                        }
                     } label: {
                         Label(.profileLogout, systemImage: "rectangle.portrait.and.arrow.right")
                     }
@@ -45,13 +47,10 @@ struct ProfileView: View {
             }
         }
     }
-
-    private func logout() {
-        try? Auth.auth().signOut()
-    }
 }
 
 #Preview {
     ProfileView()
         .environmentObject(SessionService())
+        .environmentObject(AppDependencies())
 }

@@ -1,5 +1,5 @@
 //
-//  LoginViewModel.swift
+//  ForgotPasswordViewModel.swift
 //  smmp
 //
 //  Created by Vladyslav Arseniuk on 4/4/26.
@@ -9,28 +9,26 @@ import Combine
 import Foundation
 
 @MainActor
-class LoginViewModel: ObservableObject {
+class ForgotPasswordViewModel: ObservableObject {
     @Published var email: String = ""
-    @Published var password: String = ""
 
     @Published var isEmailValid: Bool = true
-    @Published var isPasswordValid: Bool = true
     @Published var shouldShowErrorMessage: Bool = false
     @Published var errorMessage: String = ""
+    @Published var shouldShowSuccessMessage: Bool = false
     @Published var isSubmitting: Bool = false
 
     private let authRepository: AuthRepositoryProtocol
-    private let localRepository: LocalRepositoryProtocol
 
-    init(authRepository: AuthRepositoryProtocol, localRepository: LocalRepositoryProtocol) {
+    init(authRepository: AuthRepositoryProtocol) {
         self.authRepository = authRepository
-        self.localRepository = localRepository
     }
 
-    func login() async {
+    func sendResetEmail() async {
         shouldShowErrorMessage = false
+        shouldShowSuccessMessage = false
 
-        guard validateInputs() else {
+        guard validateEmail() else {
             shouldShowErrorMessage = true
             return
         }
@@ -41,8 +39,8 @@ class LoginViewModel: ObservableObject {
         let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
         do {
-            let user = try await authRepository.login(email: normalizedEmail, password: password)
-            try await localRepository.saveUser(user: user)
+            try await authRepository.sendPasswordReset(email: normalizedEmail)
+            shouldShowSuccessMessage = true
         } catch {
             errorMessage = AuthErrorMapper.message(for: error)
             shouldShowErrorMessage = true
@@ -50,19 +48,12 @@ class LoginViewModel: ObservableObject {
     }
 
     @discardableResult
-    private func validateInputs() -> Bool {
+    private func validateEmail() -> Bool {
         let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         isEmailValid = FormValidation.isValidEmail(normalizedEmail)
-        isPasswordValid = !password.isEmpty
-
         if !isEmailValid {
             errorMessage = String(localized: .authValidationEmailInvalid)
-            return false
         }
-        if !isPasswordValid {
-            errorMessage = String(localized: .authValidationPasswordRequired)
-            return false
-        }
-        return true
+        return isEmailValid
     }
 }
