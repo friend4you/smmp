@@ -38,6 +38,7 @@ struct ProfileView: View {
                 ToolbarItem(placement: .secondaryAction) {
                     Button {
                         Task {
+                            deps.postRepository.removeAllListeners()
                             try? await deps.authRepository.signOut()
                         }
                     } label: {

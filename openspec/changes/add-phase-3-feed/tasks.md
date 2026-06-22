@@ -22,15 +22,15 @@
 
 ## 5. PostRepository
 
-- [ ] 5.1 Define `PostRepositoryProtocol` with feed publisher, pagination, create, delete, like/unlike APIs
-- [ ] 5.2 Implement global feed query: `orderBy createdAt desc`, cursor pagination, dedupe by post id
-- [ ] 5.3 Attach Firestore snapshot listener keyed `"feed"`; write snapshots to CoreData; publish via `CurrentValueSubject`
-- [ ] 5.4 Implement offline path: skip listener, load from CoreData when `NetworkMonitor.isConnected == false`
-- [ ] 5.5 Implement `createPost(text:)` — text-only, 280 char max, `authorId == currentUid`, server timestamp
-- [ ] 5.6 Implement cascade `deletePost(id:)` — delete likes subcollection, comments subcollection, then post doc (paginate if >500 ops)
-- [ ] 5.7 Implement `likePost` / `unlikePost` — batch like doc write/delete + `FieldValue.increment` on `likeCount`
-- [ ] 5.8 Implement liked-state resolution for current user (`likes/{uid}` existence check on feed load)
-- [ ] 5.9 Implement `removeAllListeners()` and wire to sign-out path
+- [x] 5.1 Define `PostRepositoryProtocol` with feed publisher, pagination, create, delete, like/unlike APIs
+- [x] 5.2 Implement global feed query: `orderBy createdAt desc`, cursor pagination, dedupe by post id
+- [x] 5.3 Attach Firestore snapshot listener keyed `"feed"`; write snapshots to CoreData; publish via `CurrentValueSubject`
+- [x] 5.4 Implement offline path: skip listener, load from CoreData when `NetworkMonitor.isConnected == false`
+- [x] 5.5 Implement `createPost(text:)` — text-only, 280 char max, `authorId == currentUid`, server timestamp
+- [x] 5.6 Implement cascade `deletePost(id:)` — delete likes subcollection, comments subcollection, then post doc (paginate if >500 ops)
+- [x] 5.7 Implement `likePost` / `unlikePost` — batch like doc write/delete + `FieldValue.increment` on `likeCount`
+- [x] 5.8 Implement liked-state resolution for current user (`likes/{uid}` existence check on feed load)
+- [x] 5.9 Implement `removeAllListeners()` and wire to sign-out path
 
 ## 6. CommentRepository
 

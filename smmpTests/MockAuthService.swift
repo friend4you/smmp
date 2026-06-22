@@ -147,4 +147,6 @@ final class MockLocalRepository: LocalRepositoryProtocol {
     func fetchComments(postId: String) async throws -> [Comment] {
         savedComments.filter { $0.postId == postId }
     }
+
+    func deletePost(id: String) async throws {}
 }

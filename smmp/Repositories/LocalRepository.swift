@@ -16,6 +16,7 @@ protocol LocalRepositoryProtocol {
     func fetchPosts() async throws -> [Post]
     func saveComment(comment: Comment) async throws
     func fetchComments(postId: String) async throws -> [Comment]
+    func deletePost(id: String) async throws
 }
 
 class LocalRepository: LocalRepositoryProtocol {
@@ -94,6 +95,17 @@ class LocalRepository: LocalRepositoryProtocol {
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
         let results = try await persistence.fetch(request)
         return results.compactMap { $0.toComment() }
+    }
+
+    func deletePost(id: String) async throws {
+        let request = CDPost.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id)
+        let posts = try await persistence.fetch(request)
+        guard !posts.isEmpty else { return }
+
+        try await persistence.write { context in
+            posts.forEach { context.delete($0) }
+        }
     }
 
     // MARK: - Private
