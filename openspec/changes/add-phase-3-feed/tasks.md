@@ -1,7 +1,7 @@
 ## 1. Firestore security rules
 
-- [ ] 1.1 Add `firebase/firestore.rules` with Phase 3 rules (users read, post CRUD, likes, comments, count-field updates)
-- [ ] 1.2 Deploy rules to Firebase console and verify authenticated read/write on device
+- [x] 1.1 Add `firebase/firestore.rules` with Phase 3 rules (users read, post CRUD, likes, comments, count-field updates)
+- [x] 1.2 Deploy rules to Firebase console and verify authenticated read/write on device
 
 ## 2. Models and mapping
 
