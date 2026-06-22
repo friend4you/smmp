@@ -8,11 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var deps: AppDependencies
     @State private var selectedTab: Tab = .feed
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            FeedView()
+            FeedView(
+                postRepository: deps.postRepository,
+                profileRepository: deps.profileRepository,
+                networkMonitor: deps.networkMonitor
+            )
                 .tabItem { Label(.tabHome, systemImage: "house") }
                 .tag(Tab.feed)
             SearchView()

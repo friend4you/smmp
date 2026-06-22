@@ -41,13 +41,13 @@
 
 ## 7. Feed ViewModel and UI
 
-- [ ] 7.1 Create `FeedViewModel` — subscribe to `PostRepository`, pagination, pull-to-refresh, new-posts banner state
-- [ ] 7.2 Resolve authors per feed page via `ProfileRepository` + `LocalRepository` cache
-- [ ] 7.3 Build `PostCardView` — avatar, name, timestamp, text, like button, counts (text-only, no image yet)
-- [ ] 7.4 Replace `FeedView` placeholder — `LazyVStack`, offline banner from `NetworkMonitor`, pull-to-refresh, empty state
-- [ ] 7.5 Wire optimistic like toggle with rollback on error in `FeedViewModel`
-- [ ] 7.6 Wire navigation: post card tap → `PostDetailView` push
-- [ ] 7.7 Inject dependencies via `AppDependencies` / environment into `FeedView`
+- [x] 7.1 Create `FeedViewModel` — subscribe to `PostRepository`, pagination, pull-to-refresh, new-posts banner state
+- [x] 7.2 Resolve authors per feed page via `ProfileRepository` + `LocalRepository` cache
+- [x] 7.3 Build `PostCardView` — avatar, name, timestamp, text, like button, counts (text-only, no image yet)
+- [x] 7.4 Replace `FeedView` placeholder — `LazyVStack`, offline banner from `NetworkMonitor`, pull-to-refresh, empty state
+- [x] 7.5 Wire optimistic like toggle with rollback on error in `FeedViewModel`
+- [x] 7.6 Wire navigation: post card tap → `PostDetailView` push
+- [x] 7.7 Inject dependencies via `AppDependencies` / environment into `FeedView`
 
 ## 8. Create Post
 

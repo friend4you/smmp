@@ -5,10 +5,18 @@
 
 import Foundation
 
-struct FeedPostItem: Identifiable {
+struct FeedPostItem: Identifiable, Hashable {
     var id: String { post.id }
 
-    let post: Post
-    let author: User
+    var post: Post
+    var author: User
     var isLikedByCurrentUser: Bool
+
+    static func == (lhs: FeedPostItem, rhs: FeedPostItem) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
