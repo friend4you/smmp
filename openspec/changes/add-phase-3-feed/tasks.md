@@ -51,9 +51,9 @@
 
 ## 8. Create Post
 
-- [ ] 8.1 Create `CreatePostViewModel` — text validation (non-empty, 280 max), `isSubmitting`, error handling
-- [ ] 8.2 Flesh out `NewPostView` — multiline text, character counter, submit disabled when invalid or submitting
-- [ ] 8.3 Wire `CreatePostViewModel` to `PostRepository.createPost` and dismiss/refresh feed on success
+- [x] 8.1 Create `CreatePostViewModel` — text validation (non-empty, 280 max), `isSubmitting`, error handling
+- [x] 8.2 Flesh out `NewPostView` — multiline text, character counter, submit disabled when invalid or submitting
+- [x] 8.3 Wire `CreatePostViewModel` to `PostRepository.createPost` and dismiss/refresh feed on success
 
 ## 9. Post Detail and comments
 

@@ -23,7 +23,11 @@ struct ContentView: View {
             SearchView()
                 .tabItem { Label(.tabSearch, systemImage: "magnifyingglass") }
                 .tag(Tab.search)
-            NewPostView()
+            NewPostView(
+                postRepository: deps.postRepository,
+                networkMonitor: deps.networkMonitor,
+                selectedTab: $selectedTab
+            )
                 .tabItem { Label(.tabPost, systemImage: "plus.square") }
                 .tag(Tab.newPost)
             ProfileView()
