@@ -34,10 +34,10 @@
 
 ## 6. CommentRepository
 
-- [ ] 6.1 Define `CommentRepositoryProtocol` with fetch, add, delete APIs
-- [ ] 6.2 Implement `fetchComments(postId:)` — one-time Firestore query, order by `createdAt` asc, cache to CoreData
-- [ ] 6.3 Implement `addComment(postId:text:)` — batch comment create + `commentCount` increment
-- [ ] 6.4 Implement `deleteComment(postId:commentId:)` — batch comment delete + `commentCount` decrement (author guard)
+- [x] 6.1 Define `CommentRepositoryProtocol` with fetch, add, delete APIs
+- [x] 6.2 Implement `fetchComments(postId:)` — one-time Firestore query, order by `createdAt` asc, cache to CoreData
+- [x] 6.3 Implement `addComment(postId:text:)` — batch comment create + `commentCount` increment
+- [x] 6.4 Implement `deleteComment(postId:commentId:)` — batch comment delete + `commentCount` decrement (author guard)
 
 ## 7. Feed ViewModel and UI
 

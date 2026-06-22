@@ -48,8 +48,11 @@ final class AppDependencies: ObservableObject {
         self.followRepository = FollowRepository(networkMonitor: network,
                                                  persistence: persistence,
                                                  mediaService: media)
-        self.commentRepository = CommentRepository(networkMonitor: network,
-                                                   persistence: persistence,
-                                                   mediaService: media)
+        self.commentRepository = CommentRepository(
+            networkMonitor: network,
+            localRepository: localRepository,
+            persistence: persistence,
+            mediaService: media
+        )
     }
 }
