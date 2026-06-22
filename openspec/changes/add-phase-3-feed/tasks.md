@@ -17,8 +17,8 @@
 
 ## 4. User fetch for authors
 
-- [ ] 4.1 Add `ProfileRepository.fetchUser(id:)` (or dedicated `UserRepository`) — Firestore read `users/{id}` → `User`, cache via `LocalRepository`
-- [ ] 4.2 Deduplicate in-flight fetches per `authorId` to avoid N+1 on fast scroll
+- [x] 4.1 Add `ProfileRepository.fetchUser(id:)` (or dedicated `UserRepository`) — Firestore read `users/{id}` → `User`, cache via `LocalRepository`
+- [x] 4.2 Deduplicate in-flight fetches per `authorId` to avoid N+1 on fast scroll
 
 ## 5. PostRepository
 
