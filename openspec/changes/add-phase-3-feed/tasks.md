@@ -5,9 +5,9 @@
 
 ## 2. Models and mapping
 
-- [ ] 2.1 Add Firestore document mappers for `Post` and `Comment` (`Timestamp` → `Date`, null-safe fields)
-- [ ] 2.2 Add `FeedPostItem` (or equivalent) combining `Post`, author `User`, and `isLikedByCurrentUser`
-- [ ] 2.3 Add unit tests for Post and Comment Firestore parsing (valid doc, null text, missing optional fields)
+- [x] 2.1 Add Firestore document mappers for `Post` and `Comment` (`Timestamp` → `Date`, null-safe fields)
+- [x] 2.2 Add `FeedPostItem` (or equivalent) combining `Post`, author `User`, and `isLikedByCurrentUser`
+- [x] 2.3 Add unit tests for Post and Comment Firestore parsing (valid doc, null text, missing optional fields)
 
 ## 3. Local persistence extensions
 
