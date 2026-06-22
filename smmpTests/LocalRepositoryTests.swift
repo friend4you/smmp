@@ -16,23 +16,28 @@ struct LocalRepositoryTests {
     }
 
     @Test func saveUserCreatesNewRecord() async throws {
-        let persistence = PersistenceController(inMemory: true)
-        let repository = LocalRepository(persistence: persistence)
+        let persistence = await PersistenceController(inMemory: true)
+        let repository = await LocalRepository(persistence: persistence)
         let user = makeUser()
 
         try await repository.saveUser(user: user)
 
         let stored = try await fetchUser(id: user.id, persistence: persistence)
+        let id = await user.id
+        let displayName = await user.displayName
+        let bio = await user.bio
+        let photoURL = await user.photoURL
+        
         #expect(stored != nil)
-        #expect(stored?.id == user.id)
-        #expect(stored?.displayName == user.displayName)
-        #expect(stored?.bio == user.bio)
-        #expect(stored?.photoURL == user.photoURL)
+        #expect(stored?.id == id)
+        #expect(stored?.displayName == displayName)
+        #expect(stored?.bio == bio)
+        #expect(stored?.photoURL == photoURL)
     }
 
     @Test func saveUserUpdatesExistingRecord() async throws {
-        let persistence = PersistenceController(inMemory: true)
-        let repository = LocalRepository(persistence: persistence)
+        let persistence = await PersistenceController(inMemory: true)
+        let repository = await LocalRepository(persistence: persistence)
         let original = makeUser(displayName: "Alice")
         try await repository.saveUser(user: original)
 
@@ -46,8 +51,8 @@ struct LocalRepositoryTests {
     }
 
     @Test func saveUserSetsCachedAtOnInsert() async throws {
-        let persistence = PersistenceController(inMemory: true)
-        let repository = LocalRepository(persistence: persistence)
+        let persistence = await PersistenceController(inMemory: true)
+        let repository = await LocalRepository(persistence: persistence)
 
         try await repository.saveUser(user: makeUser())
 
@@ -56,8 +61,8 @@ struct LocalRepositoryTests {
     }
 
     @Test func saveUserDoesNotDuplicateOnSecondSave() async throws {
-        let persistence = PersistenceController(inMemory: true)
-        let repository = LocalRepository(persistence: persistence)
+        let persistence = await PersistenceController(inMemory: true)
+        let repository = await LocalRepository(persistence: persistence)
         let user = makeUser()
 
         try await repository.saveUser(user: user)

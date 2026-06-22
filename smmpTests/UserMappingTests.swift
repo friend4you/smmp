@@ -10,7 +10,7 @@ import Testing
 struct UserMappingTests {
 
     @Test func cdUserUpdateMapsAllFields() async throws {
-        let persistence = PersistenceController(inMemory: true)
+        let persistence = await PersistenceController(inMemory: true)
         let user = makeUser()
 
         try await persistence.write { context in
