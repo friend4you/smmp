@@ -11,14 +11,12 @@ import Combine
 @MainActor
 final class AppDependencies: ObservableObject {
 
-    let authService: AuthServiceProtocol
-    let mediaService: MediaServiceProtocol
     let networkMonitor: NetworkMonitor
-    let sessionService: SessionService
 
     let persistenceController: PersistenceController
 
     let authRepository: AuthRepository
+    let localRepository: LocalRepositoryProtocol
     let postRepository: PostRepository
     let profileRepository: ProfileRepository
     let followRepository: FollowRepository
@@ -32,14 +30,20 @@ final class AppDependencies: ObservableObject {
 
         self.persistenceController = persistence
         self.networkMonitor = network
-        self.authService = auth
-        self.mediaService = media
-        self.sessionService = SessionService()
 
+        self.localRepository = LocalRepository(persistence: persistence)
+        self.profileRepository = ProfileRepository(networkMonitor: network,
+                                                   persistence: persistence,
+                                                   mediaService: media)
         self.authRepository = AuthRepository(authService: auth)
-        self.postRepository = PostRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.profileRepository = ProfileRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.followRepository = FollowRepository(networkMonitor: network, persistence: persistence, mediaService: media)
-        self.commentRepository = CommentRepository(networkMonitor: network, persistence: persistence, mediaService: media)
+        self.postRepository = PostRepository(networkMonitor: network,
+                                             persistence: persistence,
+                                             mediaService: media)
+        self.followRepository = FollowRepository(networkMonitor: network,
+                                                 persistence: persistence,
+                                                 mediaService: media)
+        self.commentRepository = CommentRepository(networkMonitor: network,
+                                                   persistence: persistence,
+                                                   mediaService: media)
     }
 }

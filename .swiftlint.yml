@@ -1,0 +1,28 @@
+excluded:
+  - smmpTests
+  - smmpUITests
+  - DerivedData
+
+disabled_rules:
+  - trailing_whitespace
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - fatal_error_message
+  - first_where
+  - overridden_super_call
+  - redundant_nil_coalescing
+
+custom_rules:
+  hardcoded_ui_string:
+    name: Hardcoded UI String
+    regex: '(Text|Button|Label|SecureField|NavigationLink)\s*\(\s*"[^"]+"|\.(navigationTitle|alert)\s*\(\s*"[^"]+"'
+    message: Use String Catalog symbols (e.g. Text(.authLoginSubmit)) instead of hardcoded UI string literals.
+    severity: error
+    excluded:
+      - fatalError
+      - precondition
+      - NSPredicate
+      - entityName
+      - DispatchQueue\(label:

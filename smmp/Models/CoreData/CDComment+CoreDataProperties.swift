@@ -9,9 +9,6 @@
 public import Foundation
 public import CoreData
 
-
-public typealias CDCommentCoreDataPropertiesSet = NSSet
-
 extension CDComment {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDComment> {
@@ -19,13 +16,11 @@ extension CDComment {
     }
 
     @NSManaged public var id: String?
+    @NSManaged public var postId: String?
+    @NSManaged public var authorId: String?
     @NSManaged public var text: String?
     @NSManaged public var createdAt: Date?
-    @NSManaged public var authorId: CDUser?
-    @NSManaged public var postId: CDPost?
 
 }
 
-extension CDComment : Identifiable {
-
-}
+extension CDComment: Identifiable {}
