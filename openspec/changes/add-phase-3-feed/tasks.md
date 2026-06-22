@@ -11,9 +11,9 @@
 
 ## 3. Local persistence extensions
 
-- [ ] 3.1 Extend `LocalRepository` with `savePost`, `fetchPosts` (sorted by `createdAt` desc), and upsert helpers for feed cache
-- [ ] 3.2 Extend `LocalRepository` with `saveComment`, `fetchComments(postId:)` for comment cache
-- [ ] 3.3 Add `fetchUser(id:)` read-from-cache helper; reuse existing `saveUser` for author cache
+- [x] 3.1 Extend `LocalRepository` with `savePost`, `fetchPosts` (sorted by `createdAt` desc), and upsert helpers for feed cache
+- [x] 3.2 Extend `LocalRepository` with `saveComment`, `fetchComments(postId:)` for comment cache
+- [x] 3.3 Add `fetchUser(id:)` read-from-cache helper; reuse existing `saveUser` for author cache
 
 ## 4. User fetch for authors
 

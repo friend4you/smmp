@@ -21,4 +21,15 @@ public class CDUser: NSManagedObject {
         email = user.email
         bio = user.bio
     }
+
+    func toUser() -> User? {
+        guard let id else { return nil }
+
+        var user = User(id: id)
+        user.displayName = displayName
+        user.email = email
+        user.bio = bio
+        user.photoURL = photoURL
+        return user
+    }
 }

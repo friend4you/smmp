@@ -115,8 +115,36 @@ final class MockAuthRepository: AuthRepositoryProtocol {
 
 final class MockLocalRepository: LocalRepositoryProtocol {
     private(set) var savedUsers: [User] = []
+    private(set) var savedPosts: [Post] = []
+    private(set) var savedComments: [Comment] = []
+    var usersById: [String: User] = [:]
 
     func saveUser(user: User) async throws {
         savedUsers.append(user)
+        usersById[user.id] = user
+    }
+
+    func fetchUser(id: String) async throws -> User? {
+        usersById[id]
+    }
+
+    func savePost(post: Post) async throws {
+        savedPosts.append(post)
+    }
+
+    func savePosts(_ posts: [Post]) async throws {
+        savedPosts.append(contentsOf: posts)
+    }
+
+    func fetchPosts() async throws -> [Post] {
+        savedPosts
+    }
+
+    func saveComment(comment: Comment) async throws {
+        savedComments.append(comment)
+    }
+
+    func fetchComments(postId: String) async throws -> [Comment] {
+        savedComments.filter { $0.postId == postId }
     }
 }
