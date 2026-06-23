@@ -331,6 +331,17 @@
         }
       }
     },
+    "common.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
     "common.user" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -338,6 +349,105 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "User"
+          }
+        }
+      }
+    },
+    "comment.delete.confirm.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Comment"
+          }
+        }
+      }
+    },
+    "comment.delete.confirm.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This comment will be permanently removed."
+          }
+        }
+      }
+    },
+    "comment.delete.confirm.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this comment?"
+          }
+        }
+      }
+    },
+    "comment.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No comments yet. Be the first to reply."
+          }
+        }
+      }
+    },
+    "comment.error.add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not post your comment. Please try again."
+          }
+        }
+      }
+    },
+    "comment.error.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not delete the comment. Please try again."
+          }
+        }
+      }
+    },
+    "comment.error.load" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not load comments. Please try again."
+          }
+        }
+      }
+    },
+    "comment.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a comment…"
+          }
+        }
+      }
+    },
+    "comment.section.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comments"
           }
         }
       }
@@ -520,6 +630,17 @@
         }
       }
     },
+    "post.error.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not delete your post. Please try again."
+          }
+        }
+      }
+    },
     "post.error.offline" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -538,6 +659,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Post cannot exceed 280 characters."
+          }
+        }
+      }
+    },
+    "post.delete.confirm.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Post"
+          }
+        }
+      }
+    },
+    "post.delete.confirm.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will permanently delete your post and all of its comments."
+          }
+        }
+      }
+    },
+    "post.delete.confirm.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this post?"
           }
         }
       }

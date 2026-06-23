@@ -7,6 +7,7 @@ import SwiftUI
 
 struct FeedView: View {
     @EnvironmentObject private var sessionService: SessionService
+    @EnvironmentObject private var deps: AppDependencies
     @StateObject private var viewModel: FeedViewModel
 
     init(
@@ -100,7 +101,16 @@ struct FeedView: View {
                 }
             }
             .navigationDestination(for: FeedPostItem.self) { item in
-                PostDetailView(item: item)
+                if let userId = sessionService.currentUser?.id {
+                    PostDetailView(
+                        item: item,
+                        currentUserId: userId,
+                        commentRepository: deps.commentRepository,
+                        profileRepository: deps.profileRepository,
+                        postRepository: deps.postRepository,
+                        networkMonitor: deps.networkMonitor
+                    )
+                }
             }
         }
     }
@@ -158,4 +168,5 @@ struct FeedView: View {
         networkMonitor: NetworkMonitor()
     )
     .environmentObject(SessionService())
+    .environmentObject(AppDependencies())
 }

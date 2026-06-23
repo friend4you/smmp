@@ -57,10 +57,10 @@
 
 ## 9. Post Detail and comments
 
-- [ ] 9.1 Create `PostDetailViewModel` — load post, fetch comments on appear, pull-to-refresh comments
-- [ ] 9.2 Build `PostDetailView` — full post, comments list, inline comment composer, delete own comment
-- [ ] 9.3 Resolve comment authors via user fetch + cache
-- [ ] 9.4 Add delete-post action for post author (with confirmation alert)
+- [x] 9.1 Create `PostDetailViewModel` — load post, fetch comments on appear, pull-to-refresh comments
+- [x] 9.2 Build `PostDetailView` — full post, comments list, inline comment composer, delete own comment
+- [x] 9.3 Resolve comment authors via user fetch + cache
+- [x] 9.4 Add delete-post action for post author (with confirmation alert)
 
 ## 10. Localization
 
