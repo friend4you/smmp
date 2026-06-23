@@ -66,11 +66,8 @@ final class CreatePostViewModel: ObservableObject {
             try await postRepository.refreshFeed(currentUserId: authorId)
             text = ""
             return true
-        } catch let error as PostRepositoryError {
-            presentError(error.localizedDescription)
-            return false
         } catch {
-            presentError(String(localized: .postErrorCreate))
+            presentError(PostErrorMapper.message(for: error, fallback: String(localized: .postErrorCreate)))
             return false
         }
     }

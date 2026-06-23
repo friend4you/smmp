@@ -70,8 +70,10 @@ struct NewPostView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: .postNewSubmit)) {
+                    Button {
                         Task { await submitPost() }
+                    } label: {
+                        Text(.postNewSubmit)
                     }
                     .disabled(!viewModel.canSubmit)
                 }
@@ -81,8 +83,8 @@ struct NewPostView: View {
                 isPresented: $viewModel.showError,
                 presenting: viewModel.errorMessage
             ) { _ in
-                Button(String(localized: .commonOk)) {
-                    viewModel.showError = false
+                Button { viewModel.showError = false } label: {
+                    Text(.commonOk)
                 }
             } message: { message in
                 Text(message)

@@ -39,8 +39,8 @@ struct FeedView: View {
                 isPresented: $viewModel.showError,
                 presenting: viewModel.errorMessage
             ) { _ in
-                Button(String(localized: .commonOk)) {
-                    viewModel.showError = false
+                Button { viewModel.showError = false } label: {
+                    Text(.commonOk)
                 }
             } message: { message in
                 Text(message)

@@ -64,8 +64,8 @@
 
 ## 10. Localization
 
-- [ ] 10.1 Add `feed.*`, `post.*`, `comment.*` keys to `Localizable.xcstrings` (empty state, banners, validation, errors, delete confirm)
-- [ ] 10.2 Use generated localization symbols in all new views and ViewModels
+- [x] 10.1 Add `feed.*`, `post.*`, `comment.*` keys to `Localizable.xcstrings` (empty state, banners, validation, errors, delete confirm)
+- [x] 10.2 Use generated localization symbols in all new views and ViewModels
 
 ## 11. Tests
 

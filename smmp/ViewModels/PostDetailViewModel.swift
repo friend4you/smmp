@@ -95,10 +95,8 @@ final class PostDetailViewModel: ObservableObject {
             commentText = ""
             postItem.post.commentCount += 1
             await fetchComments()
-        } catch let error as CommentRepositoryError {
-            presentError(error.localizedDescription)
         } catch {
-            presentError(String(localized: .commentErrorAdd))
+            presentError(CommentErrorMapper.message(for: error, fallback: String(localized: .commentErrorAdd)))
         }
     }
 
@@ -112,10 +110,8 @@ final class PostDetailViewModel: ObservableObject {
             commentItems.removeAll { $0.id == item.id }
             postItem.post.commentCount = max(0, postItem.post.commentCount - 1)
             commentPendingDelete = nil
-        } catch let error as CommentRepositoryError {
-            presentError(error.localizedDescription)
         } catch {
-            presentError(String(localized: .commentErrorDelete))
+            presentError(CommentErrorMapper.message(for: error, fallback: String(localized: .commentErrorDelete)))
         }
     }
 
@@ -126,10 +122,8 @@ final class PostDetailViewModel: ObservableObject {
                 authorId: currentUserId
             )
             shouldDismiss = true
-        } catch let error as PostRepositoryError {
-            presentError(error.localizedDescription)
         } catch {
-            presentError(String(localized: .postErrorDelete))
+            presentError(PostErrorMapper.message(for: error, fallback: String(localized: .postErrorDelete)))
         }
     }
 

@@ -430,6 +430,28 @@
         }
       }
     },
+    "comment.error.notFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment not found."
+          }
+        }
+      }
+    },
+    "comment.error.unauthorizedDelete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can only delete your own comments."
+          }
+        }
+      }
+    },
     "comment.placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -448,6 +470,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comments"
+          }
+        }
+      }
+    },
+    "comment.validation.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment cannot be empty."
           }
         }
       }
@@ -641,6 +674,17 @@
         }
       }
     },
+    "post.error.notFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post not found."
+          }
+        }
+      }
+    },
     "post.error.offline" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -648,6 +692,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You're offline. Connect to the internet to post."
+          }
+        }
+      }
+    },
+    "post.error.unauthorizedDelete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can only delete your own posts."
+          }
+        }
+      }
+    },
+    "post.validation.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post text cannot be empty."
           }
         }
       }

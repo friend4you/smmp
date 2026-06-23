@@ -76,10 +76,14 @@ struct PostDetailView: View {
             isPresented: $viewModel.showDeletePostConfirmation,
             titleVisibility: .visible
         ) {
-            Button(String(localized: .postDeleteConfirmAction), role: .destructive) {
+            Button(role: .destructive) {
                 Task { await viewModel.deletePost() }
+            } label: {
+                Text(.postDeleteConfirmAction)
             }
-            Button(String(localized: .commonCancel), role: .cancel) {}
+            Button(role: .cancel) {} label: {
+                Text(.commonCancel)
+            }
         } message: {
             Text(.postDeleteConfirmMessage)
         }
@@ -91,12 +95,16 @@ struct PostDetailView: View {
             ),
             titleVisibility: .visible
         ) {
-            Button(String(localized: .commentDeleteConfirmAction), role: .destructive) {
+            Button(role: .destructive) {
                 guard let comment = viewModel.commentPendingDelete else { return }
                 Task { await viewModel.deleteComment(comment) }
+            } label: {
+                Text(.commentDeleteConfirmAction)
             }
-            Button(String(localized: .commonCancel), role: .cancel) {
+            Button(role: .cancel) {
                 viewModel.commentPendingDelete = nil
+            } label: {
+                Text(.commonCancel)
             }
         } message: {
             Text(.commentDeleteConfirmMessage)
@@ -106,8 +114,8 @@ struct PostDetailView: View {
             isPresented: $viewModel.showError,
             presenting: viewModel.errorMessage
         ) { _ in
-            Button(String(localized: .commonOk)) {
-                viewModel.showError = false
+            Button { viewModel.showError = false } label: {
+                Text(.commonOk)
             }
         } message: { message in
             Text(message)
@@ -147,7 +155,7 @@ struct PostDetailView: View {
     private var commentComposer: some View {
         HStack(spacing: 12) {
             TextField(
-                String(localized: .commentPlaceholder),
+                .commentPlaceholder,
                 text: $viewModel.commentText,
                 axis: .vertical
             )
