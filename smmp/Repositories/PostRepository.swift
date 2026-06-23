@@ -281,7 +281,7 @@ extension PostRepository {
         let data: [String: Any] = [
             "authorId": authorId,
             "text": trimmed,
-            "imageURL": NSNull(),
+            "imageURL": "",
             "likeCount": 0,
             "commentCount": 0,
             "createdAt": FieldValue.serverTimestamp()

@@ -60,7 +60,7 @@ class AuthService: AuthServiceProtocol {
             "displayName": displayName,
             "email": email,
             "bio": "",
-            "photoURL": NSNull(),
+            "photoURL": "",
             "followerCount": 0,
             "followingCount": 0,
             "createdAt": FieldValue.serverTimestamp()
