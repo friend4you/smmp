@@ -10,18 +10,21 @@ Firestore security rules in the Firebase console are currently deny-all and must
 
 **Goals:**
 
-- Deliver README Phase 3 subset: global text feed, create/delete post, like/unlike, post detail with comments, offline read of cached feed
+- Deliver README Phase 3: global feed, create/delete post (text with optional image), like/unlike, post detail with comments, offline read of cached feed
 - Follow established architecture: Repository listeners → CoreData cache → `CurrentValueSubject` → ViewModel → View
 - Fetch author profiles from `users/{authorId}` with CoreData caching for consistency
 - Cascade delete post plus `likes` and `comments` subcollections
 - Update `likeCount` and `commentCount` on the post document via client batch writes
 - Deploy Firestore security rules that allow authenticated access with field-scoped count updates
+- Deploy Firebase Storage security rules and implement `MediaService` image upload with cascade Storage delete on post delete
 - Unit tests for document parsing; integration test for offline feed fallback
 
 **Non-Goals:**
 
 - Follow-scoped feed query (Phase 4 — swap global query for following + self)
-- Image upload, Firebase Storage, SDWebImageSwiftUI (deferred slice)
+- Image-only posts (text is always required; image is optional attachment)
+- Camera capture (photo library via `PhotosPicker` only)
+- SDWebImageSwiftUI (use SwiftUI `AsyncImage` for post images)
 - Real-time comment listeners (load on open only)
 - Denormalizing author fields onto post documents
 - Profile editing, search, follow graph (Phase 4)
@@ -108,19 +111,32 @@ On failure: ViewModel rolls back optimistic state and shows error.
 
 ### 8. Cascade delete post
 
-**Decision:** `PostRepository.deletePost` runs a batched delete:
+**Decision:** `PostRepository.deletePost` runs:
 
-1. Query and delete all documents in `posts/{pid}/likes`
-2. Query and delete all documents in `posts/{pid}/comments`
-3. Delete `posts/{pid}`
+1. Delete Firebase Storage object at `posts/{pid}/image.jpg` if present
+2. Query and delete all documents in `posts/{pid}/likes`
+3. Query and delete all documents in `posts/{pid}/comments`
+4. Delete `posts/{pid}`
 
-Use batched writes (max 500 ops); paginate subcollection deletes if needed.
+Use batched writes (max 500 ops); paginate subcollection deletes if needed. Storage delete is best-effort before Firestore delete; continue if object missing.
 
-**Rationale:** User chose Option B — no orphaned subcollections.
+**Rationale:** No orphaned subcollections or Storage files.
 
-### 9. Create post (text-only)
+### 9. Create post (text required, image optional)
 
-**Decision:** `CreatePostViewModel` validates non-empty trimmed text, max 280 characters. Writes `posts/{autoId}` with `authorId`, `text`, `imageURL: null`, `likeCount: 0`, `commentCount: 0`, `createdAt: serverTimestamp`.
+**Decision:** `CreatePostViewModel` validates non-empty trimmed text, max 280 characters. Image is optional (text + image allowed; image-only rejected). Writes `posts/{autoId}` with `authorId`, `text`, `imageURL` (download URL or `null`), `likeCount` 0, `commentCount` 0, `createdAt` serverTimestamp.
+
+**Upload flow:**
+
+```
+Generate postId
+      │
+      ├─ image selected? → MediaService.resize + upload → download URL
+      │
+      └─ PostRepository.createPost(text, imageURL, postId, authorId)
+```
+
+On upload failure: do not write Firestore doc. On Firestore failure after upload: delete uploaded Storage object (compensating action).
 
 ### 10. Firestore security rules
 
@@ -147,6 +163,21 @@ Store a reference copy at `firebase/firestore.rules` in the repo for version con
 
 **Decision:** Inject `postRepository`, `commentRepository`, `sessionService`, `networkMonitor`, `localRepository` into ViewModels via `FeedView` / `NewPostView` / `PostDetailView` using `@EnvironmentObject AppDependencies` or explicit init from `ContentView`.
 
+### 14. Post image upload and display
+
+**Decision:**
+
+- **Source:** `PhotosPicker` (photo library only; no camera).
+- **Resize:** Client-side resize to max 1080px on long edge; encode as JPEG quality 0.8 before upload.
+- **Storage path:** `posts/{postId}/image.jpg`.
+- **Display:** SwiftUI `AsyncImage` in `PostCardView` and `PostDetailView` when `imageURL` is non-null (no SDWebImage dependency).
+- **Progress:** Linear upload progress bar on Create Post screen while `MediaService` uploads.
+- **Field convention:** `imageURL` is `null` when no image; HTTPS download URL when present (not empty string).
+
+**Orchestration:** `CreatePostViewModel` coordinates `MediaService.uploadPostImage` then `PostRepository.createPost`. `MediaService` exposes upload progress for the UI.
+
+**Alternative considered:** SDWebImageSwiftUI per README §3.5. Rejected for this slice — `AsyncImage` avoids an extra dependency; revisit in Phase 5 if scroll/cache performance needs work.
+
 ## Risks / Trade-offs
 
 | Risk | Mitigation |
@@ -158,10 +189,13 @@ Store a reference copy at `firebase/firestore.rules` in the repo for version con
 | Deny-all rules block testing | Deploy rules as first implementation task |
 | Stale CoreData from previous user | Accept for portfolio; scope queries by cached feed only |
 | Listener + pagination overlap duplicates | Deduplicate by post `id` in repository merge |
+| Orphan Storage file if Firestore write fails | Compensating delete in `CreatePostViewModel` / `MediaService` on post-create failure |
+| `AsyncImage` re-fetch on fast scroll | Accept for portfolio; Phase 5 may add disk cache layer |
+| Upload fails mid-create | Disable submit during upload; show error; no Firestore doc written |
 
 ## Migration Plan
 
-1. Deploy Firestore security rules to Firebase console before integration testing on device.
+1. Deploy Firestore and Storage security rules to Firebase console before integration testing on device.
 2. Implement repositories and UI behind existing tab shell — no navigation structure change.
 3. Phase 4 replaces feed query only; no data migration required.
 

@@ -75,4 +75,18 @@
 
 ## 12. README progress tracker
 
-- [ ] 12.1 Update Phase 3 checklist in README.md as tasks complete (text-only items; leave image/Storage items unchecked)
+- [ ] 12.1 Update Phase 3 checklist in README.md as tasks complete
+
+## 13. Post images
+
+- [ ] 13.1 Add Firebase Storage SPM dependency (no SDWebImage — use `AsyncImage`)
+- [ ] 13.2 Add `firebase/storage.rules` (authenticated read; write with size cap and `image/*` content type) and deploy to Firebase console
+- [ ] 13.3 Implement `MediaServiceProtocol` — resize to 1080px long edge, JPEG 0.8, upload to `posts/{postId}/image.jpg`, delete, upload progress publisher
+- [ ] 13.4 Extend `PostRepository.createPost` — accept optional `imageURL` and `postId`; write `imageURL: null` when absent; fix empty-string convention
+- [ ] 13.5 Extend `PostRepository.deletePost` — delete Storage object at `posts/{pid}/image.jpg` before Firestore cascade
+- [ ] 13.6 Extend `CreatePostViewModel` + `NewPostView` — `PhotosPicker` (library only), image preview, remove image, linear upload progress, orchestrate upload then create; compensating Storage delete on Firestore failure
+- [ ] 13.7 Show optional post image in `PostCardView` and `PostDetailView` via `AsyncImage` (scaled to fit, max height on feed card)
+- [ ] 13.8 Add `post.image.*` localization keys (picker, upload errors, progress) and use generated symbols
+- [ ] 13.9 Add `NSPhotoLibraryUsageDescription` to Info.plist
+- [ ] 13.10 Unit tests: `MediaService` resize output dimensions/ format; mocked upload/delete paths
+- [ ] 13.11 Update README Phase 3 checklist — mark image and Storage items complete

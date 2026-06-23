@@ -1,32 +1,47 @@
 ## ADDED Requirements
 
-### Requirement: User can create a text-only post
+### Requirement: User can create a post with required text and optional image
 
-The system SHALL allow an authenticated user to create a post with text only (no image in this phase). Text MUST be non-empty after trimming and MUST NOT exceed 280 characters.
+The system SHALL allow an authenticated user to create a post with non-empty trimmed text (max 280 characters). An optional image MAY be attached from the photo library. Image-only posts (no text) SHALL NOT be allowed.
 
-#### Scenario: Successful text post
+#### Scenario: Successful text-only post
 
-- **WHEN** the user enters valid text on the Create Post screen and submits while online
+- **WHEN** the user enters valid text with no image on the Create Post screen and submits while online
 - **THEN** the system writes a `posts/{pid}` document with `authorId`, `text`, `imageURL` null, `likeCount` 0, `commentCount` 0, and `createdAt` server timestamp
+
+#### Scenario: Successful text and image post
+
+- **WHEN** the user enters valid text, selects an image from the photo library, and submits while online
+- **THEN** the system resizes the image (max 1080px long edge, JPEG quality 0.8), uploads to `posts/{pid}/image.jpg` in Firebase Storage, writes the download URL to `imageURL`, and creates the Firestore post document
 
 #### Scenario: Empty post rejected
 
 - **WHEN** the user submits with empty or whitespace-only text
-- **THEN** the system disables or rejects submission and does not write to Firestore
+- **THEN** the system disables or rejects submission and does not write to Firestore or Storage
 
 #### Scenario: Text over limit rejected
 
 - **WHEN** the user enters more than 280 characters
 - **THEN** the system prevents submission and shows validation feedback
 
+#### Scenario: Upload progress shown
+
+- **WHEN** the user submits a post with an image while online
+- **THEN** the Create Post screen shows a linear upload progress indicator until upload completes or fails
+
+#### Scenario: Upload failure does not create post
+
+- **WHEN** image upload fails before the Firestore write
+- **THEN** the system does not create a `posts/{pid}` document and shows a user-readable error
+
 ### Requirement: User can delete their own post
 
-The system SHALL allow the post author to delete their post, including all documents in the `likes` and `comments` subcollections.
+The system SHALL allow the post author to delete their post, including the Firebase Storage image (if any) and all documents in the `likes` and `comments` subcollections.
 
 #### Scenario: Successful cascade delete
 
 - **WHEN** the post author deletes their post
-- **THEN** the system deletes all `posts/{pid}/likes/*` documents, all `posts/{pid}/comments/*` documents, and the `posts/{pid}` document
+- **THEN** the system deletes the Storage object at `posts/{pid}/image.jpg` (if present), all `posts/{pid}/likes/*` documents, all `posts/{pid}/comments/*` documents, and the `posts/{pid}` document
 
 #### Scenario: Non-author cannot delete
 
@@ -54,12 +69,17 @@ The system SHALL allow an authenticated user to like and unlike any post. Like s
 
 ### Requirement: Post card displays post content
 
-Each post card in the feed SHALL show author avatar, display name, timestamp, post text, like count, comment count, and a like toggle reflecting whether the current user has liked the post.
+Each post card in the feed SHALL show author avatar, display name, timestamp, post text, optional image when `imageURL` is present, like count, comment count, and a like toggle reflecting whether the current user has liked the post.
 
 #### Scenario: Post card content
 
 - **WHEN** a post is displayed in the feed
-- **THEN** the card shows text, relative or formatted timestamp, like count, comment count, and filled/unfilled like state for the current user
+- **THEN** the card shows text, optional image via `AsyncImage`, relative or formatted timestamp, like count, comment count, and filled/unfilled like state for the current user
+
+#### Scenario: Post detail shows larger image
+
+- **WHEN** the user opens Post Detail for a post with an `imageURL`
+- **THEN** the system displays the image larger than on the feed card, scaled to fit
 
 ### Requirement: Firestore documents map to Post model
 
@@ -70,10 +90,10 @@ The system SHALL map Firestore `posts/{pid}` documents to the `Post` Swift struc
 - **WHEN** a Firestore document contains all required post fields
 - **THEN** the mapper produces a `Post` with matching `id`, `authorId`, `text`, counts, and `createdAt`
 
-#### Scenario: Parse post with null text
+#### Scenario: Parse post with null imageURL
 
-- **WHEN** a Firestore document has null or missing `text` (image-only future case)
-- **THEN** the mapper produces a `Post` with `text` nil without crashing
+- **WHEN** a Firestore document has null or missing `imageURL`
+- **THEN** the mapper produces a `Post` with `imageURL` nil without crashing
 
 ### Requirement: Post repository supports offline read fallback
 
