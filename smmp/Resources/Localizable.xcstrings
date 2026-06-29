@@ -652,6 +652,50 @@
         }
       }
     },
+    "post.image.picker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Photo"
+          }
+        }
+      }
+    },
+    "post.image.upload.progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uploading image… %lld%%"
+          }
+        }
+      }
+    },
+    "post.image.error.upload" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not upload your image. Please try again."
+          }
+        }
+      }
+    },
+    "post.image.error.resize" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not prepare your image for upload."
+          }
+        }
+      }
+    },
     "post.error.create" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -63,6 +63,34 @@ struct PostCommentFirestoreMappingTests {
         #expect(post?.commentCount == 4)
     }
 
+    @Test func postMapsNullImageURL() {
+        let data: [String: Any] = [
+            "authorId": "user-1",
+            "text": "No image",
+            "imageURL": NSNull(),
+            "likeCount": 0,
+            "commentCount": 0
+        ]
+
+        let post = Post(documentId: "post-null-image", data: data)
+
+        #expect(post?.imageURL == nil)
+    }
+
+    @Test func postMapsEmptyStringImageURLAsNil() {
+        let data: [String: Any] = [
+            "authorId": "user-1",
+            "text": "Legacy empty image URL",
+            "imageURL": "",
+            "likeCount": 0,
+            "commentCount": 0
+        ]
+
+        let post = Post(documentId: "post-empty-image", data: data)
+
+        #expect(post?.imageURL == nil)
+    }
+
     @Test func postReturnsNilWhenAuthorIdMissing() {
         let data: [String: Any] = [
             "text": "Orphan",

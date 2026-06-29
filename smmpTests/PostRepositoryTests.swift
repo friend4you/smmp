@@ -44,7 +44,7 @@ struct PostRepositoryTests {
         )
 
         await #expect(throws: PostRepositoryError.emptyText) {
-            try await repository.createPost(text: "   ", authorId: "user-1")
+            try await repository.createPost(text: "   ", authorId: "user-1", postId: nil, imageURL: nil)
         }
     }
 
@@ -60,7 +60,7 @@ struct PostRepositoryTests {
 
         let longText = String(repeating: "a", count: 281)
         await #expect(throws: PostRepositoryError.textTooLong) {
-            try await repository.createPost(text: longText, authorId: "user-1")
+            try await repository.createPost(text: longText, authorId: "user-1", postId: nil, imageURL: nil)
         }
     }
 

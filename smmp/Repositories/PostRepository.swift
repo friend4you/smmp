@@ -18,7 +18,8 @@ protocol PostRepositoryProtocol: AnyObject {
     func refreshFeed(currentUserId: String) async throws
     @discardableResult
     func loadMorePosts(currentUserId: String) async throws -> Bool
-    func createPost(text: String, authorId: String) async throws
+    func newPostId() -> String
+    func createPost(text: String, authorId: String, postId: String?, imageURL: String?) async throws
     func deletePost(id: String, authorId: String) async throws
     func likePost(id: String, userId: String) async throws
     func unlikePost(id: String, userId: String) async throws
@@ -272,20 +273,34 @@ extension PostRepository {
 
 // MARK: - Writes
 extension PostRepository {
-    func createPost(text: String, authorId: String) async throws {
+    func newPostId() -> String {
+        firestore.collection("posts").document().documentID
+    }
+
+    func createPost(
+        text: String,
+        authorId: String,
+        postId: String? = nil,
+        imageURL: String? = nil
+    ) async throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw PostRepositoryError.emptyText }
         guard trimmed.count <= maxTextLength else { throw PostRepositoryError.textTooLong }
 
-        let document = firestore.collection("posts").document()
-        let data: [String: Any] = [
+        let documentId = postId ?? firestore.collection("posts").document().documentID
+        let document = firestore.collection("posts").document(documentId)
+        var data: [String: Any] = [
             "authorId": authorId,
             "text": trimmed,
-            "imageURL": "",
             "likeCount": 0,
             "commentCount": 0,
             "createdAt": FieldValue.serverTimestamp()
         ]
+        if let imageURL, !imageURL.isEmpty {
+            data["imageURL"] = imageURL
+        } else {
+            data["imageURL"] = NSNull()
+        }
         try await document.setData(data)
     }
 
@@ -297,6 +312,8 @@ extension PostRepository {
         guard snapshot.data()?["authorId"] as? String == authorId else {
             throw PostRepositoryError.unauthorizedDelete
         }
+
+        try? await mediaService.deletePostImage(postId: id)
 
         try await deleteCollection(postRef.collection("likes"))
         try await deleteCollection(postRef.collection("comments"))

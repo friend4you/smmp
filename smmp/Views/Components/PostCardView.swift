@@ -5,8 +5,14 @@
 
 import SwiftUI
 
+enum PostImageDisplayStyle {
+    case feed
+    case detail
+}
+
 struct PostCardView: View {
     let item: FeedPostItem
+    var imageDisplayStyle: PostImageDisplayStyle = .feed
     let onLikeTapped: () -> Void
 
     var body: some View {
@@ -34,6 +40,8 @@ struct PostCardView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
+            postImage
+
             HStack(spacing: 16) {
                 Button(action: onLikeTapped) {
                     Label {
@@ -59,6 +67,35 @@ struct PostCardView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    @ViewBuilder
+    private var postImage: some View {
+        if let imageURL = item.post.imageURL, let url = URL(string: imageURL) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .frame(maxHeight: imageDisplayStyle == .feed ? 240 : nil)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                case .failure:
+                    Image(systemName: "photo")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                case .empty:
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: imageDisplayStyle == .feed ? 120 : 160)
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        }
     }
 
     @ViewBuilder

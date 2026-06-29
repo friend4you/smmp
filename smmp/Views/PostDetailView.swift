@@ -36,7 +36,7 @@ struct PostDetailView: View {
                     offlineBanner
                 }
 
-                PostCardView(item: viewModel.postItem) {
+                PostCardView(item: viewModel.postItem, imageDisplayStyle: .detail) {
                     Task { await viewModel.toggleLike() }
                 }
 

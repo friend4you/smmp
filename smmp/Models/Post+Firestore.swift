@@ -14,7 +14,8 @@ extension Post {
         self.id = documentId
         self.authorId = authorId
         self.text = FirestoreFieldParser.optionalString(data["text"])
-        self.imageURL = FirestoreFieldParser.optionalString(data["imageURL"])
+        let rawImageURL = FirestoreFieldParser.optionalString(data["imageURL"])
+        self.imageURL = rawImageURL.flatMap { $0.isEmpty ? nil : $0 }
         self.likeCount = FirestoreFieldParser.intValue(data["likeCount"])
         self.commentCount = FirestoreFieldParser.intValue(data["commentCount"])
         self.createdAt = FirestoreFieldParser.date(from: data["createdAt"])

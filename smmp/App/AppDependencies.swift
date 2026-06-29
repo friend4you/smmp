@@ -15,6 +15,8 @@ final class AppDependencies: ObservableObject {
 
     let persistenceController: PersistenceController
 
+    let mediaService: MediaService
+
     let authRepository: AuthRepository
     let localRepository: LocalRepositoryProtocol
     let postRepository: PostRepository
@@ -30,6 +32,7 @@ final class AppDependencies: ObservableObject {
 
         self.persistenceController = persistence
         self.networkMonitor = network
+        self.mediaService = media
 
         self.localRepository = LocalRepository(persistence: persistence)
         self.profileRepository = ProfileRepository(

@@ -25,6 +25,7 @@ struct ContentView: View {
                 .tag(Tab.search)
             NewPostView(
                 postRepository: deps.postRepository,
+                mediaService: deps.mediaService,
                 networkMonitor: deps.networkMonitor,
                 selectedTab: $selectedTab
             )
