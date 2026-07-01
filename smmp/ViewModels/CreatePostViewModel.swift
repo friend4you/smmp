@@ -21,6 +21,7 @@ final class CreatePostViewModel: ObservableObject {
     private let postRepository: PostRepositoryProtocol
     private let mediaService: MediaServiceProtocol
     private let networkMonitor: NetworkMonitor
+    private let onPostCreated: () -> Void
     private var progressCancellable: AnyCancellable?
 
     var trimmedText: String {
@@ -54,11 +55,13 @@ final class CreatePostViewModel: ObservableObject {
     init(
         postRepository: PostRepositoryProtocol,
         mediaService: MediaServiceProtocol,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitor,
+        onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository
         self.mediaService = mediaService
         self.networkMonitor = networkMonitor
+        self.onPostCreated = onPostCreated
         progressCancellable = mediaService.uploadProgressPublisher
             .receive(on: DispatchQueue.main)
             .assign(to: \.uploadProgress, on: self)
@@ -114,6 +117,7 @@ final class CreatePostViewModel: ObservableObject {
             try await postRepository.refreshFeed(currentUserId: authorId)
             text = ""
             selectedImage = nil
+            onPostCreated()
             return true
         } catch {
             if uploadedImageURL != nil {

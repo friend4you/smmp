@@ -7,48 +7,35 @@ import SwiftUI
 
 struct FeedView: View {
     @EnvironmentObject private var sessionService: SessionService
-    @EnvironmentObject private var deps: AppDependencies
     @StateObject private var viewModel: FeedViewModel
 
-    init(
-        postRepository: PostRepositoryProtocol,
-        profileRepository: ProfileRepositoryProtocol,
-        networkMonitor: NetworkMonitor
-    ) {
-        _viewModel = StateObject(
-            wrappedValue: FeedViewModel(
-                postRepository: postRepository,
-                profileRepository: profileRepository,
-                networkMonitor: networkMonitor
-            )
-        )
+    init(viewModel: FeedViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .top) {
-                feedList
+        ZStack(alignment: .top) {
+            feedList
 
-                if viewModel.showNewPostsBanner {
-                    newPostsBanner
-                }
+            if viewModel.showNewPostsBanner {
+                newPostsBanner
             }
-            .navigationTitle(Text(.feedTitle))
-            .alert(
-                Text(.commonErrorTitle),
-                isPresented: $viewModel.showError,
-                presenting: viewModel.errorMessage
-            ) { _ in
-                Button { viewModel.showError = false } label: {
-                    Text(.commonOk)
-                }
-            } message: { message in
-                Text(message)
+        }
+        .navigationTitle(Text(.feedTitle))
+        .alert(
+            Text(.commonErrorTitle),
+            isPresented: $viewModel.showError,
+            presenting: viewModel.errorMessage
+        ) { _ in
+            Button { viewModel.showError = false } label: {
+                Text(.commonOk)
             }
-            .task(id: sessionService.currentUser?.id) {
-                guard let userId = sessionService.currentUser?.id else { return }
-                viewModel.start(userId: userId)
-            }
+        } message: { message in
+            Text(message)
+        }
+        .task(id: sessionService.currentUser?.id) {
+            guard let userId = sessionService.currentUser?.id else { return }
+            viewModel.start(userId: userId)
         }
     }
 
@@ -65,7 +52,9 @@ struct FeedView: View {
                         emptyState
                     } else {
                         ForEach(viewModel.items) { item in
-                            NavigationLink(value: item) {
+                            Button {
+                                viewModel.showPostDetail(for: item)
+                            } label: {
                                 PostCardView(item: item) {
                                     Task { await viewModel.toggleLike(for: item) }
                                 }
@@ -98,18 +87,6 @@ struct FeedView: View {
                 guard let firstId = viewModel.items.first?.id else { return }
                 withAnimation {
                     proxy.scrollTo(firstId, anchor: .top)
-                }
-            }
-            .navigationDestination(for: FeedPostItem.self) { item in
-                if let userId = sessionService.currentUser?.id {
-                    PostDetailView(
-                        item: item,
-                        currentUserId: userId,
-                        commentRepository: deps.commentRepository,
-                        profileRepository: deps.profileRepository,
-                        postRepository: deps.postRepository,
-                        networkMonitor: deps.networkMonitor
-                    )
                 }
             }
         }
@@ -152,21 +129,24 @@ struct FeedView: View {
 }
 
 #Preview {
-    FeedView(
-        postRepository: PostRepository(
-            networkMonitor: NetworkMonitor(),
-            localRepository: LocalRepository(persistence: PersistenceController.shared),
-            persistence: PersistenceController.shared,
-            mediaService: MediaService()
-        ),
-        profileRepository: ProfileRepository(
-            networkMonitor: NetworkMonitor(),
-            localRepository: LocalRepository(persistence: PersistenceController.shared),
-            persistence: PersistenceController.shared,
-            mediaService: MediaService()
-        ),
-        networkMonitor: NetworkMonitor()
-    )
+    NavigationStack {
+        FeedView(
+            viewModel: FeedViewModel(
+                postRepository: PostRepository(
+                    networkMonitor: NetworkMonitor(),
+                    localRepository: LocalRepository(persistence: PersistenceController.shared),
+                    persistence: PersistenceController.shared,
+                    mediaService: MediaService()
+                ),
+                profileRepository: ProfileRepository(
+                    networkMonitor: NetworkMonitor(),
+                    localRepository: LocalRepository(persistence: PersistenceController.shared),
+                    persistence: PersistenceController.shared,
+                    mediaService: MediaService()
+                ),
+                networkMonitor: NetworkMonitor()
+            )
+        )
+    }
     .environmentObject(SessionService())
-    .environmentObject(AppDependencies())
 }

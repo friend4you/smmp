@@ -9,11 +9,11 @@ import SwiftUI
 
 struct ForgotPasswordView: View {
     @Environment(\.dismiss) private var dismiss
-    
+
     @StateObject private var viewModel: ForgotPasswordViewModel
 
-    init(authRepository: AuthRepositoryProtocol) {
-        _viewModel = StateObject(wrappedValue: ForgotPasswordViewModel(authRepository: authRepository))
+    init(viewModel: ForgotPasswordViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
@@ -81,8 +81,10 @@ struct ForgotPasswordView: View {
 
 #Preview {
     NavigationStack {
-        ForgotPasswordView(authRepository: AuthRepository(
-            authService: AuthService()
+        ForgotPasswordView(viewModel: ForgotPasswordViewModel(
+            authRepository: AuthRepository(
+                authService: AuthService()
+            )
         ))
     }
 }

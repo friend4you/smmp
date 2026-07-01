@@ -7,12 +7,13 @@ import SwiftUI
 
 struct SearchView: View {
     var body: some View {
-        NavigationStack {
-            Text(.searchTitle)
-        }
+        Text(.searchTitle)
+            .navigationTitle(Text(.searchTitle))
     }
 }
 
 #Preview {
-    SearchView()
+    NavigationStack {
+        SearchView()
+    }
 }

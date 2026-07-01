@@ -9,104 +9,89 @@ import SwiftUI
 struct NewPostView: View {
     @EnvironmentObject private var sessionService: SessionService
     @StateObject private var viewModel: CreatePostViewModel
-    @Binding private var selectedTab: Tab
     @State private var selectedPhotoItem: PhotosPickerItem?
 
-    init(
-        postRepository: PostRepositoryProtocol,
-        mediaService: MediaServiceProtocol,
-        networkMonitor: NetworkMonitor,
-        selectedTab: Binding<Tab>
-    ) {
-        _viewModel = StateObject(
-            wrappedValue: CreatePostViewModel(
-                postRepository: postRepository,
-                mediaService: mediaService,
-                networkMonitor: networkMonitor
-            )
-        )
-        _selectedTab = selectedTab
+    init(viewModel: CreatePostViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                if viewModel.isOffline {
-                    offlineBanner
+        VStack(alignment: .leading, spacing: 16) {
+            if viewModel.isOffline {
+                offlineBanner
+            }
+
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $viewModel.text)
+                    .frame(minHeight: 160)
+                    .disabled(viewModel.isSubmitting)
+
+                if viewModel.text.isEmpty {
+                    Text(.postNewPlaceholder)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 8)
+                        .padding(.leading, 5)
+                        .allowsHitTesting(false)
                 }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(.separator), lineWidth: 1)
+            }
 
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $viewModel.text)
-                        .frame(minHeight: 160)
-                        .disabled(viewModel.isSubmitting)
+            imageSection
 
-                    if viewModel.text.isEmpty {
-                        Text(.postNewPlaceholder)
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 8)
-                            .padding(.leading, 5)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(.separator), lineWidth: 1)
-                }
-
-                imageSection
-
-                if viewModel.isUploadingImage {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ProgressView(value: viewModel.uploadProgress)
-                        Text(.postImageUploadProgress(Int(viewModel.uploadProgress * 100)))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                HStack {
-                    if viewModel.isOverLimit {
-                        Text(.postValidationTooLong)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
-
-                    Spacer()
-
-                    Text(.postNewCharacterCount(viewModel.characterCount))
+            if viewModel.isUploadingImage {
+                VStack(alignment: .leading, spacing: 8) {
+                    ProgressView(value: viewModel.uploadProgress)
+                    Text(.postImageUploadProgress(Int(viewModel.uploadProgress * 100)))
                         .font(.caption)
-                        .foregroundStyle(viewModel.isOverLimit ? .red : .secondary)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            HStack {
+                if viewModel.isOverLimit {
+                    Text(.postValidationTooLong)
+                        .font(.caption)
+                        .foregroundStyle(.red)
                 }
 
-                Spacer(minLength: 0)
+                Spacer()
+
+                Text(.postNewCharacterCount(viewModel.characterCount))
+                    .font(.caption)
+                    .foregroundStyle(viewModel.isOverLimit ? .red : .secondary)
             }
-            .padding()
-            .navigationTitle(Text(.postNewTitle))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        Task { await submitPost() }
-                    } label: {
-                        Text(.postNewSubmit)
-                    }
-                    .disabled(!viewModel.canSubmit)
+
+            Spacer(minLength: 0)
+        }
+        .padding()
+        .navigationTitle(Text(.postNewTitle))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    Task { await submitPost() }
+                } label: {
+                    Text(.postNewSubmit)
                 }
+                .disabled(!viewModel.canSubmit)
             }
-            .alert(
-                Text(.commonErrorTitle),
-                isPresented: $viewModel.showError,
-                presenting: viewModel.errorMessage
-            ) { _ in
-                Button { viewModel.showError = false } label: {
-                    Text(.commonOk)
-                }
-            } message: { message in
-                Text(message)
+        }
+        .alert(
+            Text(.commonErrorTitle),
+            isPresented: $viewModel.showError,
+            presenting: viewModel.errorMessage
+        ) { _ in
+            Button { viewModel.showError = false } label: {
+                Text(.commonOk)
             }
-            .onChange(of: selectedPhotoItem) { _, item in
-                Task { await loadSelectedPhoto(item) }
-            }
+        } message: { message in
+            Text(message)
+        }
+        .onChange(of: selectedPhotoItem) { _, item in
+            Task { await loadSelectedPhoto(item) }
         }
     }
 
@@ -175,22 +160,24 @@ struct NewPostView: View {
 
         if await viewModel.submit(authorId: userId) {
             selectedPhotoItem = nil
-            selectedTab = .feed
         }
     }
 }
 
 #Preview {
-    NewPostView(
-        postRepository: PostRepository(
-            networkMonitor: NetworkMonitor(),
-            localRepository: LocalRepository(persistence: PersistenceController.shared),
-            persistence: PersistenceController.shared,
-            mediaService: MediaService()
-        ),
-        mediaService: MediaService(),
-        networkMonitor: NetworkMonitor(),
-        selectedTab: .constant(.newPost)
-    )
+    NavigationStack {
+        NewPostView(
+            viewModel: CreatePostViewModel(
+                postRepository: PostRepository(
+                    networkMonitor: NetworkMonitor(),
+                    localRepository: LocalRepository(persistence: PersistenceController.shared),
+                    persistence: PersistenceController.shared,
+                    mediaService: MediaService()
+                ),
+                mediaService: MediaService(),
+                networkMonitor: NetworkMonitor()
+            )
+        )
+    }
     .environmentObject(SessionService())
 }

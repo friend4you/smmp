@@ -20,6 +20,7 @@ final class FeedViewModel: ObservableObject {
     private let postRepository: PostRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let networkMonitor: NetworkMonitor
+    private let onNavigate: (FeedRoute) -> Void
 
     private var cancellables = Set<AnyCancellable>()
     private var posts: [Post] = []
@@ -32,12 +33,18 @@ final class FeedViewModel: ObservableObject {
     init(
         postRepository: PostRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitor,
+        onNavigate: @escaping (FeedRoute) -> Void = { _ in }
     ) {
         self.postRepository = postRepository
         self.profileRepository = profileRepository
         self.networkMonitor = networkMonitor
+        self.onNavigate = onNavigate
         bindPublishers()
+    }
+
+    func showPostDetail(for item: FeedPostItem) {
+        onNavigate(.postDetail(item))
     }
 
     func start(userId: String) {

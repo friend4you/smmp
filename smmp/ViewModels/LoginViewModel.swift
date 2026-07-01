@@ -21,10 +21,24 @@ class LoginViewModel: ObservableObject {
 
     private let authRepository: AuthRepositoryProtocol
     private let localRepository: LocalRepositoryProtocol
+    private let onNavigate: (AuthRoute) -> Void
 
-    init(authRepository: AuthRepositoryProtocol, localRepository: LocalRepositoryProtocol) {
+    init(
+        authRepository: AuthRepositoryProtocol,
+        localRepository: LocalRepositoryProtocol,
+        onNavigate: @escaping (AuthRoute) -> Void = { _ in }
+    ) {
         self.authRepository = authRepository
         self.localRepository = localRepository
+        self.onNavigate = onNavigate
+    }
+
+    func navigateToRegister() {
+        onNavigate(.register)
+    }
+
+    func navigateToForgotPassword() {
+        onNavigate(.forgotPassword)
     }
 
     func login() async {

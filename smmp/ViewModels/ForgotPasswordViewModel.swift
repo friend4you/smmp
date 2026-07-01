@@ -19,9 +19,14 @@ class ForgotPasswordViewModel: ObservableObject {
     @Published var isSubmitting: Bool = false
 
     private let authRepository: AuthRepositoryProtocol
+    private let onNavigate: (AuthRoute) -> Void
 
-    init(authRepository: AuthRepositoryProtocol) {
+    init(
+        authRepository: AuthRepositoryProtocol,
+        onNavigate: @escaping (AuthRoute) -> Void = { _ in }
+    ) {
         self.authRepository = authRepository
+        self.onNavigate = onNavigate
     }
 
     func sendResetEmail() async {
