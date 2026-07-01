@@ -3,6 +3,7 @@
 //  smmpTests
 //
 
+import SwiftUI
 import Testing
 @testable import smmp
 
@@ -49,6 +50,20 @@ struct AppCoordinatorTests {
         #expect(coordinator.authCoordinatorGeneration == firstAuthGeneration + 1)
         #expect(coordinator.mainCoordinator == nil)
         #expect(coordinator.mainCoordinatorGeneration == firstMainGeneration)
+    }
+
+    @Test func logoutResetsMainNavigationBeforeDiscard() {
+        let deps = AppDependencies()
+        let coordinator = AppCoordinator(deps: deps, sessionService: SessionService())
+
+        coordinator.handleAuthenticationChange(isAuthenticated: true)
+        let mainCoordinator = coordinator.mainCoordinator
+        mainCoordinator?.feedCoordinator.router.push(.postDetail(makeFeedPostItem()))
+
+        coordinator.handleAuthenticationChange(isAuthenticated: false)
+
+        #expect(coordinator.mainCoordinator == nil)
+        #expect(mainCoordinator?.feedCoordinator.router.path.isEmpty == true)
     }
 
     @Test func ignoresDuplicateAuthenticationState() {

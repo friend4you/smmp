@@ -56,3 +56,15 @@ func makeComment(
         createdAt: createdAt
     )
 }
+
+func makeFeedPostItem(
+    post: Post = makePost(),
+    author: User = makeUser(),
+    isLikedByCurrentUser: Bool = false
+) -> FeedPostItem {
+    FeedPostItem(
+        post: post,
+        author: author,
+        isLikedByCurrentUser: isLikedByCurrentUser
+    )
+}

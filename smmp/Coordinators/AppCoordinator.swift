@@ -31,10 +31,12 @@ final class AppCoordinator: ObservableObject {
         lastAuthenticated = isAuthenticated
 
         if isAuthenticated {
+            authCoordinator?.router.reset()
             authCoordinator = nil
             mainCoordinator = MainCoordinator(deps: deps, sessionService: sessionService)
             mainCoordinatorGeneration += 1
         } else {
+            mainCoordinator?.resetNavigation()
             mainCoordinator = nil
             authCoordinator = AuthCoordinator(deps: deps)
             authCoordinatorGeneration += 1

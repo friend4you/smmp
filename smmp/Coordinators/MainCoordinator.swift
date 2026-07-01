@@ -10,29 +10,42 @@ import SwiftUI
 final class MainCoordinator: ObservableObject {
     @Published var selectedTab: Tab = .feed
 
-    private let deps: AppDependencies
-
     let feedCoordinator: FeedCoordinator
     let searchCoordinator: SearchCoordinator
-    lazy var newPostCoordinator: NewPostCoordinator = NewPostCoordinator(deps: deps) { [weak self] tab in
-        self?.selectTab(tab)
-    }
+    let newPostCoordinator: NewPostCoordinator
     let profileCoordinator: ProfileCoordinator
 
     init(deps: AppDependencies, sessionService: SessionService) {
-        self.deps = deps
+        let tabSelector = TabSelector()
         feedCoordinator = FeedCoordinator(deps: deps, sessionService: sessionService)
         searchCoordinator = SearchCoordinator()
         profileCoordinator = ProfileCoordinator(deps: deps)
+        newPostCoordinator = NewPostCoordinator(deps: deps) { tab in
+            tabSelector.selectTab?(tab)
+        }
+        tabSelector.selectTab = { [weak self] tab in
+            self?.selectTab(tab)
+        }
     }
 
     func selectTab(_ tab: Tab) {
         selectedTab = tab
     }
 
+    func resetNavigation() {
+        feedCoordinator.router.reset()
+        searchCoordinator.router.reset()
+        newPostCoordinator.router.reset()
+        profileCoordinator.router.reset()
+    }
+
     var rootView: some View {
         MainCoordinatorView(coordinator: self)
     }
+}
+
+private final class TabSelector {
+    var selectTab: ((Tab) -> Void)?
 }
 
 private struct MainCoordinatorView: View {
