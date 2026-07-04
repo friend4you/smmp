@@ -13,9 +13,8 @@ final class AppDependencies: ObservableObject {
 
     let networkMonitor: NetworkMonitor
 
-    let persistenceController: PersistenceController
-
     let mediaService: MediaService
+    let sessionService: SessionService
 
     let authRepository: AuthRepository
     let localRepository: LocalRepositoryProtocol
@@ -23,38 +22,34 @@ final class AppDependencies: ObservableObject {
     let profileRepository: ProfileRepository
     let followRepository: FollowRepository
     let commentRepository: CommentRepository
-
+    
     init() {
         let persistence = PersistenceController.shared
         let network = NetworkMonitor()
         let auth = AuthService()
         let media = MediaService()
 
-        self.persistenceController = persistence
         self.networkMonitor = network
         self.mediaService = media
+        self.sessionService = SessionService()
 
         self.localRepository = LocalRepository(persistence: persistence)
         self.profileRepository = ProfileRepository(
             networkMonitor: network,
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: media
         )
         self.authRepository = AuthRepository(authService: auth)
         self.postRepository = PostRepository(
             networkMonitor: network,
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: media
         )
         self.followRepository = FollowRepository(networkMonitor: network,
-                                                 persistence: persistence,
                                                  mediaService: media)
         self.commentRepository = CommentRepository(
             networkMonitor: network,
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: media
         )
     }
