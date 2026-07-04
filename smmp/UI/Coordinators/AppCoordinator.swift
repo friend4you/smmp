@@ -19,7 +19,7 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var mainCoordinator: MainCoordinator?
 
     private let deps: AppDependencies
-    private var lastAuthenticated: Bool?
+//    private var lastAuthenticated: Bool?
 
     init(deps: AppDependencies) {
         self.deps = deps
@@ -29,16 +29,19 @@ final class AppCoordinator: ObservableObject {
         AppCoordinatorView(coordinator: self, sessionService: deps.sessionService)
     }
 
-    func handleAuthenticationChange(isAuthenticated: Bool) {
-        guard lastAuthenticated != isAuthenticated else { return }
-        lastAuthenticated = isAuthenticated
+    func handleAuthenticationChange(authState: AuthSession) {
+//        guard lastAuthenticated != isAuthenticated else { return }
+//        lastAuthenticated = isAuthenticated
 
-        if isAuthenticated {
+        switch authState {
+        case .idle, .loading:
+            return
+        case .success:
             authCoordinator?.router.reset()
             authCoordinator = nil
             mainCoordinator = MainCoordinator(deps: deps)
             rootState = .main
-        } else if !deps.sessionService.isResolvingSession {
+        case .failure:
             mainCoordinator?.resetNavigation()
             mainCoordinator = nil
             deps.postRepository.removeAllListeners()
@@ -48,7 +51,7 @@ final class AppCoordinator: ObservableObject {
     }
 
     func onCoordinatorStart() {
-        handleAuthenticationChange(isAuthenticated: deps.sessionService.isAuthenticated)
+        handleAuthenticationChange(authState: .loading)
     }
 }
 
@@ -68,12 +71,12 @@ private struct AppCoordinatorView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: sessionService.isAuthenticated)
-        .animation(.easeInOut(duration: 0.3), value: sessionService.isResolvingSession)
+//        .animation(.easeInOut(duration: 0.3), value: sessionService.)
         .onAppear {
             coordinator.onCoordinatorStart()
         }
-        .onChange(of: sessionService.isAuthenticated) { _, isAuthenticated in
-            coordinator.handleAuthenticationChange(isAuthenticated: isAuthenticated)
+        .onChange(of: sessionService.sessionState) { _, state in
+            coordinator.handleAuthenticationChange(authState: state)
         }
     }
 }

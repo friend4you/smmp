@@ -9,7 +9,7 @@ import Foundation
 extension Post {
 
     init?(documentId: String, data: [String: Any]) {
-        guard let authorId = data["authorId"] as? String else { return nil }
+        guard let authorId = FirestoreFieldParser.optionalString(data["authorId"]) else { return nil }
 
         self.id = documentId
         self.authorId = authorId

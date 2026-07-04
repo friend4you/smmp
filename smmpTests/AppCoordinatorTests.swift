@@ -13,25 +13,23 @@ struct AppCoordinatorTests {
     @Test func createsAuthCoordinatorWhenUnauthenticated() {
         let deps = AppDependencies()
         let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps, sessionService: sessionService)
+        let coordinator = AppCoordinator(deps: deps)
 
         coordinator.handleAuthenticationChange(isAuthenticated: false)
 
         #expect(coordinator.authCoordinator != nil)
         #expect(coordinator.mainCoordinator == nil)
-        #expect(coordinator.authCoordinatorGeneration == 1)
     }
 
     @Test func createsMainCoordinatorWhenAuthenticated() {
         let deps = AppDependencies()
         let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps, sessionService: sessionService)
+        let coordinator = AppCoordinator(deps: deps)
 
         coordinator.handleAuthenticationChange(isAuthenticated: true)
 
         #expect(coordinator.mainCoordinator != nil)
         #expect(coordinator.authCoordinator == nil)
-        #expect(coordinator.mainCoordinatorGeneration == 1)
     }
 
     @Test func recreatesCoordinatorsOnAuthTransition() {
