@@ -14,7 +14,7 @@ enum ConnectionType {
     case unknown
 }
 
-protocol NetworkMonitorProtocol: ObservableObject {
+protocol NetworkMonitorProtocol {
     var isConnected: Bool { get }
     var connectionType: ConnectionType { get }
 }

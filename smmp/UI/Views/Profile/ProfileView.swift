@@ -28,7 +28,7 @@ struct ProfileView: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             viewModel.fetchProfile()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

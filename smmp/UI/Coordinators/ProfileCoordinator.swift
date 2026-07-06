@@ -11,7 +11,7 @@ final class ProfileCoordinator: Coordinating, ObservableObject {
     let router = ProfileRouter()
     private let builder: ProfileViewBuilder
 
-    init(deps: AppDependenciesProviding) {
+    init(deps: any AppDependenciesProviding) {
         builder = ProfileViewBuilder(deps: deps)
     }
 

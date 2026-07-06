@@ -16,10 +16,11 @@ final class FeedViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var showError = false
     @Published private(set) var scrollToTopRequest = 0
+    
+    private let networkMonitor: NetworkMonitor
 
     private let postRepository: PostRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
-    private let networkMonitor: NetworkMonitorProtocol
     private let sessionService: SessionServiceProtocol
     private let onNavigate: (FeedRoute) -> Void
 
@@ -34,7 +35,7 @@ final class FeedViewModel: ObservableObject {
     init(
         postRepository: PostRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
-        networkMonitor: NetworkMonitorProtocol,
+        networkMonitor: NetworkMonitor,
         sessionService: SessionServiceProtocol,
         onNavigate: @escaping (FeedRoute) -> Void = { _ in }
     ) {

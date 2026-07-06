@@ -36,9 +36,8 @@ final class ProfileViewModel: ObservableObject {
                 user = try await self.profileRepository.fetchUser(id: userId)
                 displayName = user?.displayName
                 bio = user?.bio
-            } catch(let error){
+            } catch {
                 print(error)
-                //presentError(String(localized: .authErrorUserNotFound))
             }
         }
         
@@ -49,7 +48,6 @@ final class ProfileViewModel: ObservableObject {
     }
 
     func logout() async {
-//        postRepository.removeAllListeners()
         try? await authRepository.signOut()
     }
 }

@@ -9,7 +9,7 @@ import Network
 import Combine
 
 @MainActor
-final class NetworkMonitor: NetworkMonitorProtocol {
+final class NetworkMonitor: NetworkMonitorProtocol, ObservableObject {
     @Published private(set) var isConnected: Bool = true
     @Published private(set) var connectionType: ConnectionType = .unknown
 

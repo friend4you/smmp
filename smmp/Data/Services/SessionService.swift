@@ -10,7 +10,7 @@ import Combine
 import FirebaseAuth
 
 @MainActor
-final class SessionService: SessionServiceProtocol {
+final class SessionService: SessionServiceProtocol, ObservableObject {
 
     @Published private(set) var currentUser: User?
 

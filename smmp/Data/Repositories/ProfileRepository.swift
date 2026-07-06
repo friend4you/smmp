@@ -34,13 +34,15 @@ final class ProfileRepository: ProfileRepositoryProtocol {
         let isOnline = networkMonitor.isConnected
         guard isOnline else { return nil }
 
-        return try await inFlightFetches.user(for: id) { [userDocumentFetcher, localRepository] in
-            guard let user = try await userDocumentFetcher.fetchUserDocument(id: id) else {
-                return nil
-            }
-            try await localRepository.saveUser(user: user)
-            return user
+        let user = try await inFlightFetches.user(for: id) { [userDocumentFetcher] in
+            try await userDocumentFetcher.fetchUserDocument(id: id)
         }
+        
+        if let fetchedUser = user {
+            try await localRepository.saveUser(user: fetchedUser)
+        }
+        
+        return user
     }
 }
 

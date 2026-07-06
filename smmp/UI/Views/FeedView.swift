@@ -42,6 +42,7 @@ struct FeedView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
+                    // TODO: Fix network service
                     if viewModel.isOffline {
                         offlineBanner
                     }

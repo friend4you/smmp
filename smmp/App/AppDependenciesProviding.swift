@@ -7,10 +7,10 @@
 
 import Foundation
 
-protocol AppDependenciesProviding: ObservableObject {
-    var networkMonitor: any NetworkMonitorProtocol { get }
+protocol AppDependenciesProviding {
+    var networkMonitor: NetworkMonitor { get }
     var mediaService: MediaServiceProtocol { get }
-    var sessionService: SessionServiceProtocol { get }
+    var sessionService: SessionService { get }
     var authRepository: AuthRepositoryProtocol { get }
     var localRepository: LocalRepositoryProtocol { get }
     var postRepository: PostRepositoryProtocol { get }
