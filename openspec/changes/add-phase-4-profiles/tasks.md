@@ -1,9 +1,9 @@
 ## 1. Firestore and Storage security rules
 
-- [ ] 1.1 Extend `firebase/firestore.rules` — `users/{uid}/following/{fid}` read (authenticated) and create/delete (owner only)
-- [ ] 1.2 Extend `firebase/firestore.rules` — count-only updates for `followerCount` and `followingCount` on user documents
-- [ ] 1.3 Extend `firebase/storage.rules` — authenticated read for `users/{userId}/`; write for `users/{userId}/` when `userId == auth.uid`, image type, size cap
-- [ ] 1.4 Deploy Firestore and Storage rules to Firebase console and verify on device
+- [x] 1.1 Extend `firebase/firestore.rules` — `users/{uid}/following/{fid}` read (authenticated) and create/delete (owner only)
+- [x] 1.2 Extend `firebase/firestore.rules` — count-only updates for `followerCount` and `followingCount` on user documents
+- [x] 1.3 Extend `firebase/storage.rules` — authenticated read for `users/{userId}/`; write for `users/{userId}/` when `userId == auth.uid`, image type, size cap
+- [x] 1.4 Deploy Firestore and Storage rules to Firebase console and verify on device
 
 ## 2. Models and mapping
 

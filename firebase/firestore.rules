@@ -28,6 +28,13 @@ service cloud.firestore {
             .hasOnly(['likeCount', 'commentCount']);
     }
 
+    // followerCount / followingCount only — any authenticated user (follow batch maintenance)
+    function isUserCountOnlyUpdate() {
+      return isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['followerCount', 'followingCount']);
+    }
+
     // Post author may edit text / imageURL only (not counts)
     function isAuthorContentUpdate() {
       return isSignedIn()
@@ -47,7 +54,15 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isOwner(userId);
+      allow create, delete: if isOwner(userId);
+      allow update: if isOwner(userId) || isUserCountOnlyUpdate();
+
+      // ── users/{uid}/following/{fid} ────────────────────────────────────────
+
+      match /following/{followedId} {
+        allow read: if isSignedIn();
+        allow create, delete: if isOwner(userId);
+      }
     }
 
     // ── posts/{pid} ──────────────────────────────────────────────────────────
@@ -82,7 +97,7 @@ service cloud.firestore {
       }
     }
 
-    // Deny all other paths (e.g. users/{uid}/following — Phase 4)
+    // Deny all other paths
     match /{document=**} {
       allow read, write: if false;
     }

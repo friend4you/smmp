@@ -14,5 +14,18 @@ service firebase.storage {
                    && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
     }
+
+    // ── Profile avatars ──────────────────────────────────────────────────────
+    // Path: users/{userId}/avatar.jpg
+    // Authenticated read; owner write only, images under 5 MB.
+
+    match /users/{userId}/{fileName} {
+      allow read: if request.auth != null;
+
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
   }
 }
