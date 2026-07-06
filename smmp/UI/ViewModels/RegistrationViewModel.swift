@@ -26,15 +26,21 @@ class RegistrationViewModel: ObservableObject {
     @Published var isSubmitting: Bool = false
 
     private let authRepository: AuthRepositoryProtocol
+    private let profileRepository: ProfileRepositoryProtocol
+    private let accountDeleter: AuthAccountDeleting
     private let localRepository: LocalRepositoryProtocol
     private let onNavigate: (AuthRoute) -> Void
 
     init(
         authRepository: AuthRepositoryProtocol,
+        profileRepository: ProfileRepositoryProtocol,
+        accountDeleter: AuthAccountDeleting,
         localRepository: LocalRepositoryProtocol,
         onNavigate: @escaping (AuthRoute) -> Void = { _ in }
     ) {
         self.authRepository = authRepository
+        self.profileRepository = profileRepository
+        self.accountDeleter = accountDeleter
         self.localRepository = localRepository
         self.onNavigate = onNavigate
     }
@@ -54,12 +60,23 @@ class RegistrationViewModel: ObservableObject {
         let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
         do {
-            let user = try await authRepository.register(
+            let authUser = try await authRepository.register(
                 displayName: normalizedDisplayName,
                 email: normalizedEmail,
                 password: password
             )
-            try await localRepository.saveUser(user: user)
+
+            do {
+                let user = try await profileRepository.createProfile(
+                    uid: authUser.id,
+                    displayName: normalizedDisplayName,
+                    email: normalizedEmail
+                )
+                try await localRepository.saveUser(user: user)
+            } catch {
+                try? await accountDeleter.deleteCurrentUser()
+                throw error
+            }
         } catch {
             errorMessage = AuthErrorMapper.message(for: error)
             shouldShowErrorMessage = true

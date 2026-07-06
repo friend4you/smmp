@@ -7,4 +7,5 @@
 
 protocol UserDocumentProtocol: Sendable {
     func fetchUserDocument(id: String) async throws -> User?
+    func createUserDocument(id: String, data: [String: Any]) async throws
 }

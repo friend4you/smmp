@@ -109,9 +109,7 @@ struct LoginView: View {
 
 #Preview {
     LoginView(viewModel: LoginViewModel(
-        authRepository: AuthRepository(
-            authService: AuthService()
-        ),
+        authRepository: AuthRepository(authService: AuthService()),
         localRepository: LocalRepository(persistence: PersistenceController())
     ))
 }

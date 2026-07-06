@@ -14,4 +14,11 @@ struct FirestoreUserDocumentRepository: UserDocumentProtocol {
             .getDocument()
         return User(document: snapshot)
     }
+
+    func createUserDocument(id: String, data: [String: Any]) async throws {
+        try await Firestore.firestore()
+            .collection("users")
+            .document(id)
+            .setData(data)
+    }
 }

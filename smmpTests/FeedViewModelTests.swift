@@ -94,6 +94,10 @@ private final class MockPostRepository: PostRepositoryProtocol {
 }
 
 private struct MockProfileRepository: ProfileRepositoryProtocol {
+    func createProfile(uid: String, displayName: String, email: String) async throws -> User {
+        makeUser(id: uid, displayName: displayName, email: email)
+    }
+
     func fetchUser(id: String) async throws -> User? {
         makeUser(id: id)
     }

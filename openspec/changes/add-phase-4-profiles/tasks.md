@@ -14,9 +14,9 @@
 
 ## 3. Move createProfile to ProfileRepository
 
-- [ ] 3.1 Add `createProfile(uid:displayName:email:)` to `ProfileRepositoryProtocol` and `ProfileRepository` (include `displayNameLower`)
-- [ ] 3.2 Remove `createProfile` from `AuthService`; wire `AuthRepository.register` through `ProfileRepository`
-- [ ] 3.3 Update registration tests and any mocks referencing `AuthService.createProfile`
+- [x] 3.1 Add `createProfile(uid:displayName:email:)` to `ProfileRepositoryProtocol` and `ProfileRepository` (include `displayNameLower`)
+- [x] 3.2 Remove `createProfile` from `AuthService`; wire `AuthRepository.register` through `ProfileRepository`
+- [x] 3.3 Update registration tests and any mocks referencing `AuthService.createProfile`
 
 ## 4. ProfileRepository extensions
 

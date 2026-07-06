@@ -6,5 +6,6 @@
 //
 
 protocol ProfileRepositoryProtocol {
+    func createProfile(uid: String, displayName: String, email: String) async throws -> User
     func fetchUser(id: String) async throws -> User?
 }

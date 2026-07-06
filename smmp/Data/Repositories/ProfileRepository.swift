@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 final class ProfileRepository: ProfileRepositoryProtocol {
     private let networkMonitor: NetworkConnectivityProviding
@@ -24,6 +25,24 @@ final class ProfileRepository: ProfileRepositoryProtocol {
         self.localRepository = localRepository
         self.mediaService = mediaService
         self.userDocumentFetcher = userDocumentFetcher
+    }
+
+    func createProfile(uid: String, displayName: String, email: String) async throws -> User {
+        var user = User(id: uid)
+        user.displayName = displayName
+        user.email = email
+        user.bio = ""
+        user.photoURL = ""
+        user.followerCount = 0
+        user.followingCount = 0
+        user.displayNameLower = User.displayNameLower(from: displayName)
+
+        var data = user.firestoreWriteData(includeEmail: true)
+        data["createdAt"] = FieldValue.serverTimestamp()
+
+        try await userDocumentFetcher.createUserDocument(id: uid, data: data)
+        try await localRepository.saveUser(user: user)
+        return user
     }
 
     func fetchUser(id: String) async throws -> User? {

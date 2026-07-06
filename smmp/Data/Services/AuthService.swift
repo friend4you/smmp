@@ -6,9 +6,8 @@
 //
 
 import FirebaseAuth
-import FirebaseFirestore
 
-class AuthService: AuthServiceProtocol {
+class AuthService: AuthServiceProtocol, AuthAccountDeleting {
     func login(email: String, password: String) async throws -> User {
         let authResult = try await performAuthOperation { completion in
             Auth.auth().signIn(withEmail: email, password: password, completion: completion)
@@ -21,22 +20,11 @@ class AuthService: AuthServiceProtocol {
             Auth.auth().createUser(withEmail: email, password: password, completion: completion)
         }
 
-        do {
-            try await updateDisplayName(displayName, for: authResult.user)
-            try await reloadUser(authResult.user)
-            var user = User(firebaseUser: authResult.user)
-            user.bio = ""
-            
-            try await createProfile(
-                uid: user.id,
-                displayName: displayName,
-                email: email
-            )
-            return user
-        } catch {
-            try? await deleteCurrentUser()
-            throw error
-        }
+        try await updateDisplayName(displayName, for: authResult.user)
+        try await reloadUser(authResult.user)
+        var user = User(firebaseUser: authResult.user)
+        user.bio = ""
+        return user
     }
 
     func signOut() async throws {
@@ -55,22 +43,6 @@ class AuthService: AuthServiceProtocol {
         }
     }
     
-    func createProfile(uid: String, displayName: String, email: String) async throws {
-        let data: [String: Any] = [
-            "displayName": displayName,
-            "email": email,
-            "bio": "",
-            "photoURL": "",
-            "followerCount": 0,
-            "followingCount": 0,
-            "createdAt": FieldValue.serverTimestamp()
-        ]
-        try await Firestore.firestore()
-            .collection("users")
-            .document(uid)
-            .setData(data)
-    }
-
     func deleteCurrentUser() async throws {
         guard let user = Auth.auth().currentUser else { return }
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
