@@ -66,9 +66,9 @@
 
 ## 11. EditProfileView
 
-- [ ] 11.1 Create `EditProfileViewModel` — display name, bio, photo picker, validation, save/discard, upload progress, offline guard
-- [ ] 11.2 Replace `EditProfileView` placeholder — form fields, `PhotosPicker`, save/cancel with discard confirmation
-- [ ] 11.3 Present edit sheet from `ProfileView` and `UserProfileView` (self mode)
+- [x] 11.1 Create `EditProfileViewModel` — display name, bio, photo picker, validation, save/discard, upload progress, offline guard
+- [x] 11.2 Replace `EditProfileView` placeholder — form fields, `PhotosPicker`, save/cancel with discard confirmation
+- [x] 11.3 Present edit sheet from `ProfileView` and `UserProfileView` (self mode)
 
 ## 12. FollowingScreen
 

@@ -24,7 +24,7 @@ struct ProfileViewBuilder {
     }
 
     private func buildEditProfile() -> EditProfileView {
-        EditProfileView()
+        EditProfileViewBuilder(deps: deps).build()
     }
 
     private func buildFollowing() -> FollowingView {

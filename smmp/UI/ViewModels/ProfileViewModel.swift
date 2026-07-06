@@ -48,6 +48,7 @@ final class ProfileViewModel: ObservableObject {
         self.sessionService = sessionService
         self.onNavigate = onNavigate
         bindNetworkMonitor()
+        bindProfileUpdates()
     }
 
     func load() async {
@@ -136,6 +137,15 @@ final class ProfileViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isConnected in
                 self?.isOffline = !isConnected
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindProfileUpdates() {
+        NotificationCenter.default.publisher(for: .profileDidUpdate)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { await self?.load() }
             }
             .store(in: &cancellables)
     }
