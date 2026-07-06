@@ -14,14 +14,34 @@ struct ProfileViewBuilder {
             viewModel: ProfileViewModel(
                 authRepository: deps.authRepository,
                 profileRepository: deps.profileRepository,
+                postRepository: deps.postRepository,
+                localRepository: deps.localRepository,
+                networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
                 onNavigate: onNavigate
             )
         )
     }
-    
-    private func buildEditProfile(onNavigate: @escaping (ProfileRoute) -> Void) -> EditProfileView {
+
+    private func buildEditProfile() -> EditProfileView {
         EditProfileView()
+    }
+
+    private func buildFollowing() -> FollowingView {
+        FollowingView()
+    }
+
+    private func buildPostDetail(item: FeedPostItem) -> PostDetailView? {
+        guard let userId = deps.sessionService.currentUser?.id else { return nil }
+
+        return PostDetailView(
+            item: item,
+            currentUserId: userId,
+            commentRepository: deps.commentRepository,
+            profileRepository: deps.profileRepository,
+            postRepository: deps.postRepository,
+            networkMonitor: deps.networkMonitor
+        )
     }
 
     @ViewBuilder
@@ -30,7 +50,13 @@ struct ProfileViewBuilder {
         case .profile:
             buildProfile(onNavigate: onNavigate)
         case .editProfile:
-            buildEditProfile(onNavigate: onNavigate)
+            buildEditProfile()
+        case .following:
+            buildFollowing()
+        case .postDetail(let item):
+            if let view = buildPostDetail(item: item) {
+                view
+            }
         }
     }
 }

@@ -351,6 +351,10 @@ extension PostRepository {
         likedIds.remove(id)
         likedPostIdsSubject.send(likedIds)
     }
+
+    func likedPostIds(for postIds: [String], userId: String) async -> Set<String> {
+        await fetchLikedPostIds(for: postIds, userId: userId)
+    }
 }
 
 // MARK: - Listener registry

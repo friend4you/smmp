@@ -23,6 +23,8 @@ final class ProfileCoordinator: Coordinating, ObservableObject {
         switch route {
         case .editProfile:
             router.presentSheet(route)
+        case .following, .postDetail:
+            router.push(route)
         case .profile:
             router.push(route)
         }

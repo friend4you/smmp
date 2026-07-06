@@ -54,9 +54,9 @@
 
 ## 9. ProfileView (own profile tab)
 
-- [ ] 9.1 Extend `ProfileViewModel` — load profile, posts, following count tap navigation, edit sheet, logout, offline state
-- [ ] 9.2 Replace `ProfileView` placeholder UI with `ProfileHeaderView`, posts list, toolbar (Edit, Logout)
-- [ ] 9.3 Wire `ProfileRoute.following` in `ProfileCoordinator` and `ProfileViewBuilder`
+- [x] 9.1 Extend `ProfileViewModel` — load profile, posts, following count tap navigation, edit sheet, logout, offline state
+- [x] 9.2 Replace `ProfileView` placeholder UI with `ProfileHeaderView`, posts list, toolbar (Edit, Logout)
+- [x] 9.3 Wire `ProfileRoute.following` in `ProfileCoordinator` and `ProfileViewBuilder`
 
 ## 10. UserProfileView (other users + self from feed)
 

@@ -96,6 +96,10 @@ private final class MockPostRepository: PostRepositoryProtocol {
             throw likePostError
         }
     }
+
+    func likedPostIds(for postIds: [String], userId: String) async -> Set<String> {
+        []
+    }
 }
 
 private struct MockProfileRepository: ProfileRepositoryProtocol {
