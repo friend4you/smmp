@@ -79,6 +79,12 @@ final class PostRepository: PostRepositoryProtocol {
 
     private func handleFeedSnapshot(_ snapshot: QuerySnapshot, currentUserId: String) async {
         let posts = snapshot.documents.compactMap { Post(document: $0) }
+
+        // Firestore can emit an empty cached snapshot before server data arrives.
+        if posts.isEmpty, snapshot.metadata.isFromCache {
+            return
+        }
+
         try? await localRepository.savePosts(posts)
 
         listenerPosts = posts

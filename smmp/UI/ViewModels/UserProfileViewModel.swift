@@ -12,6 +12,7 @@ final class UserProfileViewModel: ObservableObject {
     @Published private(set) var items: [FeedPostItem] = []
     @Published private(set) var isFollowing = false
     @Published private(set) var isOffline = false
+    @Published private(set) var hasCompletedInitialLoad = false
     @Published private(set) var isLoading = false
     @Published private(set) var isRefreshing = false
     @Published private(set) var isFollowActionInProgress = false
@@ -20,18 +21,21 @@ final class UserProfileViewModel: ObservableObject {
 
     let userId: String
 
+    private let userStub: User?
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
     private let localRepository: LocalRepositoryProtocol
-    private let networkMonitor: NetworkMonitor
+    private let networkMonitor: NetworkMonitorProtocol
     private let sessionService: SessionServiceProtocol
+    private let hapticService: HapticServiceProtocol
     private let onPostDetail: (FeedPostItem) -> Void
     private let onEditProfile: () -> Void
     private let onFollowing: () -> Void
 
     private var likedPostIds = Set<String>()
     private var cancellables = Set<AnyCancellable>()
+    private var isScreenActive = false
 
     var isOwnProfile: Bool {
         sessionService.currentUser?.id == userId
@@ -55,23 +59,27 @@ final class UserProfileViewModel: ObservableObject {
 
     init(
         userId: String,
+        userStub: User? = nil,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
         localRepository: LocalRepositoryProtocol,
-        networkMonitor: NetworkMonitor,
+        networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
+        hapticService: HapticServiceProtocol = HapticService(),
         onPostDetail: @escaping (FeedPostItem) -> Void,
         onEditProfile: @escaping () -> Void,
         onFollowing: @escaping () -> Void
     ) {
         self.userId = userId
+        self.userStub = userStub
         self.profileRepository = profileRepository
         self.postRepository = postRepository
         self.followRepository = followRepository
         self.localRepository = localRepository
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
+        self.hapticService = hapticService
         self.onPostDetail = onPostDetail
         self.onEditProfile = onEditProfile
         self.onFollowing = onFollowing
@@ -80,15 +88,27 @@ final class UserProfileViewModel: ObservableObject {
         bindFollowingUpdates()
     }
 
+    func onAppear() {
+        isScreenActive = true
+    }
+
+    func onDisappear() {
+        isScreenActive = false
+    }
+
     func load() async {
         isLoading = true
-        defer { isLoading = false }
+        hasCompletedInitialLoad = false
+        defer {
+            isLoading = false
+            hasCompletedInitialLoad = true
+        }
 
         isOffline = !networkMonitor.isConnected
 
         do {
             let profile = try await profileRepository.fetchUser(id: userId)
-            user = profile
+            user = profile ?? (isOffline ? userStub : nil)
 
             let posts: [Post]
             if networkMonitor.isConnected {
@@ -113,6 +133,13 @@ final class UserProfileViewModel: ObservableObject {
 
             rebuildItems(posts: posts)
         } catch {
+            if isOffline, user == nil {
+                user = userStub
+                if let cachedPosts = try? await loadCachedPosts() {
+                    rebuildItems(posts: cachedPosts)
+                    return
+                }
+            }
             presentError(String(localized: .profileErrorLoad))
         }
     }
@@ -163,6 +190,7 @@ final class UserProfileViewModel: ObservableObject {
                 isFollowing = true
                 adjustFollowerCount(by: 1)
             }
+            hapticService.playFollowToggle()
         } catch {
             presentError(
                 FollowErrorMapper.message(
@@ -181,6 +209,7 @@ final class UserProfileViewModel: ObservableObject {
         let previousCount = item.post.likeCount
 
         applyOptimisticLike(postId: postId, isLiked: !wasLiked)
+        hapticService.playLike()
 
         do {
             if wasLiked {
@@ -197,12 +226,13 @@ final class UserProfileViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindNetworkMonitor() {
-        networkMonitor.$isConnected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isConnected in
-                self?.isOffline = !isConnected
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+            guard let self else { return }
+            self.isOffline = !isConnected
+            if isConnected, !wasConnected, self.isScreenActive {
+                Task { await self.load() }
             }
-            .store(in: &cancellables)
+        }
     }
 
     private func bindProfileUpdates() {
@@ -231,7 +261,7 @@ final class UserProfileViewModel: ObservableObject {
     }
 
     private func rebuildItems(posts: [Post]) {
-        guard let author = user else {
+        guard let author = user ?? userStub else {
             items = []
             return
         }

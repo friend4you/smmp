@@ -5,7 +5,7 @@
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
-struct User {
+struct User: Hashable {
     var id: String
     var displayName: String?
     var email: String?

@@ -18,6 +18,7 @@ final class EditProfileViewModel: ObservableObject {
     @Published private(set) var isSaving = false
     @Published private(set) var uploadProgress: Double = 0
     @Published private(set) var isLoading = false
+    @Published private(set) var isOffline = false
     @Published private(set) var existingPhotoURL: String?
     @Published var errorMessage: String?
     @Published var showError = false
@@ -28,6 +29,7 @@ final class EditProfileViewModel: ObservableObject {
     private let networkMonitor: NetworkMonitorProtocol
     private let onSaved: () -> Void
     private var progressCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     private var initialDisplayName = ""
     private var initialBio = ""
@@ -51,10 +53,6 @@ final class EditProfileViewModel: ObservableObject {
 
     var isValid: Bool {
         isDisplayNameValid && !isBioOverLimit
-    }
-
-    var isOffline: Bool {
-        !networkMonitor.isConnected
     }
 
     var canSave: Bool {
@@ -88,6 +86,8 @@ final class EditProfileViewModel: ObservableObject {
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
         self.onSaved = onSaved
+        isOffline = !networkMonitor.isConnected
+        bindConnectivity()
         progressCancellable = mediaService.uploadProgressPublisher
             .receive(on: DispatchQueue.main)
             .assign(to: \.uploadProgress, on: self)
@@ -135,7 +135,7 @@ final class EditProfileViewModel: ObservableObject {
         guard let userId = sessionService.currentUser?.id else { return false }
         showError = false
 
-        guard networkMonitor.isConnected else {
+        guard !isOffline else {
             presentError(String(localized: .profileEditErrorOffline))
             return false
         }
@@ -175,6 +175,12 @@ final class EditProfileViewModel: ObservableObject {
         } catch {
             presentError(String(localized: .profileEditErrorSave))
             return false
+        }
+    }
+
+    private func bindConnectivity() {
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, _ in
+            self?.isOffline = !isConnected
         }
     }
 

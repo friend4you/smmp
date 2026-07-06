@@ -13,9 +13,12 @@ enum PostImageDisplayStyle {
 struct PostCardView: View {
     let item: FeedPostItem
     var imageDisplayStyle: PostImageDisplayStyle = .feed
+    var isLikeDisabled = false
     let onLikeTapped: () -> Void
-    var onAuthorTap: (() -> Void)? = nil
-    var onPostTap: (() -> Void)? = nil
+    var onAuthorTap: (() -> Void)?
+    var onPostTap: (() -> Void)?
+
+    @State private var likeScale: CGFloat = 1.0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -33,10 +36,20 @@ struct PostCardView: View {
                         Text(.feedLikeCount(item.post.likeCount))
                     } icon: {
                         Image(systemName: item.isLikedByCurrentUser ? "heart.fill" : "heart")
+                            .scaleEffect(likeScale)
                     }
                     .foregroundStyle(item.isLikedByCurrentUser ? .red : .secondary)
                 }
                 .buttonStyle(.plain)
+                .disabled(isLikeDisabled)
+                .onChange(of: item.isLikedByCurrentUser) { _, _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                        likeScale = 1.25
+                    }
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5).delay(0.1)) {
+                        likeScale = 1.0
+                    }
+                }
 
                 Label {
                     Text(.feedCommentCount(item.post.commentCount))

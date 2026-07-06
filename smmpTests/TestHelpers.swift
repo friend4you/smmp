@@ -3,6 +3,7 @@
 //  smmpTests
 //
 
+import Combine
 import Foundation
 @testable import smmp
 
@@ -73,4 +74,28 @@ func makeFeedPostItem(
         author: author,
         isLikedByCurrentUser: isLikedByCurrentUser
     )
+}
+
+@MainActor
+final class MockNetworkMonitor: NetworkMonitorProtocol {
+    let subject: CurrentValueSubject<Bool, Never>
+
+    var isConnected: Bool {
+        get { subject.value }
+        set { subject.send(newValue) }
+    }
+
+    var connectionType: ConnectionType = .unknown
+
+    var connectivityPublisher: AnyPublisher<Bool, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    init(isConnected: Bool) {
+        subject = CurrentValueSubject(isConnected)
+    }
+
+    func setConnected(_ connected: Bool) {
+        subject.send(connected)
+    }
 }

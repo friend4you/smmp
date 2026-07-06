@@ -10,19 +10,20 @@ import Foundation
 final class FeedViewModel: ObservableObject {
     @Published private(set) var items: [FeedPostItem] = []
     @Published private(set) var isOffline = false
+    @Published private(set) var hasCompletedInitialLoad = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var isRefreshing = false
     @Published var showNewPostsBanner = false
     @Published var errorMessage: String?
     @Published var showError = false
     @Published private(set) var scrollToTopRequest = 0
-    
-    private let networkMonitor: NetworkMonitor
 
+    private let networkMonitor: NetworkMonitorProtocol
     private let postRepository: PostRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
     private let sessionService: SessionServiceProtocol
+    private let hapticService: HapticServiceProtocol
     private let onNavigate: (FeedRoute) -> Void
 
     private var cancellables = Set<AnyCancellable>()
@@ -32,13 +33,15 @@ final class FeedViewModel: ObservableObject {
     private var currentUserId: String?
     private var isAtTop = true
     private var acknowledgedTopPostId: String?
+    private var hasStarted = false
 
     init(
         postRepository: PostRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
-        networkMonitor: NetworkMonitor,
+        networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
+        hapticService: HapticServiceProtocol = HapticService(),
         onNavigate: @escaping (FeedRoute) -> Void = { _ in }
     ) {
         self.postRepository = postRepository
@@ -46,6 +49,7 @@ final class FeedViewModel: ObservableObject {
         self.followRepository = followRepository
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
+        self.hapticService = hapticService
         self.onNavigate = onNavigate
         bindPublishers()
     }
@@ -54,14 +58,18 @@ final class FeedViewModel: ObservableObject {
         onNavigate(.postDetail(item))
     }
 
-    func showAuthorProfile(authorId: String) {
-        onNavigate(.userProfile(userId: authorId))
+    func showAuthorProfile(author: User) {
+        onNavigate(.userProfile(userId: author.id, stub: author))
     }
 
     func start() {
         guard let userId = sessionService.currentUser?.id else { return }
         currentUserId = userId
         isOffline = !networkMonitor.isConnected
+
+        guard !hasStarted else { return }
+        hasStarted = true
+        hasCompletedInitialLoad = false
         Task { await reloadFeed(userId: userId) }
     }
 
@@ -91,13 +99,14 @@ final class FeedViewModel: ObservableObject {
     }
 
     func toggleLike(for item: FeedPostItem) async {
-        guard let userId = currentUserId else { return }
+        guard let userId = currentUserId, !isOffline else { return }
 
         let postId = item.id
         let wasLiked = item.isLikedByCurrentUser
         let previousCount = item.post.likeCount
 
         applyOptimisticLike(postId: postId, isLiked: !wasLiked)
+        hapticService.playLike()
 
         do {
             if wasLiked {
@@ -145,16 +154,13 @@ final class FeedViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        networkMonitor.$isConnected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isConnected in
-                guard let self else { return }
-                self.isOffline = !isConnected
-                if isConnected, let userId = self.currentUserId {
-                    Task { await self.reloadFeed(userId: userId) }
-                }
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+            guard let self else { return }
+            self.isOffline = !isConnected
+            if isConnected, !wasConnected, let userId = self.currentUserId {
+                Task { await self.reloadFeed(userId: userId) }
             }
-            .store(in: &cancellables)
+        }
     }
 
     private func reloadFeed(userId: String) async {
@@ -168,6 +174,8 @@ final class FeedViewModel: ObservableObject {
     }
 
     private func handlePostsUpdate(_ newPosts: [Post]) async {
+        guard hasStarted else { return }
+
         if !isAtTop,
            let newTopId = newPosts.first?.id,
            newTopId != acknowledgedTopPostId {
@@ -180,6 +188,7 @@ final class FeedViewModel: ObservableObject {
 
         posts = newPosts
         await rebuildItems()
+        hasCompletedInitialLoad = true
     }
 
     private func handleLikedIdsUpdate(_ likedIds: Set<String>) async {

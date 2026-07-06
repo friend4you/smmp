@@ -26,19 +26,20 @@ final class FollowingViewModel: ObservableObject {
     private let followRepository: FollowRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let sessionService: SessionServiceProtocol
-    private let networkMonitor: NetworkMonitor
+    private let networkMonitor: NetworkMonitorProtocol
     private var cancellables = Set<AnyCancellable>()
 
     init(
         followRepository: FollowRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         sessionService: SessionServiceProtocol,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitorProtocol
     ) {
         self.followRepository = followRepository
         self.profileRepository = profileRepository
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
+        isOffline = !networkMonitor.isConnected
         bindNetworkMonitor()
     }
 
@@ -101,12 +102,9 @@ final class FollowingViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindNetworkMonitor() {
-        networkMonitor.$isConnected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isConnected in
-                self?.isOffline = !isConnected
-            }
-            .store(in: &cancellables)
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, _ in
+            self?.isOffline = !isConnected
+        }
     }
 
     private func resolveUsers(from follows: [Follow]) async throws -> [FollowingUserRow] {

@@ -83,7 +83,7 @@ struct EditProfileView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if viewModel.isOffline {
-                    offlineBanner
+                    OfflineBanner()
                 }
 
                 photoSection
@@ -211,15 +211,6 @@ struct EditProfileView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var offlineBanner: some View {
-        Text(.profileEditErrorOffline)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
 
     private func loadSelectedPhoto(_ item: PhotosPickerItem?) async {
         guard let item else {

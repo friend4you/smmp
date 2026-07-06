@@ -19,4 +19,18 @@ struct FeedPostItem: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    static var skeletonPlaceholder: FeedPostItem {
+        FeedPostItem(
+            post: Post(
+                id: "skeleton-post",
+                authorId: "skeleton-author",
+                text: "Loading post content placeholder",
+                likeCount: 12,
+                commentCount: 3
+            ),
+            author: User(id: "skeleton-author", displayName: "Loading Author"),
+            isLikedByCurrentUser: false
+        )
+    }
 }

@@ -21,6 +21,7 @@ struct FeedViewBuilder {
                 followRepository: deps.followRepository,
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
+                hapticService: deps.hapticService,
                 onNavigate: onNavigate
             )
         )
@@ -28,10 +29,12 @@ struct FeedViewBuilder {
 
     private func buildUserProfile(
         userId: String,
+        stub: User?,
         onNavigate: @escaping (FeedRoute) -> Void
     ) -> UserProfileView {
         userProfileBuilder.build(
             userId: userId,
+            userStub: stub,
             onPostDetail: { onNavigate(.postDetail($0)) },
             onEditProfile: { onNavigate(.editProfile) },
             onFollowing: { onNavigate(.following) }
@@ -51,7 +54,10 @@ struct FeedViewBuilder {
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
             networkMonitor: deps.networkMonitor,
-            onAuthorTap: { onNavigate(.userProfile(userId: $0)) }
+            hapticService: deps.hapticService,
+            onAuthorTap: { user in
+                onNavigate(.userProfile(userId: user.id, stub: user))
+            }
         )
     }
 
@@ -68,8 +74,8 @@ struct FeedViewBuilder {
         switch route {
         case .feed:
             buildFeed(onNavigate: onNavigate)
-        case .userProfile(let userId):
-            buildUserProfile(userId: userId, onNavigate: onNavigate)
+        case .userProfile(let userId, let stub):
+            buildUserProfile(userId: userId, stub: stub, onNavigate: onNavigate)
         case .postDetail(let item):
             if let view = buildPostDetails(post: item, onNavigate: onNavigate) {
                 view

@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct SplashView: View {
+    @State private var logoOpacity: Double = 0
+    @State private var logoScale: CGFloat = 0.9
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -16,8 +19,16 @@ struct SplashView: View {
                 .scaledToFit()
                 .frame(maxHeight: 200)
                 .padding(.horizontal, 24)
+                .opacity(logoOpacity)
+                .scaleEffect(logoScale)
             ProgressView()
             Spacer()
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) {
+                logoOpacity = 1
+                logoScale = 1.0
+            }
         }
     }
 }

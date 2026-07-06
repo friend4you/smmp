@@ -132,10 +132,33 @@ struct UserProfileViewModelTests {
         #expect(didNavigateToEdit)
     }
 
+    @Test func partialOfflineProfileUsesStubWhenFetchReturnsNil() async {
+        let stub = makeUser(id: "other-user", displayName: "Bob from Feed")
+        let cachedPost = makePost(id: "cached-post", authorId: "other-user", text: "Cached")
+        let localRepository = MockLocalRepository(posts: [cachedPost])
+
+        let viewModel = makeViewModel(
+            userId: "other-user",
+            userStub: stub,
+            profileRepository: MockUserProfileProfileRepository(user: nil),
+            postRepository: MockUserProfilePostRepository(),
+            localRepository: localRepository,
+            sessionService: MockSessionService(currentUser: makeUser(id: "me")),
+            networkMonitor: NetworkMonitor(testConnection: false)
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.user?.displayName == "Bob from Feed")
+        #expect(viewModel.items.count == 1)
+        #expect(viewModel.items.first?.post.text == "Cached")
+    }
+
     // MARK: - Helpers
 
     private func makeViewModel(
         userId: String,
+        userStub: User? = nil,
         profileRepository: ProfileRepositoryProtocol = MockUserProfileProfileRepository(),
         postRepository: PostRepositoryProtocol = MockUserProfilePostRepository(),
         followRepository: FollowRepositoryProtocol = MockUserProfileFollowRepository(),
@@ -148,6 +171,7 @@ struct UserProfileViewModelTests {
     ) -> UserProfileViewModel {
         UserProfileViewModel(
             userId: userId,
+            userStub: userStub,
             profileRepository: profileRepository,
             postRepository: postRepository,
             followRepository: followRepository,

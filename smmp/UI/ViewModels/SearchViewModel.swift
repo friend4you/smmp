@@ -31,7 +31,8 @@ final class SearchViewModel: ObservableObject {
     private let profileRepository: ProfileRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
     private let sessionService: SessionServiceProtocol
-    private let networkMonitor: NetworkMonitor
+    private let networkMonitor: NetworkMonitorProtocol
+    private let hapticService: HapticServiceProtocol
     private let onNavigate: (SearchRoute) -> Void
 
     private var cancellables = Set<AnyCancellable>()
@@ -41,14 +42,17 @@ final class SearchViewModel: ObservableObject {
         profileRepository: ProfileRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
         sessionService: SessionServiceProtocol,
-        networkMonitor: NetworkMonitor,
+        networkMonitor: NetworkMonitorProtocol,
+        hapticService: HapticServiceProtocol = HapticService(),
         onNavigate: @escaping (SearchRoute) -> Void = { _ in }
     ) {
         self.profileRepository = profileRepository
         self.followRepository = followRepository
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
+        self.hapticService = hapticService
         self.onNavigate = onNavigate
+        isOffline = !networkMonitor.isConnected
         bindNetworkMonitor()
         bindQuery()
     }
@@ -67,8 +71,8 @@ final class SearchViewModel: ObservableObject {
             && !isOffline
     }
 
-    func openProfile(userId: String) {
-        onNavigate(.userProfile(userId: userId))
+    func openProfile(user: User) {
+        onNavigate(.userProfile(userId: user.id, stub: user))
     }
 
     func canToggleFollow(for result: SearchUserResult) -> Bool {
@@ -99,6 +103,7 @@ final class SearchViewModel: ObservableObject {
             }
 
             results[index].isFollowing = !wasFollowing
+            hapticService.playFollowToggle()
             NotificationCenter.default.post(name: .followingDidChange, object: nil)
         } catch {
             presentError(
@@ -113,23 +118,20 @@ final class SearchViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindNetworkMonitor() {
-        networkMonitor.$isConnected
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isConnected in
-                guard let self else { return }
-                self.isOffline = !isConnected
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, _ in
+            guard let self else { return }
+            self.isOffline = !isConnected
 
-                if !isConnected {
-                    self.results = []
-                    self.hasSearched = false
-                    return
-                }
-
-                if self.trimmedQuery.count >= Self.minQueryLength {
-                    Task { await self.performSearch(query: self.trimmedQuery) }
-                }
+            if !isConnected {
+                self.results = []
+                self.hasSearched = false
+                return
             }
-            .store(in: &cancellables)
+
+            if self.trimmedQuery.count >= Self.minQueryLength {
+                Task { await self.performSearch(query: self.trimmedQuery) }
+            }
+        }
     }
 
     private func bindQuery() {

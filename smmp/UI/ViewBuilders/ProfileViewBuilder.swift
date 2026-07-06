@@ -22,6 +22,7 @@ struct ProfileViewBuilder {
                 localRepository: deps.localRepository,
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
+                hapticService: deps.hapticService,
                 onNavigate: onNavigate
             )
         )
@@ -48,16 +49,21 @@ struct ProfileViewBuilder {
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
             networkMonitor: deps.networkMonitor,
-            onAuthorTap: { onNavigate(.userProfile(userId: $0)) }
+            hapticService: deps.hapticService,
+            onAuthorTap: { user in
+                onNavigate(.userProfile(userId: user.id, stub: user))
+            }
         )
     }
 
     private func buildUserProfile(
         userId: String,
+        stub: User?,
         onNavigate: @escaping (ProfileRoute) -> Void
     ) -> UserProfileView {
         userProfileBuilder.build(
             userId: userId,
+            userStub: stub,
             onPostDetail: { onNavigate(.postDetail($0)) },
             onEditProfile: { onNavigate(.editProfile) },
             onFollowing: { onNavigate(.following) }
@@ -73,8 +79,8 @@ struct ProfileViewBuilder {
             buildEditProfile()
         case .following:
             buildFollowing()
-        case .userProfile(let userId):
-            buildUserProfile(userId: userId, onNavigate: onNavigate)
+        case .userProfile(let userId, let stub):
+            buildUserProfile(userId: userId, stub: stub, onNavigate: onNavigate)
         case .postDetail(let item):
             if let view = buildPostDetail(item: item, onNavigate: onNavigate) {
                 view

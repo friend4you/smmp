@@ -20,6 +20,7 @@ struct SearchViewBuilder {
                 followRepository: deps.followRepository,
                 sessionService: deps.sessionService,
                 networkMonitor: deps.networkMonitor,
+                hapticService: deps.hapticService,
                 onNavigate: onNavigate
             )
         )
@@ -27,10 +28,12 @@ struct SearchViewBuilder {
 
     private func buildUserProfile(
         userId: String,
+        stub: User?,
         onNavigate: @escaping (SearchRoute) -> Void
     ) -> UserProfileView {
         userProfileBuilder.build(
             userId: userId,
+            userStub: stub,
             onPostDetail: { onNavigate(.postDetail($0)) },
             onEditProfile: { onNavigate(.editProfile) },
             onFollowing: { onNavigate(.following) }
@@ -50,7 +53,10 @@ struct SearchViewBuilder {
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
             networkMonitor: deps.networkMonitor,
-            onAuthorTap: { onNavigate(.userProfile(userId: $0)) }
+            hapticService: deps.hapticService,
+            onAuthorTap: { user in
+                onNavigate(.userProfile(userId: user.id, stub: user))
+            }
         )
     }
 
@@ -67,8 +73,8 @@ struct SearchViewBuilder {
         switch route {
         case .search:
             buildSearch(onNavigate: onNavigate)
-        case .userProfile(let userId):
-            buildUserProfile(userId: userId, onNavigate: onNavigate)
+        case .userProfile(let userId, let stub):
+            buildUserProfile(userId: userId, stub: stub, onNavigate: onNavigate)
         case .postDetail(let item):
             if let view = buildPostDetail(item: item, onNavigate: onNavigate) {
                 view

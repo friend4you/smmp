@@ -119,6 +119,10 @@ final class MockLocalRepository: LocalRepositoryProtocol {
     private(set) var savedComments: [Comment] = []
     var usersById: [String: User] = [:]
 
+    init(posts: [Post] = []) {
+        savedPosts = posts
+    }
+
     func saveUser(user: User) async throws {
         savedUsers.append(user)
         usersById[user.id] = user

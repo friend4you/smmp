@@ -366,15 +366,15 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] Unit tests for `ProfileViewModel`, `SearchViewModel`, `UserProfileViewModel`, and `FollowRepository` written
 
 ### Phase 5 — Polish, Animations & Offline
-- [ ] `matchedGeometryEffect` transitions added
-- [ ] Heart animation on like implemented
-- [ ] Skeleton loading placeholders added
-- [ ] Scroll-to-top on new-posts banner implemented
-- [ ] Haptic feedback added
-- [ ] Full offline mode implemented and verified
-- [ ] Image cache memory audit done
-- [ ] Instruments profiling completed and hotspots fixed
-- [ ] UI tests for critical flows written
+- [ ] `matchedGeometryEffect` transitions added *(out of scope — replaced by skeletons)*
+- [x] Heart animation on like implemented
+- [x] Skeleton loading placeholders added
+- [x] Scroll-to-top on new-posts banner implemented
+- [x] Haptic feedback added
+- [x] Full offline mode implemented and verified
+- [ ] Image cache memory audit done *(out of scope — AsyncImage, no SDWebImage)*
+- [ ] Instruments profiling completed and hotspots fixed *(out of scope)*
+- [ ] UI tests for critical flows written *(out of scope — unit/integration tests instead)*
 
 ### Phase 6 — Release Prep
 - [ ] App icon and launch screen assets added

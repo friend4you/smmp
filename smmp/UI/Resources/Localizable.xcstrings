@@ -1226,6 +1226,17 @@
         }
       }
     },
+    "search.requiresConnection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search requires an internet connection."
+          }
+        }
+      }
+    },
     "search.placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
