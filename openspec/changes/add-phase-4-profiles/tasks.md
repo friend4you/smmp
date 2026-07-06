@@ -49,8 +49,8 @@
 
 ## 8. Shared profile UI components
 
-- [ ] 8.1 Build `ProfileHeaderView` — avatar (`AsyncImage`), display name, bio, follower/following counts (following tappable on own profile only)
-- [ ] 8.2 Build reusable profile posts list section using `PostCardView` + navigation to post detail
+- [x] 8.1 Build `ProfileHeaderView` — avatar (`AsyncImage`), display name, bio, follower/following counts (following tappable on own profile only)
+- [x] 8.2 Build reusable profile posts list section using `PostCardView` + navigation to post detail
 
 ## 9. ProfileView (own profile tab)
 
