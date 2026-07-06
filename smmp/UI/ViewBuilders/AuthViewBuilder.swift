@@ -7,7 +7,7 @@ import SwiftUI
 
 @MainActor
 struct AuthViewBuilder {
-    let deps: AppDependencies
+    let deps: AppDependenciesProviding
 
     private func buildLogin(onNavigate: @escaping (AuthRoute) -> Void) -> LoginView {
         LoginView(

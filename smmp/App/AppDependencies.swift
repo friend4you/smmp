@@ -9,19 +9,19 @@ import Foundation
 import Combine
 
 @MainActor
-final class AppDependencies: ObservableObject {
+final class AppDependencies: AppDependenciesProviding {
 
-    let networkMonitor: NetworkMonitor
+    let networkMonitor: NetworkMonitorProtocol
 
-    let mediaService: MediaService
-    let sessionService: SessionService
+    let mediaService: MediaServiceProtocol
+    let sessionService: SessionServiceProtocol
 
-    let authRepository: AuthRepository
+    let authRepository: AuthRepositoryProtocol
     let localRepository: LocalRepositoryProtocol
-    let postRepository: PostRepository
-    let profileRepository: ProfileRepository
-    let followRepository: FollowRepository
-    let commentRepository: CommentRepository
+    let postRepository: PostRepositoryProtocol
+    let profileRepository: ProfileRepositoryProtocol
+    let followRepository: FollowRepositoryProtocol
+    let commentRepository: CommentRepositoryProtocol
     
     init() {
         let persistence = PersistenceController.shared

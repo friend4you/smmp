@@ -96,7 +96,6 @@ struct ProfileRepositoryTests {
         ProfileRepository(
             networkMonitor: networkMonitor,
             localRepository: localRepository,
-            persistence: PersistenceController(inMemory: true),
             mediaService: MediaService(),
             userDocumentFetcher: fetcher
         )
@@ -113,7 +112,7 @@ private final class MockNetworkMonitor: NetworkConnectivityProviding {
     }
 }
 
-private final class MockUserDocumentFetcher: UserDocumentFetching, @unchecked Sendable {
+private final class MockUserDocumentFetcher: UserDocumentProtocol, @unchecked Sendable {
     private(set) var fetchCount = 0
     private let user: User?
     private let delayNanoseconds: UInt64

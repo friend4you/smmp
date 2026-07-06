@@ -314,7 +314,7 @@ Use this checklist to track implementation status. Items map to the Development 
 ### Phase 1 — Project Foundation
 - [x] Xcode project created with SwiftUI lifecycle
 - [x] Swift Package dependencies added (Firebase Auth, Firestore)
-- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3)*
+- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3; Storage added, AsyncImage used instead of SDWebImage)*
 - [x] Firebase project configured (Auth, Firestore, Storage)
 - [x] Folder structure set up
 - [x] Swift model structs defined (`User`, `Post`, `Comment`)
@@ -348,8 +348,8 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] Image upload via `MediaService` implemented
 - [x] `PostDetailScreen` built
 - [x] `CommentRepository` implemented
-- [ ] Unit tests for Firestore → model parsing
-- [ ] Integration tests for offline path written
+- [x] Unit tests for Firestore → model parsing
+- [x] Integration tests for offline path written
 
 ### Phase 4 — Profiles & Social Graph
 - [ ] `UserProfileScreen` built
@@ -382,4 +382,4 @@ Use this checklist to track implementation status. Items map to the Development 
 
 ---
 
-> **Last updated:** June 2026
+> **Last updated:** July 2026

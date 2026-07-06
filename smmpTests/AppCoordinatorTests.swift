@@ -11,67 +11,62 @@ import Testing
 struct AppCoordinatorTests {
 
     @Test func createsAuthCoordinatorWhenUnauthenticated() {
-        let deps = AppDependencies()
-        let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps)
+        let coordinator = AppCoordinator(deps: AppDependencies())
 
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
+        coordinator.handleAuthenticationChange(authState: .failure)
 
         #expect(coordinator.authCoordinator != nil)
         #expect(coordinator.mainCoordinator == nil)
+        #expect(coordinator.rootState == .auth)
     }
 
     @Test func createsMainCoordinatorWhenAuthenticated() {
-        let deps = AppDependencies()
-        let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps)
+        let coordinator = AppCoordinator(deps: AppDependencies())
 
-        coordinator.handleAuthenticationChange(isAuthenticated: true)
+        coordinator.handleAuthenticationChange(authState: .success)
 
         #expect(coordinator.mainCoordinator != nil)
         #expect(coordinator.authCoordinator == nil)
+        #expect(coordinator.rootState == .main)
     }
 
     @Test func recreatesCoordinatorsOnAuthTransition() {
-        let deps = AppDependencies()
-        let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps, sessionService: sessionService)
+        let coordinator = AppCoordinator(deps: AppDependencies())
 
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
-        let firstAuthGeneration = coordinator.authCoordinatorGeneration
+        coordinator.handleAuthenticationChange(authState: .failure)
+        let firstAuthCoordinator = coordinator.authCoordinator
 
-        coordinator.handleAuthenticationChange(isAuthenticated: true)
-        let firstMainGeneration = coordinator.mainCoordinatorGeneration
+        coordinator.handleAuthenticationChange(authState: .success)
+        let firstMainCoordinator = coordinator.mainCoordinator
 
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
+        coordinator.handleAuthenticationChange(authState: .failure)
 
-        #expect(coordinator.authCoordinatorGeneration == firstAuthGeneration + 1)
+        #expect(coordinator.authCoordinator !== firstAuthCoordinator)
         #expect(coordinator.mainCoordinator == nil)
-        #expect(coordinator.mainCoordinatorGeneration == firstMainGeneration)
+        #expect(firstMainCoordinator?.feedCoordinator.router.path.isEmpty == true)
     }
 
     @Test func logoutResetsMainNavigationBeforeDiscard() {
-        let deps = AppDependencies()
-        let coordinator = AppCoordinator(deps: deps, sessionService: SessionService())
+        let coordinator = AppCoordinator(deps: AppDependencies())
 
-        coordinator.handleAuthenticationChange(isAuthenticated: true)
+        coordinator.handleAuthenticationChange(authState: .success)
         let mainCoordinator = coordinator.mainCoordinator
         mainCoordinator?.feedCoordinator.router.push(.postDetail(makeFeedPostItem()))
 
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
+        coordinator.handleAuthenticationChange(authState: .failure)
 
         #expect(coordinator.mainCoordinator == nil)
         #expect(mainCoordinator?.feedCoordinator.router.path.isEmpty == true)
     }
 
-    @Test func ignoresDuplicateAuthenticationState() {
-        let deps = AppDependencies()
-        let sessionService = SessionService()
-        let coordinator = AppCoordinator(deps: deps, sessionService: sessionService)
+    @Test func ignoresIdleAndLoadingStates() {
+        let coordinator = AppCoordinator(deps: AppDependencies())
 
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
-        coordinator.handleAuthenticationChange(isAuthenticated: false)
+        coordinator.handleAuthenticationChange(authState: .idle)
+        coordinator.handleAuthenticationChange(authState: .loading)
 
-        #expect(coordinator.authCoordinatorGeneration == 1)
+        #expect(coordinator.rootState == .splash)
+        #expect(coordinator.authCoordinator == nil)
+        #expect(coordinator.mainCoordinator == nil)
     }
 }

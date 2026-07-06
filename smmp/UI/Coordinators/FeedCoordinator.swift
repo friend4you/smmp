@@ -11,7 +11,7 @@ final class FeedCoordinator: Coordinating, ObservableObject {
     let router = FeedRouter()
     private let builder: FeedViewBuilder
 
-    init(deps: AppDependencies) {
+    init(deps: AppDependenciesProviding) {
         builder = FeedViewBuilder(deps: deps)
     }
 

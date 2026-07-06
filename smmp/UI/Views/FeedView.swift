@@ -145,5 +145,4 @@ struct FeedView: View {
             )
         )
     }
-    .environmentObject(SessionService())
 }

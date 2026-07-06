@@ -13,14 +13,14 @@ final class ProfileViewModel: ObservableObject {
     
     private let authRepository: AuthRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
-    private let sessionService: SessionService
+    private let sessionService: SessionServiceProtocol
     private let onNavigate: (ProfileRoute) -> Void
     private var user: User?
 
     init(
         authRepository: AuthRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
-        sessionService: SessionService,
+        sessionService: SessionServiceProtocol,
         onNavigate: @escaping (ProfileRoute) -> Void = { _ in }
     ) {
         self.authRepository = authRepository

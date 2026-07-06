@@ -6,7 +6,7 @@
 import Combine
 
 @MainActor
-protocol Coordinating: AnyObject, ObservableObject {
+protocol Coordinating: ObservableObject {
     associatedtype Route: AppRoute
 
     var router: Router<Route> { get }

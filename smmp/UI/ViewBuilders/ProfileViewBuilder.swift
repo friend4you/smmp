@@ -7,14 +7,14 @@ import SwiftUI
 
 @MainActor
 struct ProfileViewBuilder {
-    let deps: AppDependencies
+    let deps: AppDependenciesProviding
 
     private func buildProfile(onNavigate: @escaping (ProfileRoute) -> Void) -> ProfileView {
         ProfileView(
             viewModel: ProfileViewModel(
                 authRepository: deps.authRepository,
                 profileRepository: deps.profileRepository,
-                sessionService: SessionService(),
+                sessionService: deps.sessionService,
                 onNavigate: onNavigate
             )
         )

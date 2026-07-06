@@ -7,7 +7,7 @@ import SwiftUI
 
 @MainActor
 struct NewPostViewBuilder {
-    let deps: AppDependencies
+    let deps: AppDependenciesProviding
 
     private func buildNewPost(onPostCreated: @escaping () -> Void) -> NewPostView {
         NewPostView(

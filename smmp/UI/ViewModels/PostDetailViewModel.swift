@@ -23,7 +23,7 @@ final class PostDetailViewModel: ObservableObject {
     private let commentRepository: CommentRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
-    private let networkMonitor: NetworkMonitor
+    private let networkMonitor: NetworkMonitorProtocol
     private var authorCache: [String: User] = [:]
     private let currentUserId: String
 
@@ -49,7 +49,7 @@ final class PostDetailViewModel: ObservableObject {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitorProtocol
     ) {
         self.postItem = item
         self.currentUserId = currentUserId

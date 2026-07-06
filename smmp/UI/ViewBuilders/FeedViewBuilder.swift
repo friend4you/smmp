@@ -7,7 +7,7 @@ import SwiftUI
 
 @MainActor
 struct FeedViewBuilder {
-    let deps: AppDependencies
+    let deps: AppDependenciesProviding
 
     private func buildFeed(onNavigate: @escaping (FeedRoute) -> Void) -> FeedView {
         FeedView(

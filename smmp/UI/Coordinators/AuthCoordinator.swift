@@ -7,11 +7,11 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class AuthCoordinator: Coordinating, ObservableObject {
+final class AuthCoordinator: Coordinating {
     let router = AuthRouter()
     private let builder: AuthViewBuilder
 
-    init(deps: AppDependencies) {
+    init(deps: AppDependenciesProviding) {
         builder = AuthViewBuilder(deps: deps)
     }
 
@@ -19,7 +19,7 @@ final class AuthCoordinator: Coordinating, ObservableObject {
         AuthCoordinatorView(coordinator: self)
     }
 
-    fileprivate func navigate(_ route: AuthRoute) {
+    func navigate(_ route: AuthRoute) {
         switch route {
         case .register, .forgotPassword:
             router.push(route)

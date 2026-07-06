@@ -12,7 +12,7 @@ final class NewPostCoordinator: Coordinating, ObservableObject {
     private let builder: NewPostViewBuilder
     private let onSelectTab: (Tab) -> Void
 
-    init(deps: AppDependencies, onSelectTab: @escaping (Tab) -> Void) {
+    init(deps: AppDependenciesProviding, onSelectTab: @escaping (Tab) -> Void) {
         builder = NewPostViewBuilder(deps: deps)
         self.onSelectTab = onSelectTab
     }
@@ -21,7 +21,7 @@ final class NewPostCoordinator: Coordinating, ObservableObject {
         NewPostCoordinatorView(coordinator: self)
     }
 
-    fileprivate func handlePostCreated() {
+    func handlePostCreated() {
         onSelectTab(.feed)
     }
 

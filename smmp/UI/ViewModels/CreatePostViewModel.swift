@@ -20,8 +20,8 @@ final class CreatePostViewModel: ObservableObject {
 
     private let postRepository: PostRepositoryProtocol
     private let mediaService: MediaServiceProtocol
-    private let sessionService: SessionService
-    private let networkMonitor: NetworkMonitor
+    private let sessionService: SessionServiceProtocol
+    private let networkMonitor: NetworkMonitorProtocol
     private let onPostCreated: () -> Void
     private var progressCancellable: AnyCancellable?
 
@@ -56,8 +56,8 @@ final class CreatePostViewModel: ObservableObject {
     init(
         postRepository: PostRepositoryProtocol,
         mediaService: MediaServiceProtocol,
-        sessionService: SessionService,
-        networkMonitor: NetworkMonitor,
+        sessionService: SessionServiceProtocol,
+        networkMonitor: NetworkMonitorProtocol,
         onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository

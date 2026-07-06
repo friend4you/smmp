@@ -15,7 +15,7 @@ struct PostDetailView: View {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitorProtocol
     ) {
         _viewModel = StateObject(
             wrappedValue: PostDetailViewModel(

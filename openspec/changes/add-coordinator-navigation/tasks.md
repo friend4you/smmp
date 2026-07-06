@@ -63,5 +63,5 @@
 
 - [x] 9.1 Delete or reduce `RootView` / `ContentView` to thin wrappers if no longer needed
 - [x] 9.2 Audit migrated views for remaining `NavigationLink { Destination() }` patterns
-- [ ] 9.3 Manual test: login → register → back → forgot password → login → feed → post detail → pop → logout → login
-- [ ] 9.4 Manual test: tab switching preserves feed stack; new post switches to feed tab
+- [x] 9.3 Manual test: login → register → back → forgot password → login → feed → post detail → pop → logout → login
+- [x] 9.4 Manual test: tab switching preserves feed stack; new post switches to feed tab

@@ -177,5 +177,4 @@ struct NewPostView: View {
             )
         )
     }
-    .environmentObject(SessionService())
 }

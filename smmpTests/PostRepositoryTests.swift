@@ -18,7 +18,6 @@ struct PostRepositoryTests {
         let repository = PostRepository(
             networkMonitor: MockNetworkMonitor(isConnected: false),
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: MediaService()
         )
 
@@ -39,7 +38,6 @@ struct PostRepositoryTests {
         let repository = PostRepository(
             networkMonitor: MockNetworkMonitor(isConnected: true),
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: MediaService()
         )
 
@@ -54,7 +52,6 @@ struct PostRepositoryTests {
         let repository = PostRepository(
             networkMonitor: MockNetworkMonitor(isConnected: true),
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: MediaService()
         )
 
@@ -72,7 +69,6 @@ struct PostRepositoryTests {
         let repository = PostRepository(
             networkMonitor: MockNetworkMonitor(isConnected: false),
             localRepository: localRepository,
-            persistence: persistence,
             mediaService: MediaService()
         )
 

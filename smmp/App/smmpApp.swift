@@ -10,7 +10,7 @@ import Firebase
 
 @main
 struct SMMPApp: App {
-    let dependencies: AppDependencies
+    let dependencies: AppDependenciesProviding
     let appCoordinator: AppCoordinator
 
     init() {

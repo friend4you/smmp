@@ -68,5 +68,4 @@ struct ProfileView: View {
             )
         )
     }
-    .environmentObject(SessionService())
 }

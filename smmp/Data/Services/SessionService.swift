@@ -9,20 +9,12 @@ import Foundation
 import Combine
 import FirebaseAuth
 
-enum AuthSession {
-    case idle
-    case loading
-    case success
-    case failure
-}
-
 @MainActor
-final class SessionService: ObservableObject {
+final class SessionService: SessionServiceProtocol {
 
     @Published private(set) var currentUser: User?
-//    @Published private(set) var isResolvingSession: Bool = true
-    
-    var sessionState: AuthSession = .idle
+
+    private(set) var sessionState: AuthSession = .idle
 
     var isAuthenticated: Bool { currentUser != nil }
 
@@ -39,15 +31,10 @@ final class SessionService: ObservableObject {
     }
 
     private func attachListener() {
-        self.sessionState = .loading
+        sessionState = .loading
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, firebaseUser in
             guard let self else { return }
             Task { @MainActor in
-                defer {
-                    
-//                    self.isResolvingSession = false
-                }
-                
                 guard let user = firebaseUser else {
                     self.currentUser = nil
                     self.sessionState = .failure

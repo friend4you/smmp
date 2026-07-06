@@ -15,7 +15,7 @@ final class MainCoordinator: ObservableObject {
     let newPostCoordinator: NewPostCoordinator
     let profileCoordinator: ProfileCoordinator
 
-    init(deps: AppDependencies) {
+    init(deps: AppDependenciesProviding) {
         let tabSelector = TabSelector()
         feedCoordinator = FeedCoordinator(deps: deps)
         searchCoordinator = SearchCoordinator()

@@ -18,21 +18,18 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var authCoordinator: AuthCoordinator?
     @Published private(set) var mainCoordinator: MainCoordinator?
 
-    private let deps: AppDependencies
-//    private var lastAuthenticated: Bool?
+    private let deps: any AppDependenciesProviding
 
-    init(deps: AppDependencies) {
+    init(deps: any AppDependenciesProviding) {
         self.deps = deps
     }
 
     var rootView: some View {
-        AppCoordinatorView(coordinator: self, sessionService: deps.sessionService)
+        AppCoordinatorView(coordinator: self,
+                           sessionService: deps.sessionService)
     }
 
     func handleAuthenticationChange(authState: AuthSession) {
-//        guard lastAuthenticated != isAuthenticated else { return }
-//        lastAuthenticated = isAuthenticated
-
         switch authState {
         case .idle, .loading:
             return
@@ -71,7 +68,6 @@ private struct AppCoordinatorView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: sessionService.isAuthenticated)
-//        .animation(.easeInOut(duration: 0.3), value: sessionService.)
         .onAppear {
             coordinator.onCoordinatorStart()
         }

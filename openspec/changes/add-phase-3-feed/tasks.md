@@ -69,13 +69,13 @@
 
 ## 11. Tests
 
-- [ ] 11.1 Unit tests: Post and Comment Firestore mapping (from task 2.3)
-- [ ] 11.2 Integration test: `PostRepository` offline fallback returns CoreData-cached posts when network is unavailable
-- [ ] 11.3 Unit tests: `FeedViewModel` optimistic like rollback on repository error (optional if timeboxed)
+- [x] 11.1 Unit tests: Post and Comment Firestore mapping (from task 2.3)
+- [x] 11.2 Integration test: `PostRepository` offline fallback returns CoreData-cached posts when network is unavailable
+- [x] 11.3 Unit tests: `FeedViewModel` optimistic like rollback on repository error (optional if timeboxed)
 
 ## 12. README progress tracker
 
-- [ ] 12.1 Update Phase 3 checklist in README.md as tasks complete
+- [x] 12.1 Update Phase 3 checklist in README.md as tasks complete
 
 ## 13. Post images
 
