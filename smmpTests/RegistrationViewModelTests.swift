@@ -3,6 +3,7 @@
 //  smmpTests
 //
 
+import Foundation
 import Testing
 @testable import smmp
 
@@ -127,8 +128,14 @@ private final class MockRegistrationProfileRepository: ProfileRepositoryProtocol
         nil
     }
 
-    func updateProfile(uid: String, displayName: String, bio: String?, photoURL: String?) async throws -> User {
-        makeUser(id: uid, displayName: displayName, bio: bio, photoURL: photoURL)
+    func updateProfile(
+        uid: String,
+        displayName: String,
+        bio: String?,
+        profileImageData: Data?,
+        removeProfileImage: Bool
+    ) async throws -> User {
+        makeUser(id: uid, displayName: displayName, bio: bio)
     }
 
     func searchUsers(prefix: String) async throws -> [User] {

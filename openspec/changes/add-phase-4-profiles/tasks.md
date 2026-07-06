@@ -27,9 +27,9 @@
 
 ## 5. MediaService profile photos
 
-- [ ] 5.1 Add `MediaPaths.profileImage(userId:)` → `users/{uid}/avatar.jpg`
-- [ ] 5.2 Add `uploadProfileImage` and `deleteProfileImage` to `MediaServiceProtocol` and `MediaService`
-- [ ] 5.3 Wire `ProfileRepository.updateProfile` to upload/delete avatar via `MediaService`
+- [x] 5.1 Add `MediaPaths.profileImage(userId:)` → `users/{uid}/avatar.jpg`
+- [x] 5.2 Add `uploadProfileImage` and `deleteProfileImage` to `MediaServiceProtocol` and `MediaService`
+- [x] 5.3 Wire `ProfileRepository.updateProfile` to upload/delete avatar via `MediaService`
 
 ## 6. FollowRepository
 

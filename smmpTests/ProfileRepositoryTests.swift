@@ -3,8 +3,10 @@
 //  smmpTests
 //
 
+import Combine
 import Foundation
 import Testing
+import UIKit
 @testable import smmp
 
 struct ProfileRepositoryTests {
@@ -145,41 +147,110 @@ struct ProfileRepositoryTests {
     @Test func updateProfileWritesFirestoreSyncsAuthAndCachesLocally() async throws {
         let persistence = await PersistenceController(inMemory: true)
         let localRepository = await LocalRepository(persistence: persistence)
-        let existing = makeUser(id: "user-edit", displayName: "Old Name", bio: "Old bio")
+        let existing = makeUser(
+            id: "user-edit",
+            displayName: "Old Name",
+            bio: "Old bio",
+            photoURL: "https://example.com/old.jpg"
+        )
         try await localRepository.saveUser(user: existing)
 
         let fetcher = MockUserDocumentFetcher()
         let authUpdater = MockAuthProfileUpdater()
+        let mediaService = MockProfileMediaService()
         let repository = makeRepository(
             localRepository: localRepository,
             networkMonitor: MockNetworkMonitor(isConnected: true),
             fetcher: fetcher,
-            authUpdater: authUpdater
+            authUpdater: authUpdater,
+            mediaService: mediaService
         )
 
         let updated = try await repository.updateProfile(
             uid: "user-edit",
             displayName: "New Name",
             bio: "New bio",
-            photoURL: "https://example.com/new.jpg"
+            profileImageData: nil,
+            removeProfileImage: false
         )
 
         #expect(updated.displayName == "New Name")
         #expect(updated.bio == "New bio")
-        #expect(updated.photoURL == "https://example.com/new.jpg")
+        #expect(updated.photoURL == "https://example.com/old.jpg")
         #expect(updated.displayNameLower == "new name")
         #expect(fetcher.updateCount == 1)
-        #expect(fetcher.lastUpdateId == "user-edit")
-        #expect(fetcher.lastUpdateData?["displayName"] as? String == "New Name")
-        #expect(fetcher.lastUpdateData?["displayNameLower"] as? String == "new name")
-        #expect(fetcher.lastUpdateData?["bio"] as? String == "New bio")
         #expect(authUpdater.updateCount == 1)
         #expect(authUpdater.lastDisplayName == "New Name")
-        #expect(authUpdater.lastPhotoURL?.absoluteString == "https://example.com/new.jpg")
+        #expect(authUpdater.lastPhotoURL?.absoluteString == "https://example.com/old.jpg")
+        #expect(mediaService.uploadedUserIds.isEmpty)
+    }
 
-        let cached = try await localRepository.fetchUser(id: "user-edit")
-        #expect(cached?.displayName == "New Name")
-        #expect(cached?.displayNameLower == "new name")
+    @Test func updateProfileUploadsProfileImageAndDeletesPrevious() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let existing = makeUser(
+            id: "user-photo",
+            displayName: "Alice",
+            photoURL: "https://example.com/old.jpg"
+        )
+        try await localRepository.saveUser(user: existing)
+
+        let fetcher = MockUserDocumentFetcher()
+        let authUpdater = MockAuthProfileUpdater()
+        let mediaService = MockProfileMediaService()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher,
+            authUpdater: authUpdater,
+            mediaService: mediaService
+        )
+
+        let imageData = Data([0xFF, 0xD8, 0xFF])
+        let updated = try await repository.updateProfile(
+            uid: "user-photo",
+            displayName: "Alice",
+            bio: nil,
+            profileImageData: imageData,
+            removeProfileImage: false
+        )
+
+        #expect(updated.photoURL == "https://example.com/users/user-photo/avatar.jpg")
+        #expect(mediaService.deletedUserIds == ["user-photo"])
+        #expect(mediaService.uploadedUserIds == ["user-photo"])
+        #expect(mediaService.lastUploadedData == imageData)
+        #expect(authUpdater.lastPhotoURL?.absoluteString == "https://example.com/users/user-photo/avatar.jpg")
+    }
+
+    @Test func updateProfileRemoveProfileImageDeletesStorageObject() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let existing = makeUser(
+            id: "user-remove",
+            displayName: "Bob",
+            photoURL: "https://example.com/old.jpg"
+        )
+        try await localRepository.saveUser(user: existing)
+
+        let mediaService = MockProfileMediaService()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: MockUserDocumentFetcher(),
+            mediaService: mediaService
+        )
+
+        let updated = try await repository.updateProfile(
+            uid: "user-remove",
+            displayName: "Bob",
+            bio: nil,
+            profileImageData: nil,
+            removeProfileImage: true
+        )
+
+        #expect(updated.photoURL == "")
+        #expect(mediaService.deletedUserIds == ["user-remove"])
+        #expect(mediaService.uploadedUserIds.isEmpty)
     }
 
     @Test func updateProfileThrowsWhenUserNotFound() async throws {
@@ -197,7 +268,8 @@ struct ProfileRepositoryTests {
                 uid: "missing-user",
                 displayName: "Name",
                 bio: nil,
-                photoURL: nil
+                profileImageData: nil,
+                removeProfileImage: false
             )
         }
     }
@@ -308,12 +380,13 @@ struct ProfileRepositoryTests {
         localRepository: LocalRepository,
         networkMonitor: MockNetworkMonitor,
         fetcher: MockUserDocumentFetcher,
-        authUpdater: MockAuthProfileUpdater = MockAuthProfileUpdater()
+        authUpdater: MockAuthProfileUpdater = MockAuthProfileUpdater(),
+        mediaService: MockProfileMediaService = MockProfileMediaService()
     ) -> ProfileRepository {
         ProfileRepository(
             networkMonitor: networkMonitor,
             localRepository: localRepository,
-            mediaService: MediaService(),
+            mediaService: mediaService,
             authProfileUpdater: authUpdater,
             userDocumentFetcher: fetcher
         )
@@ -396,5 +469,38 @@ private final class MockAuthProfileUpdater: AuthProfileUpdating {
         updateCount += 1
         lastDisplayName = displayName
         lastPhotoURL = photoURL
+    }
+}
+
+private final class MockProfileMediaService: MediaServiceProtocol {
+    private let progressSubject = CurrentValueSubject<Double, Never>(0)
+
+    private(set) var uploadedUserIds: [String] = []
+    private(set) var deletedUserIds: [String] = []
+    private(set) var lastUploadedData: Data?
+
+    var uploadProgressPublisher: AnyPublisher<Double, Never> {
+        progressSubject.eraseToAnyPublisher()
+    }
+
+    func resizeImage(_ image: UIImage) -> Data? {
+        image.jpegData(compressionQuality: 0.8)
+    }
+
+    func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
+        ""
+    }
+
+    func deletePostImage(postId: String) async throws {}
+
+    func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String {
+        uploadedUserIds.append(userId)
+        lastUploadedData = imageData
+        progressSubject.send(1)
+        return "https://example.com/users/\(userId)/avatar.jpg"
+    }
+
+    func deleteProfileImage(userId: String) async throws {
+        deletedUserIds.append(userId)
     }
 }

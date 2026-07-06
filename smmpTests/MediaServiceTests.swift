@@ -51,6 +51,10 @@ struct MediaServiceTests {
         #expect(MediaPaths.postImage(postId: "abc123") == "posts/abc123/image.jpg")
     }
 
+    @Test func profileImagePathUsesExpectedStorageLocation() {
+        #expect(MediaPaths.profileImage(userId: "user-42") == "users/user-42/avatar.jpg")
+    }
+
     @Test func mockMediaServiceRecordsUploadAndDeletePaths() async throws {
         let mock = MockMediaService()
 
@@ -60,6 +64,17 @@ struct MediaServiceTests {
         #expect(mock.uploadedPostIds == ["post-1"])
         #expect(mock.deletedPostIds == ["post-1"])
         #expect(mock.uploadProgressPublisher.value == 1)
+    }
+
+    @Test func mockMediaServiceRecordsProfileImageUploadAndDelete() async throws {
+        let mock = MockMediaService()
+
+        let url = try await mock.uploadProfileImage(Data([0xFF, 0xD8, 0xFF]), userId: "user-1")
+        try await mock.deleteProfileImage(userId: "user-1")
+
+        #expect(url == "https://example.com/users/user-1/avatar.jpg")
+        #expect(mock.uploadedProfileUserIds == ["user-1"])
+        #expect(mock.deletedProfileUserIds == ["user-1"])
     }
 }
 
@@ -80,6 +95,8 @@ private final class MockMediaService: MediaServiceProtocol {
 
     private(set) var uploadedPostIds: [String] = []
     private(set) var deletedPostIds: [String] = []
+    private(set) var uploadedProfileUserIds: [String] = []
+    private(set) var deletedProfileUserIds: [String] = []
 
     var uploadProgressPublisher: AnyPublisher<Double, Never> {
         progressSubject.eraseToAnyPublisher()
@@ -97,6 +114,16 @@ private final class MockMediaService: MediaServiceProtocol {
 
     func deletePostImage(postId: String) async throws {
         deletedPostIds.append(postId)
+    }
+
+    func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String {
+        uploadedProfileUserIds.append(userId)
+        progressSubject.send(1)
+        return "https://example.com/users/\(userId)/avatar.jpg"
+    }
+
+    func deleteProfileImage(userId: String) async throws {
+        deletedProfileUserIds.append(userId)
     }
 }
 

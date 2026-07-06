@@ -76,10 +76,23 @@ final class ProfileRepository: ProfileRepositoryProtocol {
         uid: String,
         displayName: String,
         bio: String?,
-        photoURL: String?
+        profileImageData: Data?,
+        removeProfileImage: Bool
     ) async throws -> User {
         guard var user = try await fetchUser(id: uid) else {
             throw ProfileRepositoryError.userNotFound
+        }
+
+        var photoURL = user.photoURL
+
+        if let profileImageData {
+            if let existing = photoURL, !existing.isEmpty {
+                try? await mediaService.deleteProfileImage(userId: uid)
+            }
+            photoURL = try await mediaService.uploadProfileImage(profileImageData, userId: uid)
+        } else if removeProfileImage {
+            try? await mediaService.deleteProfileImage(userId: uid)
+            photoURL = ""
         }
 
         user.displayName = displayName
