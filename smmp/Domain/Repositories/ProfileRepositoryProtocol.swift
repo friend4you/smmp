@@ -8,4 +8,6 @@
 protocol ProfileRepositoryProtocol {
     func createProfile(uid: String, displayName: String, email: String) async throws -> User
     func fetchUser(id: String) async throws -> User?
+    func updateProfile(uid: String, displayName: String, bio: String?, photoURL: String?) async throws -> User
+    func searchUsers(prefix: String) async throws -> [User]
 }

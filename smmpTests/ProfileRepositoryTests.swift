@@ -142,17 +142,179 @@ struct ProfileRepositoryTests {
         #expect(cached == nil)
     }
 
+    @Test func updateProfileWritesFirestoreSyncsAuthAndCachesLocally() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let existing = makeUser(id: "user-edit", displayName: "Old Name", bio: "Old bio")
+        try await localRepository.saveUser(user: existing)
+
+        let fetcher = MockUserDocumentFetcher()
+        let authUpdater = MockAuthProfileUpdater()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher,
+            authUpdater: authUpdater
+        )
+
+        let updated = try await repository.updateProfile(
+            uid: "user-edit",
+            displayName: "New Name",
+            bio: "New bio",
+            photoURL: "https://example.com/new.jpg"
+        )
+
+        #expect(updated.displayName == "New Name")
+        #expect(updated.bio == "New bio")
+        #expect(updated.photoURL == "https://example.com/new.jpg")
+        #expect(updated.displayNameLower == "new name")
+        #expect(fetcher.updateCount == 1)
+        #expect(fetcher.lastUpdateId == "user-edit")
+        #expect(fetcher.lastUpdateData?["displayName"] as? String == "New Name")
+        #expect(fetcher.lastUpdateData?["displayNameLower"] as? String == "new name")
+        #expect(fetcher.lastUpdateData?["bio"] as? String == "New bio")
+        #expect(authUpdater.updateCount == 1)
+        #expect(authUpdater.lastDisplayName == "New Name")
+        #expect(authUpdater.lastPhotoURL?.absoluteString == "https://example.com/new.jpg")
+
+        let cached = try await localRepository.fetchUser(id: "user-edit")
+        #expect(cached?.displayName == "New Name")
+        #expect(cached?.displayNameLower == "new name")
+    }
+
+    @Test func updateProfileThrowsWhenUserNotFound() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let fetcher = MockUserDocumentFetcher()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: false),
+            fetcher: fetcher
+        )
+
+        await #expect(throws: ProfileRepositoryError.userNotFound) {
+            try await repository.updateProfile(
+                uid: "missing-user",
+                displayName: "Name",
+                bio: nil,
+                photoURL: nil
+            )
+        }
+    }
+
+    @Test func searchUsersReturnsEmptyForShortPrefix() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let fetcher = MockUserDocumentFetcher()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher
+        )
+
+        let results = try await repository.searchUsers(prefix: "a")
+
+        #expect(results.isEmpty)
+        #expect(fetcher.searchCount == 0)
+    }
+
+    @Test func searchUsersQueriesWithNormalizedPrefixWhenOnline() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let fetcher = MockUserDocumentFetcher(
+            searchResults: [
+                makeUser(id: "user-1", displayName: "Alice"),
+                makeUser(id: "user-2", displayName: "Alvin")
+            ]
+        )
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher
+        )
+
+        let results = try await repository.searchUsers(prefix: "Al")
+
+        #expect(results.count == 2)
+        #expect(fetcher.searchCount == 1)
+        #expect(fetcher.lastSearchPrefix == "al")
+        #expect(fetcher.lastSearchLimit == 20)
+    }
+
+    @Test func searchUsersReturnsEmptyWhenOffline() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        let fetcher = MockUserDocumentFetcher(
+            searchResults: [makeUser(id: "user-1", displayName: "Alice")]
+        )
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: false),
+            fetcher: fetcher
+        )
+
+        let results = try await repository.searchUsers(prefix: "alice")
+
+        #expect(results.isEmpty)
+        #expect(fetcher.searchCount == 0)
+    }
+
+    @Test func fetchUserBackfillsDisplayNameLowerWhenMissing() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        var remoteUser = makeUser(id: "legacy-user", displayName: "Legacy")
+        remoteUser.displayNameLower = nil
+        let fetcher = MockUserDocumentFetcher(user: remoteUser)
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher
+        )
+
+        let user = try await repository.fetchUser(id: "legacy-user")
+
+        #expect(user?.displayNameLower == "legacy")
+        #expect(fetcher.updateCount == 1)
+        #expect(fetcher.lastUpdateData?["displayNameLower"] as? String == "legacy")
+
+        let cached = try await localRepository.fetchUser(id: "legacy-user")
+        #expect(cached?.displayNameLower == "legacy")
+    }
+
+    @Test func fetchUserBackfillsCachedUserMissingDisplayNameLower() async throws {
+        let persistence = await PersistenceController(inMemory: true)
+        let localRepository = await LocalRepository(persistence: persistence)
+        var cachedUser = makeUser(id: "cached-legacy", displayName: "Cached")
+        cachedUser.displayNameLower = nil
+        try await localRepository.saveUser(user: cachedUser)
+
+        let fetcher = MockUserDocumentFetcher()
+        let repository = makeRepository(
+            localRepository: localRepository,
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            fetcher: fetcher
+        )
+
+        let user = try await repository.fetchUser(id: "cached-legacy")
+
+        #expect(user?.displayNameLower == "cached")
+        #expect(fetcher.fetchCount == 0)
+        #expect(fetcher.updateCount == 1)
+    }
+
     // MARK: - Helpers
 
     private func makeRepository(
         localRepository: LocalRepository,
         networkMonitor: MockNetworkMonitor,
-        fetcher: MockUserDocumentFetcher
+        fetcher: MockUserDocumentFetcher,
+        authUpdater: MockAuthProfileUpdater = MockAuthProfileUpdater()
     ) -> ProfileRepository {
         ProfileRepository(
             networkMonitor: networkMonitor,
             localRepository: localRepository,
             mediaService: MediaService(),
+            authProfileUpdater: authUpdater,
             userDocumentFetcher: fetcher
         )
     }
@@ -171,14 +333,26 @@ private final class MockNetworkMonitor: NetworkConnectivityProviding {
 private final class MockUserDocumentFetcher: UserDocumentProtocol, @unchecked Sendable {
     private(set) var fetchCount = 0
     private(set) var createCount = 0
+    private(set) var updateCount = 0
+    private(set) var searchCount = 0
     private(set) var lastCreateId: String?
     private(set) var lastCreateData: [String: Any]?
+    private(set) var lastUpdateId: String?
+    private(set) var lastUpdateData: [String: Any]?
+    private(set) var lastSearchPrefix: String?
+    private(set) var lastSearchLimit: Int?
     var createError: Error?
     private let user: User?
+    private let searchResults: [User]
     private let delayNanoseconds: UInt64
 
-    init(user: User? = nil, delayNanoseconds: UInt64 = 0) {
+    init(
+        user: User? = nil,
+        searchResults: [User] = [],
+        delayNanoseconds: UInt64 = 0
+    ) {
         self.user = user
+        self.searchResults = searchResults
         self.delayNanoseconds = delayNanoseconds
     }
 
@@ -197,5 +371,30 @@ private final class MockUserDocumentFetcher: UserDocumentProtocol, @unchecked Se
         if let createError {
             throw createError
         }
+    }
+
+    func updateUserDocument(id: String, data: [String: Any]) async throws {
+        updateCount += 1
+        lastUpdateId = id
+        lastUpdateData = data
+    }
+
+    func searchUsers(prefix: String, limit: Int) async throws -> [User] {
+        searchCount += 1
+        lastSearchPrefix = prefix
+        lastSearchLimit = limit
+        return searchResults
+    }
+}
+
+private final class MockAuthProfileUpdater: AuthProfileUpdating {
+    private(set) var updateCount = 0
+    private(set) var lastDisplayName: String?
+    private(set) var lastPhotoURL: URL?
+
+    func updateAuthProfile(displayName: String?, photoURL: URL?) async throws {
+        updateCount += 1
+        lastDisplayName = displayName
+        lastPhotoURL = photoURL
     }
 }

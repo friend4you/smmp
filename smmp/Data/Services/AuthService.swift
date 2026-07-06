@@ -7,7 +7,7 @@
 
 import FirebaseAuth
 
-class AuthService: AuthServiceProtocol, AuthAccountDeleting {
+class AuthService: AuthServiceProtocol, AuthAccountDeleting, AuthProfileUpdating {
     func login(email: String, password: String) async throws -> User {
         let authResult = try await performAuthOperation { completion in
             Auth.auth().signIn(withEmail: email, password: password, completion: completion)
@@ -47,6 +47,26 @@ class AuthService: AuthServiceProtocol, AuthAccountDeleting {
         guard let user = Auth.auth().currentUser else { return }
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             user.delete { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    func updateAuthProfile(displayName: String?, photoURL: URL?) async throws {
+        guard let user = Auth.auth().currentUser else { return }
+        let changeRequest = user.createProfileChangeRequest()
+        if let displayName {
+            changeRequest.displayName = displayName
+        }
+        if let photoURL {
+            changeRequest.photoURL = photoURL
+        }
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            changeRequest.commitChanges { error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

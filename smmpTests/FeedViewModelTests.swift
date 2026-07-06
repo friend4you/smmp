@@ -101,4 +101,12 @@ private struct MockProfileRepository: ProfileRepositoryProtocol {
     func fetchUser(id: String) async throws -> User? {
         makeUser(id: id)
     }
+
+    func updateProfile(uid: String, displayName: String, bio: String?, photoURL: String?) async throws -> User {
+        makeUser(id: uid, displayName: displayName, bio: bio, photoURL: photoURL)
+    }
+
+    func searchUsers(prefix: String) async throws -> [User] {
+        []
+    }
 }

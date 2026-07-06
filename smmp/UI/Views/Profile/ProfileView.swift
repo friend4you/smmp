@@ -62,6 +62,7 @@ struct ProfileView: View {
                     networkMonitor: NetworkMonitor(),
                     localRepository: LocalRepository(persistence: PersistenceController.shared),
                     mediaService: MediaService(),
+                    authProfileUpdater: AuthService(),
                     userDocumentFetcher: FirestoreUserDocumentRepository()),
                 sessionService: SessionService(),
                 onNavigate: { _ in }

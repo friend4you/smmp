@@ -20,10 +20,10 @@
 
 ## 4. ProfileRepository extensions
 
-- [ ] 4.1 Add `updateProfile` to `ProfileRepositoryProtocol` — Firestore write, Auth `displayName`/`photoURL` sync, CoreData cache update, `displayNameLower` maintenance
-- [ ] 4.2 Add `searchUsers(prefix:)` — prefix query on `displayNameLower`, min 2 chars, limit results
-- [ ] 4.3 Backfill `displayNameLower` on `fetchUser` when missing (lazy migration)
-- [ ] 4.4 Add `ProfileRepositoryTests` for `updateProfile` and `searchUsers` with mocks
+- [x] 4.1 Add `updateProfile` to `ProfileRepositoryProtocol` — Firestore write, Auth `displayName`/`photoURL` sync, CoreData cache update, `displayNameLower` maintenance
+- [x] 4.2 Add `searchUsers(prefix:)` — prefix query on `displayNameLower`, min 2 chars, limit results
+- [x] 4.3 Backfill `displayNameLower` on `fetchUser` when missing (lazy migration)
+- [x] 4.4 Add `ProfileRepositoryTests` for `updateProfile` and `searchUsers` with mocks
 
 ## 5. MediaService profile photos
 

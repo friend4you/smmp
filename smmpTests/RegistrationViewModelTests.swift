@@ -126,6 +126,14 @@ private final class MockRegistrationProfileRepository: ProfileRepositoryProtocol
     func fetchUser(id: String) async throws -> User? {
         nil
     }
+
+    func updateProfile(uid: String, displayName: String, bio: String?, photoURL: String?) async throws -> User {
+        makeUser(id: uid, displayName: displayName, bio: bio, photoURL: photoURL)
+    }
+
+    func searchUsers(prefix: String) async throws -> [User] {
+        []
+    }
 }
 
 private final class MockAccountDeleter: AuthAccountDeleting {

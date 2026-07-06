@@ -139,7 +139,8 @@ struct FeedView: View {
                 profileRepository: ProfileRepository(
                     networkMonitor: NetworkMonitor(),
                     localRepository: LocalRepository(persistence: PersistenceController.shared),
-                    mediaService: MediaService()
+                    mediaService: MediaService(),
+                    authProfileUpdater: AuthService()
                 ),
                 networkMonitor: NetworkMonitor(),
                 sessionService: SessionService()

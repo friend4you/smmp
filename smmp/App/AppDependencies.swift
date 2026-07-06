@@ -38,7 +38,8 @@ final class AppDependencies: AppDependenciesProviding {
         self.profileRepository = ProfileRepository(
             networkMonitor: network,
             localRepository: localRepository,
-            mediaService: media
+            mediaService: media,
+            authProfileUpdater: auth
         )
         self.accountDeleter = auth
         self.authRepository = AuthRepository(authService: auth)
