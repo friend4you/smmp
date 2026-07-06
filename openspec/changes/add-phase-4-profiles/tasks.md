@@ -60,9 +60,9 @@
 
 ## 10. UserProfileView (other users + self from feed)
 
-- [ ] 10.1 Create `UserProfileViewModel` — load user, posts, `isFollowing`, follow/unfollow, edit when self, offline disable for writes
-- [ ] 10.2 Build `UserProfileView` — header, Follow/Unfollow or Edit, posts list
-- [ ] 10.3 Add `FeedRoute.userProfile(userId)` and `SearchRoute.userProfile(userId)`; wire builders and coordinators
+- [x] 10.1 Create `UserProfileViewModel` — load user, posts, `isFollowing`, follow/unfollow, edit when self, offline disable for writes
+- [x] 10.2 Build `UserProfileView` — header, Follow/Unfollow or Edit, posts list
+- [x] 10.3 Add `FeedRoute.userProfile(userId)` and `SearchRoute.userProfile(userId)`; wire builders and coordinators
 
 ## 11. EditProfileView
 

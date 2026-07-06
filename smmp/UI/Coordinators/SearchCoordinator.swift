@@ -9,14 +9,23 @@ import SwiftUI
 @MainActor
 final class SearchCoordinator: Coordinating, ObservableObject {
     let router = SearchRouter()
-    private let builder = SearchViewBuilder()
+    private let builder: SearchViewBuilder
+
+    init(deps: AppDependenciesProviding) {
+        builder = SearchViewBuilder(deps: deps)
+    }
 
     var rootView: some View {
         SearchCoordinatorView(coordinator: self)
     }
 
     fileprivate func navigate(_ route: SearchRoute) {
-        router.push(route)
+        switch route {
+        case .editProfile:
+            router.presentSheet(route)
+        default:
+            router.push(route)
+        }
     }
 
     fileprivate func searchView() -> some View {

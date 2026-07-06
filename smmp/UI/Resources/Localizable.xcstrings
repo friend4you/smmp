@@ -918,6 +918,50 @@
         }
       }
     },
+    "follow.error.generic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not update follow status. Please try again."
+          }
+        }
+      }
+    },
+    "follow.error.limit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can follow at most 30 users."
+          }
+        }
+      }
+    },
+    "follow.error.self" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You cannot follow yourself."
+          }
+        }
+      }
+    },
+    "follow.follow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow"
+          }
+        }
+      }
+    },
     "follow.list.placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -936,6 +980,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Following"
+          }
+        }
+      }
+    },
+    "follow.unfollow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unfollow"
           }
         }
       }

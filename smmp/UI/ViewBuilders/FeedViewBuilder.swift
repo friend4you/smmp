@@ -9,6 +9,10 @@ import SwiftUI
 struct FeedViewBuilder {
     let deps: AppDependenciesProviding
 
+    private var userProfileBuilder: UserProfileViewBuilder {
+        UserProfileViewBuilder(deps: deps)
+    }
+
     private func buildFeed(onNavigate: @escaping (FeedRoute) -> Void) -> FeedView {
         FeedView(
             viewModel: FeedViewModel(
@@ -21,10 +25,22 @@ struct FeedViewBuilder {
             )
         )
     }
-    
-    private func buildPostDetails(post: FeedPostItem, onNavigate: @escaping (FeedRoute) -> Void) -> PostDetailView? {
+
+    private func buildUserProfile(
+        userId: String,
+        onNavigate: @escaping (FeedRoute) -> Void
+    ) -> UserProfileView {
+        userProfileBuilder.build(
+            userId: userId,
+            onPostDetail: { onNavigate(.postDetail($0)) },
+            onEditProfile: { onNavigate(.editProfile) },
+            onFollowing: { onNavigate(.following) }
+        )
+    }
+
+    private func buildPostDetails(post: FeedPostItem) -> PostDetailView? {
         guard let userId = deps.sessionService.currentUser?.id else { return nil }
-        
+
         return PostDetailView(
             item: post,
             currentUserId: userId,
@@ -35,13 +51,29 @@ struct FeedViewBuilder {
         )
     }
 
+    private func buildEditProfile() -> EditProfileView {
+        EditProfileView()
+    }
+
+    private func buildFollowing() -> FollowingView {
+        FollowingView()
+    }
+
     @ViewBuilder
     func build(_ route: FeedRoute, onNavigate: @escaping (FeedRoute) -> Void) -> some View {
         switch route {
         case .feed:
             buildFeed(onNavigate: onNavigate)
+        case .userProfile(let userId):
+            buildUserProfile(userId: userId, onNavigate: onNavigate)
         case .postDetail(let item):
-            buildPostDetails(post: item, onNavigate: onNavigate)
+            if let view = buildPostDetails(post: item) {
+                view
+            }
+        case .editProfile:
+            buildEditProfile()
+        case .following:
+            buildFollowing()
         }
     }
 }

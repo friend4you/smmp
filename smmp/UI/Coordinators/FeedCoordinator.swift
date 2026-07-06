@@ -20,7 +20,12 @@ final class FeedCoordinator: Coordinating, ObservableObject {
     }
 
     fileprivate func navigate(_ route: FeedRoute) {
-        router.push(route)
+        switch route {
+        case .editProfile:
+            router.presentSheet(route)
+        default:
+            router.push(route)
+        }
     }
     
     @ViewBuilder
