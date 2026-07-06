@@ -9,41 +9,48 @@ import Foundation
 import Combine
 
 @MainActor
-final class AppDependencies: ObservableObject {
+final class AppDependencies: AppDependenciesProviding {
 
-    let networkMonitor: NetworkMonitor
+    let networkMonitor: NetworkMonitorProtocol
 
-    let persistenceController: PersistenceController
+    let mediaService: MediaServiceProtocol
+    let sessionService: SessionServiceProtocol
 
-    let authRepository: AuthRepository
+    let authRepository: AuthRepositoryProtocol
     let localRepository: LocalRepositoryProtocol
-    let postRepository: PostRepository
-    let profileRepository: ProfileRepository
-    let followRepository: FollowRepository
-    let commentRepository: CommentRepository
-
+    let postRepository: PostRepositoryProtocol
+    let profileRepository: ProfileRepositoryProtocol
+    let followRepository: FollowRepositoryProtocol
+    let commentRepository: CommentRepositoryProtocol
+    
     init() {
         let persistence = PersistenceController.shared
         let network = NetworkMonitor()
         let auth = AuthService()
         let media = MediaService()
 
-        self.persistenceController = persistence
         self.networkMonitor = network
+        self.mediaService = media
+        self.sessionService = SessionService()
 
         self.localRepository = LocalRepository(persistence: persistence)
-        self.profileRepository = ProfileRepository(networkMonitor: network,
-                                                   persistence: persistence,
-                                                   mediaService: media)
+        self.profileRepository = ProfileRepository(
+            networkMonitor: network,
+            localRepository: localRepository,
+            mediaService: media
+        )
         self.authRepository = AuthRepository(authService: auth)
-        self.postRepository = PostRepository(networkMonitor: network,
-                                             persistence: persistence,
-                                             mediaService: media)
+        self.postRepository = PostRepository(
+            networkMonitor: network,
+            localRepository: localRepository,
+            mediaService: media
+        )
         self.followRepository = FollowRepository(networkMonitor: network,
-                                                 persistence: persistence,
                                                  mediaService: media)
-        self.commentRepository = CommentRepository(networkMonitor: network,
-                                                   persistence: persistence,
-                                                   mediaService: media)
+        self.commentRepository = CommentRepository(
+            networkMonitor: network,
+            localRepository: localRepository,
+            mediaService: media
+        )
     }
 }

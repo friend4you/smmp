@@ -314,7 +314,7 @@ Use this checklist to track implementation status. Items map to the Development 
 ### Phase 1 — Project Foundation
 - [x] Xcode project created with SwiftUI lifecycle
 - [x] Swift Package dependencies added (Firebase Auth, Firestore)
-- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3)*
+- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3; Storage added, AsyncImage used instead of SDWebImage)*
 - [x] Firebase project configured (Auth, Firestore, Storage)
 - [x] Folder structure set up
 - [x] Swift model structs defined (`User`, `Post`, `Comment`)
@@ -338,18 +338,18 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] Unit tests for login/register ViewModels and `SessionService`
 
 ### Phase 3 — Feed & Posts
-- [ ] Firebase Storage + SDWebImageSwiftUI added
-- [ ] `PostRepository` implemented (Firestore + CoreData + offline)
-- [ ] `FeedViewModel` implemented
-- [ ] `PostCardView` built
-- [ ] `FeedScreen` built (pull-to-refresh, offline banner, new-posts banner)
-- [ ] Like/unlike with optimistic UI implemented
-- [ ] `CreatePostScreen` built
-- [ ] Image upload via `MediaService` implemented
-- [ ] `PostDetailScreen` built
-- [ ] `CommentRepository` implemented
-- [ ] Unit tests for Firestore → model parsing
-- [ ] Integration tests for offline path written
+- [x] Firebase Storage added (AsyncImage for display; no SDWebImage)
+- [x] `PostRepository` implemented (Firestore + CoreData + offline)
+- [x] `FeedViewModel` implemented
+- [x] `PostCardView` built
+- [x] `FeedScreen` built (pull-to-refresh, offline banner, new-posts banner)
+- [x] Like/unlike with optimistic UI implemented
+- [x] `CreatePostScreen` built
+- [x] Image upload via `MediaService` implemented
+- [x] `PostDetailScreen` built
+- [x] `CommentRepository` implemented
+- [x] Unit tests for Firestore → model parsing
+- [x] Integration tests for offline path written
 
 ### Phase 4 — Profiles & Social Graph
 - [ ] `UserProfileScreen` built
@@ -382,4 +382,4 @@ Use this checklist to track implementation status. Items map to the Development 
 
 ---
 
-> **Last updated:** June 2026
+> **Last updated:** July 2026

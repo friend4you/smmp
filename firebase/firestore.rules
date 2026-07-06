@@ -1,0 +1,90 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function postAuthorId(postId) {
+      return get(/databases/$(database)/documents/posts/$(postId)).data.authorId;
+    }
+
+    function isPostOwner(postId) {
+      return isSignedIn() && postAuthorId(postId) == request.auth.uid;
+    }
+
+    // likeCount / commentCount only — any authenticated user (batch count maintenance)
+    function isCountOnlyUpdate() {
+      return isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['likeCount', 'commentCount']);
+    }
+
+    // Post author may edit text / imageURL only (not counts)
+    function isAuthorContentUpdate() {
+      return isSignedIn()
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['text', 'imageURL']);
+    }
+
+    function isValidPostCreate() {
+      return isSignedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.likeCount == 0
+        && request.resource.data.commentCount == 0;
+    }
+
+    // ── users/{uid} ──────────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isOwner(userId);
+    }
+
+    // ── posts/{pid} ──────────────────────────────────────────────────────────
+
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isValidPostCreate();
+      allow update: if isCountOnlyUpdate() || isAuthorContentUpdate();
+      allow delete: if isPostOwner(postId);
+
+      // ── posts/{pid}/likes/{uid} ────────────────────────────────────────────
+
+      match /likes/{likeUserId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && likeUserId == request.auth.uid;
+        // Unlike own like, or post author cascade-deletes all likes on post delete
+        allow delete: if isSignedIn() && (
+          likeUserId == request.auth.uid || isPostOwner(postId)
+        );
+      }
+
+      // ── posts/{pid}/comments/{cid} ─────────────────────────────────────────
+
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn()
+          && request.resource.data.authorId == request.auth.uid;
+        // Delete own comment, or post author cascade-deletes all comments on post delete
+        allow delete: if isSignedIn() && (
+          resource.data.authorId == request.auth.uid || isPostOwner(postId)
+        );
+      }
+    }
+
+    // Deny all other paths (e.g. users/{uid}/following — Phase 4)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

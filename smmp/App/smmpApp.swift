@@ -10,20 +10,18 @@ import Firebase
 
 @main
 struct SMMPApp: App {
-    let dependencies: AppDependencies
-    let sessionService: SessionService
-    
+    let dependencies: AppDependenciesProviding
+    let appCoordinator: AppCoordinator
+
     init() {
         FirebaseApp.configure()
         self.dependencies = AppDependencies()
-        self.sessionService = SessionService()
+        self.appCoordinator = AppCoordinator(deps: dependencies)
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(dependencies)
-                .environmentObject(sessionService)
+            appCoordinator.rootView
         }
     }
 }

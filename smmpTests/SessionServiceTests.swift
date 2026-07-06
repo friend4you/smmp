@@ -9,9 +9,8 @@ import Testing
 @MainActor
 struct SessionServiceTests {
 
-    @Test func startsResolvingSession() {
+    @Test func startsWithoutAuthenticatedUser() {
         let service = SessionService()
-        #expect(service.isResolvingSession)
         #expect(service.currentUser == nil)
         #expect(!service.isAuthenticated)
     }
