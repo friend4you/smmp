@@ -102,4 +102,4 @@
 
 ## 17. README progress tracker
 
-- [ ] 17.1 Update Phase 4 checklist in README.md as tasks complete
+- [x] 17.1 Update Phase 4 checklist in README.md as tasks complete
