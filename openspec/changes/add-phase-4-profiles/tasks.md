@@ -78,9 +78,9 @@
 
 ## 13. SearchScreen
 
-- [ ] 13.1 Create `SearchViewModel` — debounced query (300ms), min 2 chars, `searchUsers`, inline follow/unfollow, offline guard
-- [ ] 13.2 Replace `SearchView` placeholder — search bar, results list, empty/no-results states, tap → user profile
-- [ ] 13.3 Wire `SearchCoordinator` with `SearchRoute.userProfile` and inject dependencies via `SearchViewBuilder`
+- [x] 13.1 Create `SearchViewModel` — debounced query (300ms), min 2 chars, `searchUsers`, inline follow/unfollow, offline guard
+- [x] 13.2 Replace `SearchView` placeholder — search bar, results list, empty/no-results states, tap → user profile
+- [x] 13.3 Wire `SearchCoordinator` with `SearchRoute.userProfile` and inject dependencies via `SearchViewBuilder`
 
 ## 14. Feed and comment author navigation
 

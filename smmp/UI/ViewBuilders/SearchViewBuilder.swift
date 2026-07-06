@@ -14,7 +14,15 @@ struct SearchViewBuilder {
     }
 
     private func buildSearch(onNavigate: @escaping (SearchRoute) -> Void) -> SearchView {
-        SearchView()
+        SearchView(
+            viewModel: SearchViewModel(
+                profileRepository: deps.profileRepository,
+                followRepository: deps.followRepository,
+                sessionService: deps.sessionService,
+                networkMonitor: deps.networkMonitor,
+                onNavigate: onNavigate
+            )
+        )
     }
 
     private func buildUserProfile(
