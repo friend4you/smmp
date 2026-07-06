@@ -84,9 +84,9 @@
 
 ## 14. Feed and comment author navigation
 
-- [ ] 14.1 Add `onAuthorTap` to `PostCardView`; wire `FeedViewModel` → `onNavigate(.userProfile(id))`
-- [ ] 14.2 Add author tap to `CommentRowView`; wire `PostDetailViewModel` → feed coordinator `userProfile` route
-- [ ] 14.3 Ensure post detail push from profile post lists works within each tab stack
+- [x] 14.1 Add `onAuthorTap` to `PostCardView`; wire `FeedViewModel` → `onNavigate(.userProfile(id))`
+- [x] 14.2 Add author tap to `CommentRowView`; wire `PostDetailViewModel` → feed coordinator `userProfile` route
+- [x] 14.3 Ensure post detail push from profile post lists works within each tab stack
 
 ## 15. Localization
 

@@ -37,7 +37,10 @@ struct SearchViewBuilder {
         )
     }
 
-    private func buildPostDetail(item: FeedPostItem) -> PostDetailView? {
+    private func buildPostDetail(
+        item: FeedPostItem,
+        onNavigate: @escaping (SearchRoute) -> Void
+    ) -> PostDetailView? {
         guard let userId = deps.sessionService.currentUser?.id else { return nil }
 
         return PostDetailView(
@@ -46,7 +49,8 @@ struct SearchViewBuilder {
             commentRepository: deps.commentRepository,
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
-            networkMonitor: deps.networkMonitor
+            networkMonitor: deps.networkMonitor,
+            onAuthorTap: { onNavigate(.userProfile(userId: $0)) }
         )
     }
 
@@ -66,7 +70,7 @@ struct SearchViewBuilder {
         case .userProfile(let userId):
             buildUserProfile(userId: userId, onNavigate: onNavigate)
         case .postDetail(let item):
-            if let view = buildPostDetail(item: item) {
+            if let view = buildPostDetail(item: item, onNavigate: onNavigate) {
                 view
             }
         case .editProfile:

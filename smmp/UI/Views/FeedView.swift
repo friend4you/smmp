@@ -51,14 +51,18 @@ struct FeedView: View {
                         emptyState
                     } else {
                         ForEach(viewModel.items) { item in
-                            Button {
-                                viewModel.showPostDetail(for: item)
-                            } label: {
-                                PostCardView(item: item) {
+                            PostCardView(
+                                item: item,
+                                onLikeTapped: {
                                     Task { await viewModel.toggleLike(for: item) }
+                                },
+                                onAuthorTap: {
+                                    viewModel.showAuthorProfile(authorId: item.author.id)
+                                },
+                                onPostTap: {
+                                    viewModel.showPostDetail(for: item)
                                 }
-                            }
-                            .buttonStyle(.plain)
+                            )
                             .id(item.id)
                             .task {
                                 await viewModel.loadMoreIfNeeded(currentItem: item)

@@ -38,7 +38,10 @@ struct FeedViewBuilder {
         )
     }
 
-    private func buildPostDetails(post: FeedPostItem) -> PostDetailView? {
+    private func buildPostDetails(
+        post: FeedPostItem,
+        onNavigate: @escaping (FeedRoute) -> Void
+    ) -> PostDetailView? {
         guard let userId = deps.sessionService.currentUser?.id else { return nil }
 
         return PostDetailView(
@@ -47,7 +50,8 @@ struct FeedViewBuilder {
             commentRepository: deps.commentRepository,
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
-            networkMonitor: deps.networkMonitor
+            networkMonitor: deps.networkMonitor,
+            onAuthorTap: { onNavigate(.userProfile(userId: $0)) }
         )
     }
 
@@ -67,7 +71,7 @@ struct FeedViewBuilder {
         case .userProfile(let userId):
             buildUserProfile(userId: userId, onNavigate: onNavigate)
         case .postDetail(let item):
-            if let view = buildPostDetails(post: item) {
+            if let view = buildPostDetails(post: item, onNavigate: onNavigate) {
                 view
             }
         case .editProfile:

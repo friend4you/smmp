@@ -9,6 +9,7 @@ enum ProfileRoute: AppRoute {
     case profile
     case editProfile
     case following
+    case userProfile(userId: String)
     case postDetail(FeedPostItem)
 }
 

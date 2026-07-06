@@ -54,6 +54,10 @@ final class FeedViewModel: ObservableObject {
         onNavigate(.postDetail(item))
     }
 
+    func showAuthorProfile(authorId: String) {
+        onNavigate(.userProfile(userId: authorId))
+    }
+
     func start() {
         guard let userId = sessionService.currentUser?.id else { return }
         currentUserId = userId

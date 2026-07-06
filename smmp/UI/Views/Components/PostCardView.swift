@@ -14,30 +14,15 @@ struct PostCardView: View {
     let item: FeedPostItem
     var imageDisplayStyle: PostImageDisplayStyle = .feed
     let onLikeTapped: () -> Void
+    var onAuthorTap: (() -> Void)? = nil
+    var onPostTap: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                authorAvatar
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.author.displayName ?? String(localized: .commonUser))
-                        .font(.subheadline.bold())
-
-                    if let createdAt = item.post.createdAt {
-                        Text(createdAt, style: .relative)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer(minLength: 0)
-            }
+            authorHeader
 
             if let text = item.post.text, !text.isEmpty {
-                Text(text)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                postBody(text)
             }
 
             postImage
@@ -70,30 +55,93 @@ struct PostCardView: View {
     }
 
     @ViewBuilder
+    private var authorHeader: some View {
+        if let onAuthorTap {
+            Button(action: onAuthorTap) {
+                authorHeaderContent
+            }
+            .buttonStyle(.plain)
+        } else {
+            authorHeaderContent
+        }
+    }
+
+    private var authorHeaderContent: some View {
+        HStack(spacing: 12) {
+            authorAvatar
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.author.displayName ?? String(localized: .commonUser))
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.primary)
+
+                if let createdAt = item.post.createdAt {
+                    Text(createdAt, style: .relative)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func postBody(_ text: String) -> some View {
+        if let onPostTap {
+            Button(action: onPostTap) {
+                Text(text)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+        } else {
+            Text(text)
+                .font(.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
     private var postImage: some View {
         if let imageURL = item.post.imageURL, let url = URL(string: imageURL) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
-                        .frame(maxHeight: imageDisplayStyle == .feed ? 240 : nil)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                case .failure:
-                    Image(systemName: "photo")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                case .empty:
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: imageDisplayStyle == .feed ? 120 : 160)
-                @unknown default:
-                    EmptyView()
+            Group {
+                if let onPostTap {
+                    Button(action: onPostTap) {
+                        postImageContent(url: url)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    postImageContent(url: url)
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func postImageContent(url: URL) -> some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(maxHeight: imageDisplayStyle == .feed ? 240 : nil)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            case .failure:
+                Image(systemName: "photo")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+            case .empty:
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: imageDisplayStyle == .feed ? 120 : 160)
+            @unknown default:
+                EmptyView()
             }
         }
     }
