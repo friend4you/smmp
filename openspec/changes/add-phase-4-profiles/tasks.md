@@ -90,15 +90,15 @@
 
 ## 15. Localization
 
-- [ ] 15.1 Add `profile.*`, `search.*`, `follow.*` keys to `Localizable.xcstrings`
-- [ ] 15.2 Use generated localization symbols in all new views and ViewModels
+- [x] 15.1 Add `profile.*`, `search.*`, `follow.*` keys to `Localizable.xcstrings`
+- [x] 15.2 Use generated localization symbols in all new views and ViewModels
 
 ## 16. Tests
 
-- [ ] 16.1 Unit tests: `ProfileViewModel` (load profile, edit navigation, offline)
-- [ ] 16.2 Unit tests: `SearchViewModel` (debounce, min length, follow toggle)
-- [ ] 16.3 Unit tests: `FollowRepository` (from task 6.5)
-- [ ] 16.4 Unit tests: `UserProfileViewModel` (follow state, self vs other mode)
+- [x] 16.1 Unit tests: `ProfileViewModel` (load profile, edit navigation, offline)
+- [x] 16.2 Unit tests: `SearchViewModel` (debounce, min length, follow toggle)
+- [x] 16.3 Unit tests: `FollowRepository` (from task 6.5)
+- [x] 16.4 Unit tests: `UserProfileViewModel` (follow state, self vs other mode)
 
 ## 17. README progress tracker
 
