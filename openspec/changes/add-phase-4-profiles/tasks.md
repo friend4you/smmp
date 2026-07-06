@@ -33,11 +33,11 @@
 
 ## 6. FollowRepository
 
-- [ ] 6.1 Define `FollowRepositoryProtocol` — `follow`, `unfollow`, `isFollowing`, `fetchFollowing`, `followingIds(for:)`
-- [ ] 6.2 Implement follow batch — create `users/me/following/theirId`, increment counts; enforce 30-following cap
-- [ ] 6.3 Implement unfollow batch — delete following doc, decrement counts
-- [ ] 6.4 Implement `fetchFollowing` and `followingIds` for feed query
-- [ ] 6.5 Add `FollowRepositoryTests` for batch logic, cap enforcement, and error paths
+- [x] 6.1 Define `FollowRepositoryProtocol` — `follow`, `unfollow`, `isFollowing`, `fetchFollowing`, `followingIds(for:)`
+- [x] 6.2 Implement follow batch — create `users/me/following/theirId`, increment counts; enforce 30-following cap
+- [x] 6.3 Implement unfollow batch — delete following doc, decrement counts
+- [x] 6.4 Implement `fetchFollowing` and `followingIds` for feed query
+- [x] 6.5 Add `FollowRepositoryTests` for batch logic, cap enforcement, and error paths
 
 ## 7. PostRepository follow-scoped feed
 

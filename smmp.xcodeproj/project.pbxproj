@@ -50,6 +50,13 @@
 			);
 			target = AAC3AB3C2F7FB9C1005BCCCC /* smmpUITests */;
 		};
+		AADD5F192FFBE4E600EC8535 /* Exceptions for "smmpTests" folder in "smmpTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				smmp.xctestplan,
+			);
+			target = AAC3AB322F7FB9C1005BCCCC /* smmpTests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -64,6 +71,9 @@
 		};
 		AAC3AB362F7FB9C1005BCCCC /* smmpTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AADD5F192FFBE4E600EC8535 /* Exceptions for "smmpTests" folder in "smmpTests" target */,
+			);
 			path = smmpTests;
 			sourceTree = "<group>";
 		};

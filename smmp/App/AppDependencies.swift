@@ -48,8 +48,7 @@ final class AppDependencies: AppDependenciesProviding {
             localRepository: localRepository,
             mediaService: media
         )
-        self.followRepository = FollowRepository(networkMonitor: network,
-                                                 mediaService: media)
+        self.followRepository = FollowRepository(profileRepository: profileRepository)
         self.commentRepository = CommentRepository(
             networkMonitor: network,
             localRepository: localRepository,
