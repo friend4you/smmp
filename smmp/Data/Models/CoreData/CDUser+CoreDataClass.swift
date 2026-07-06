@@ -18,8 +18,11 @@ public class CDUser: NSManagedObject {
         id = user.id
         photoURL = user.photoURL
         displayName = user.displayName
+        displayNameLower = user.displayNameLower ?? User.displayNameLower(from: user.displayName)
         email = user.email
         bio = user.bio
+        followerCount = Int64(user.followerCount)
+        followingCount = Int64(user.followingCount)
     }
 
     func toUser() -> User? {
@@ -27,9 +30,12 @@ public class CDUser: NSManagedObject {
 
         var user = User(id: id)
         user.displayName = displayName
+        user.displayNameLower = displayNameLower
         user.email = email
         user.bio = bio
         user.photoURL = photoURL
+        user.followerCount = Int(followerCount)
+        user.followingCount = Int(followingCount)
         return user
     }
 }

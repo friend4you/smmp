@@ -24,6 +24,7 @@ final class PostDetailViewModel: ObservableObject {
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
     private let networkMonitor: NetworkMonitorProtocol
+    private let onAuthorTap: (String) -> Void
     private var authorCache: [String: User] = [:]
     private let currentUserId: String
 
@@ -49,7 +50,8 @@ final class PostDetailViewModel: ObservableObject {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
-        networkMonitor: NetworkMonitorProtocol
+        networkMonitor: NetworkMonitorProtocol,
+        onAuthorTap: @escaping (String) -> Void = { _ in }
     ) {
         self.postItem = item
         self.currentUserId = currentUserId
@@ -57,7 +59,12 @@ final class PostDetailViewModel: ObservableObject {
         self.profileRepository = profileRepository
         self.postRepository = postRepository
         self.networkMonitor = networkMonitor
+        self.onAuthorTap = onAuthorTap
         authorCache[item.author.id] = item.author
+    }
+
+    func showAuthorProfile(authorId: String) {
+        onAuthorTap(authorId)
     }
 
     func canDeleteComment(_ item: CommentRowItem) -> Bool {

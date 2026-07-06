@@ -23,6 +23,8 @@ struct AuthViewBuilder {
         RegistrationView(
             viewModel: RegistrationViewModel(
                 authRepository: deps.authRepository,
+                profileRepository: deps.profileRepository,
+                accountDeleter: deps.accountDeleter,
                 localRepository: deps.localRepository,
                 onNavigate: onNavigate
             )

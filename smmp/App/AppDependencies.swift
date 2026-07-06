@@ -17,6 +17,7 @@ final class AppDependencies: AppDependenciesProviding {
     let sessionService: SessionService
 
     let authRepository: AuthRepositoryProtocol
+    let accountDeleter: AuthAccountDeleting
     let localRepository: LocalRepositoryProtocol
     let postRepository: PostRepositoryProtocol
     let profileRepository: ProfileRepositoryProtocol
@@ -37,16 +38,17 @@ final class AppDependencies: AppDependenciesProviding {
         self.profileRepository = ProfileRepository(
             networkMonitor: network,
             localRepository: localRepository,
-            mediaService: media
+            mediaService: media,
+            authProfileUpdater: auth
         )
+        self.accountDeleter = auth
         self.authRepository = AuthRepository(authService: auth)
+        self.followRepository = FollowRepository(profileRepository: profileRepository)
         self.postRepository = PostRepository(
             networkMonitor: network,
             localRepository: localRepository,
             mediaService: media
         )
-        self.followRepository = FollowRepository(networkMonitor: network,
-                                                 mediaService: media)
         self.commentRepository = CommentRepository(
             networkMonitor: network,
             localRepository: localRepository,

@@ -44,9 +44,27 @@ final class MediaService: MediaServiceProtocol {
     }
 
     func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
+        try await uploadImage(imageData, at: MediaPaths.postImage(postId: postId))
+    }
+
+    func deletePostImage(postId: String) async throws {
+        try await deleteStorageObject(at: MediaPaths.postImage(postId: postId))
+    }
+
+    func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String {
+        try await uploadImage(imageData, at: MediaPaths.profileImage(userId: userId))
+    }
+
+    func deleteProfileImage(userId: String) async throws {
+        try await deleteStorageObject(at: MediaPaths.profileImage(userId: userId))
+    }
+
+    // MARK: - Private
+
+    private func uploadImage(_ imageData: Data, at path: String) async throws -> String {
         progressSubject.send(0)
 
-        let ref = storage.reference().child(MediaPaths.postImage(postId: postId))
+        let ref = storage.reference().child(path)
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
@@ -83,8 +101,8 @@ final class MediaService: MediaServiceProtocol {
         }
     }
 
-    func deletePostImage(postId: String) async throws {
-        let ref = storage.reference().child(MediaPaths.postImage(postId: postId))
+    private func deleteStorageObject(at path: String) async throws {
+        let ref = storage.reference().child(path)
         do {
             try await ref.delete()
         } catch let error as NSError where error.domain == StorageErrorDomain

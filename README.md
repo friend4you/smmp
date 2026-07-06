@@ -352,13 +352,18 @@ Use this checklist to track implementation status. Items map to the Development 
 - [x] Integration tests for offline path written
 
 ### Phase 4 — Profiles & Social Graph
-- [ ] `UserProfileScreen` built
-- [ ] `ProfileRepository` implemented
-- [ ] `EditProfileScreen` built
-- [ ] `SearchScreen` built
-- [ ] `FollowersScreen` and `FollowingScreen` built
-- [ ] `FollowRepository` implemented
-- [ ] Unit tests for `ProfileViewModel` and `SearchViewModel` written
+- [x] `ProfileScreen` (own profile tab) built
+- [x] `UserProfileScreen` built (other users + self from Feed/Search)
+- [x] `ProfileRepository` extended (`createProfile`, `updateProfile`, `searchUsers`)
+- [x] `EditProfileScreen` built (fields, photo picker, save/discard)
+- [x] `SearchScreen` built (debounced prefix search, inline follow)
+- [x] `FollowingScreen` built
+- [ ] `FollowersScreen` built *(deferred — portfolio shortcut; follower count shown on profile only)*
+- [x] `FollowRepository` implemented (follow/unfollow batch writes, 30-following cap)
+- [x] Follow-scoped feed implemented
+- [x] Author avatar navigation (feed posts + comments → user profile)
+- [x] Localization keys for profile, search, and follow UI
+- [x] Unit tests for `ProfileViewModel`, `SearchViewModel`, `UserProfileViewModel`, and `FollowRepository` written
 
 ### Phase 5 — Polish, Animations & Offline
 - [ ] `matchedGeometryEffect` transitions added

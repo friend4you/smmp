@@ -11,4 +11,11 @@ struct User {
     var email: String?
     var bio: String?
     var photoURL: String?
+    var followerCount: Int = 0
+    var followingCount: Int = 0
+    var displayNameLower: String?
+
+    static func displayNameLower(from displayName: String?) -> String? {
+        displayName?.lowercased()
+    }
 }

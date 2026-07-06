@@ -9,10 +9,11 @@ struct CommentRowView: View {
     let item: CommentRowItem
     let canDelete: Bool
     let onDeleteTapped: () -> Void
+    var onAuthorTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            authorAvatar
+            authorAvatarControl
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -44,6 +45,18 @@ struct CommentRowView: View {
             }
         }
         .padding(.vertical, 8)
+    }
+
+    @ViewBuilder
+    private var authorAvatarControl: some View {
+        if let onAuthorTap {
+            Button(action: onAuthorTap) {
+                authorAvatar
+            }
+            .buttonStyle(.plain)
+        } else {
+            authorAvatar
+        }
     }
 
     @ViewBuilder

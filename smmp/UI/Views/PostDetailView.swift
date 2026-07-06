@@ -15,7 +15,8 @@ struct PostDetailView: View {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
-        networkMonitor: NetworkMonitorProtocol
+        networkMonitor: NetworkMonitorProtocol,
+        onAuthorTap: @escaping (String) -> Void = { _ in }
     ) {
         _viewModel = StateObject(
             wrappedValue: PostDetailViewModel(
@@ -24,7 +25,8 @@ struct PostDetailView: View {
                 commentRepository: commentRepository,
                 profileRepository: profileRepository,
                 postRepository: postRepository,
-                networkMonitor: networkMonitor
+                networkMonitor: networkMonitor,
+                onAuthorTap: onAuthorTap
             )
         )
     }
@@ -38,6 +40,8 @@ struct PostDetailView: View {
 
                 PostCardView(item: viewModel.postItem, imageDisplayStyle: .detail) {
                     Task { await viewModel.toggleLike() }
+                } onAuthorTap: {
+                    viewModel.showAuthorProfile(authorId: viewModel.postItem.author.id)
                 }
 
                 commentsSection
@@ -145,6 +149,8 @@ struct PostDetailView: View {
                         canDelete: viewModel.canDeleteComment(comment)
                     ) {
                         viewModel.commentPendingDelete = comment
+                    } onAuthorTap: {
+                        viewModel.showAuthorProfile(authorId: comment.author.id)
                     }
                     Divider()
                 }

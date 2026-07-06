@@ -13,25 +13,38 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(.secondary)
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                if viewModel.isOffline {
+                    offlineBanner
+                }
 
-            if let displayName = viewModel.displayName {
-                Text(displayName)
-                    .font(.title2.bold())
+                if viewModel.isLoading && viewModel.user == nil {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 48)
+                } else if let user = viewModel.user {
+                    ProfileHeaderView(
+                        user: user,
+                        isOwnProfile: true,
+                        onFollowingTapped: viewModel.followingTapped
+                    )
 
-                if let bio = viewModel.bio {
-                    Text(bio)
-                        .foregroundStyle(.secondary)
+                    ProfilePostsListSection(
+                        items: viewModel.items,
+                        onPostTapped: viewModel.showPostDetail,
+                        onLikeTapped: { item in
+                            Task { await viewModel.toggleLike(for: item) }
+                        }
+                    )
                 }
             }
+            .padding()
         }
-        .task {
-            viewModel.fetchProfile()
+        .refreshable {
+            await viewModel.refresh()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle(Text(.tabProfile))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -39,6 +52,7 @@ struct ProfileView: View {
                 } label: {
                     Text(.profileEdit)
                 }
+                .disabled(!viewModel.canEditProfile)
             }
             ToolbarItem(placement: .secondaryAction) {
                 Button {
@@ -50,21 +64,56 @@ struct ProfileView: View {
                 }
             }
         }
+        .alert(
+            Text(.commonErrorTitle),
+            isPresented: $viewModel.showError,
+            presenting: viewModel.errorMessage
+        ) { _ in
+            Button { viewModel.showError = false } label: {
+                Text(.commonOk)
+            }
+        } message: { message in
+            Text(message)
+        }
+        .task {
+            await viewModel.load()
+        }
+    }
+
+    private var offlineBanner: some View {
+        Text(.profileOfflineBanner)
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(Color.orange)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
 #Preview {
-    NavigationStack {
+    let network = NetworkMonitor()
+    let localRepository = LocalRepository(persistence: PersistenceController.shared)
+    let media = MediaService()
+
+    return NavigationStack {
         ProfileView(
             viewModel: ProfileViewModel(
                 authRepository: AuthRepository(authService: AuthService()),
                 profileRepository: ProfileRepository(
-                    networkMonitor: NetworkMonitor(),
-                    localRepository: LocalRepository(persistence: PersistenceController.shared),
-                    mediaService: MediaService(),
-                    userDocumentFetcher: FirestoreUserDocumentRepository()),
-                sessionService: SessionService(),
-                onNavigate: { _ in }
+                    networkMonitor: network,
+                    localRepository: localRepository,
+                    mediaService: media,
+                    authProfileUpdater: AuthService()
+                ),
+                postRepository: PostRepository(
+                    networkMonitor: network,
+                    localRepository: localRepository,
+                    mediaService: media
+                ),
+                localRepository: localRepository,
+                networkMonitor: network,
+                sessionService: SessionService()
             )
         )
     }

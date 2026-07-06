@@ -82,9 +82,7 @@ struct ForgotPasswordView: View {
 #Preview {
     NavigationStack {
         ForgotPasswordView(viewModel: ForgotPasswordViewModel(
-            authRepository: AuthRepository(
-                authService: AuthService()
-            )
+            authRepository: AuthRepository(authService: AuthService())
         ))
     }
 }

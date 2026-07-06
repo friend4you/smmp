@@ -12,6 +12,7 @@ protocol AppDependenciesProviding {
     var mediaService: MediaServiceProtocol { get }
     var sessionService: SessionService { get }
     var authRepository: AuthRepositoryProtocol { get }
+    var accountDeleter: AuthAccountDeleting { get }
     var localRepository: LocalRepositoryProtocol { get }
     var postRepository: PostRepositoryProtocol { get }
     var profileRepository: ProfileRepositoryProtocol { get }

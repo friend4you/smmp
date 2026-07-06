@@ -21,6 +21,12 @@ final class NetworkMonitor: NetworkMonitorProtocol, ObservableObject {
         startMonitoring()
     }
 
+    /// Fixed connection state for unit tests; does not start `NWPathMonitor`.
+    init(testConnection isConnected: Bool) {
+        monitor = NWPathMonitor()
+        self.isConnected = isConnected
+    }
+
     deinit {
         monitor.cancel()
     }

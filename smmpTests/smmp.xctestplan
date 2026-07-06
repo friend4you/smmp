@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "8510BDFD-08E8-42E1-ACFA-21A00433268A",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:smmp.xcodeproj",
+      "identifier" : "AAC3AB202F7FB9BE005BCCCC",
+      "name" : "smmp"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:smmp.xcodeproj",
+        "identifier" : "AAC3AB322F7FB9C1005BCCCC",
+        "name" : "smmpTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:smmp.xcodeproj",
+        "identifier" : "AAC3AB3C2F7FB9C1005BCCCC",
+        "name" : "smmpUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

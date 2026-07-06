@@ -11,13 +11,19 @@ func makeUser(
     displayName: String? = "Alice",
     email: String? = "alice@example.com",
     bio: String? = "Hello",
-    photoURL: String? = "https://example.com/a.jpg"
+    photoURL: String? = "https://example.com/a.jpg",
+    followerCount: Int = 0,
+    followingCount: Int = 0,
+    displayNameLower: String? = nil
 ) -> User {
     var user = User(id: id)
     user.displayName = displayName
     user.email = email
     user.bio = bio
     user.photoURL = photoURL
+    user.followerCount = followerCount
+    user.followingCount = followingCount
+    user.displayNameLower = displayNameLower ?? User.displayNameLower(from: displayName)
     return user
 }
 

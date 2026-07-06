@@ -19,9 +19,12 @@ struct UserMappingTests {
 
             #expect(cdUser.id == user.id)
             #expect(cdUser.displayName == user.displayName)
+            #expect(cdUser.displayNameLower == user.displayNameLower)
             #expect(cdUser.email == user.email)
             #expect(cdUser.bio == user.bio)
             #expect(cdUser.photoURL == user.photoURL)
+            #expect(cdUser.followerCount == Int64(user.followerCount))
+            #expect(cdUser.followingCount == Int64(user.followingCount))
         }
     }
 
@@ -33,5 +36,8 @@ struct UserMappingTests {
         #expect(user.email == nil)
         #expect(user.bio == nil)
         #expect(user.photoURL == nil)
+        #expect(user.followerCount == 0)
+        #expect(user.followingCount == 0)
+        #expect(user.displayNameLower == nil)
     }
 }

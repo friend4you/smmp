@@ -17,9 +17,12 @@ extension CDUser {
 
     @NSManaged public var id: String?
     @NSManaged public var displayName: String?
+    @NSManaged public var displayNameLower: String?
     @NSManaged public var email: String?
     @NSManaged public var bio: String?
     @NSManaged public var photoURL: String?
+    @NSManaged public var followerCount: Int64
+    @NSManaged public var followingCount: Int64
     @NSManaged public var cachedAt: Date?
 
 }

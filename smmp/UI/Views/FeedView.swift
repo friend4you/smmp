@@ -51,14 +51,18 @@ struct FeedView: View {
                         emptyState
                     } else {
                         ForEach(viewModel.items) { item in
-                            Button {
-                                viewModel.showPostDetail(for: item)
-                            } label: {
-                                PostCardView(item: item) {
+                            PostCardView(
+                                item: item,
+                                onLikeTapped: {
                                     Task { await viewModel.toggleLike(for: item) }
+                                },
+                                onAuthorTap: {
+                                    viewModel.showAuthorProfile(authorId: item.author.id)
+                                },
+                                onPostTap: {
+                                    viewModel.showPostDetail(for: item)
                                 }
-                            }
-                            .buttonStyle(.plain)
+                            )
                             .id(item.id)
                             .task {
                                 await viewModel.loadMoreIfNeeded(currentItem: item)
@@ -128,20 +132,28 @@ struct FeedView: View {
 }
 
 #Preview {
-    NavigationStack {
+    let network = NetworkMonitor()
+    let localRepository = LocalRepository(persistence: PersistenceController.shared)
+    let media = MediaService()
+    let profileRepository = ProfileRepository(
+        networkMonitor: network,
+        localRepository: localRepository,
+        mediaService: media,
+        authProfileUpdater: AuthService()
+    )
+    let followRepository = FollowRepository(profileRepository: profileRepository)
+
+    return NavigationStack {
         FeedView(
             viewModel: FeedViewModel(
                 postRepository: PostRepository(
-                    networkMonitor: NetworkMonitor(),
-                    localRepository: LocalRepository(persistence: PersistenceController.shared),
-                    mediaService: MediaService()
+                    networkMonitor: network,
+                    localRepository: localRepository,
+                    mediaService: media
                 ),
-                profileRepository: ProfileRepository(
-                    networkMonitor: NetworkMonitor(),
-                    localRepository: LocalRepository(persistence: PersistenceController.shared),
-                    mediaService: MediaService()
-                ),
-                networkMonitor: NetworkMonitor(),
+                profileRepository: profileRepository,
+                followRepository: followRepository,
+                networkMonitor: network,
                 sessionService: SessionService()
             )
         )
