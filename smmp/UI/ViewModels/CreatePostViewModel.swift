@@ -19,6 +19,7 @@ final class CreatePostViewModel: ObservableObject {
     @Published var showError = false
 
     private let postRepository: PostRepositoryProtocol
+    private let followRepository: FollowRepositoryProtocol
     private let mediaService: MediaServiceProtocol
     private let sessionService: SessionServiceProtocol
     private let networkMonitor: NetworkMonitorProtocol
@@ -55,12 +56,14 @@ final class CreatePostViewModel: ObservableObject {
 
     init(
         postRepository: PostRepositoryProtocol,
+        followRepository: FollowRepositoryProtocol,
         mediaService: MediaServiceProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
         onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository
+        self.followRepository = followRepository
         self.mediaService = mediaService
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
@@ -118,7 +121,12 @@ final class CreatePostViewModel: ObservableObject {
                 postId: postId,
                 imageURL: uploadedImageURL
             )
-            try await postRepository.refreshFeed(currentUserId: authorId)
+            let followingIds = (try? await followRepository.followingIds(for: authorId)) ?? []
+            let feedAuthorIds = FeedAuthorIds.authorIds(
+                currentUserId: authorId,
+                followingIds: followingIds
+            )
+            try await postRepository.refreshFeed(currentUserId: authorId, feedAuthorIds: feedAuthorIds)
             text = ""
             selectedImage = nil
             onPostCreated()

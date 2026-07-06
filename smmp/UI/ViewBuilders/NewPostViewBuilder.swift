@@ -13,6 +13,7 @@ struct NewPostViewBuilder {
         NewPostView(
             viewModel: CreatePostViewModel(
                 postRepository: deps.postRepository,
+                followRepository: deps.followRepository,
                 mediaService: deps.mediaService,
                 sessionService: deps.sessionService,
                 networkMonitor: deps.networkMonitor,

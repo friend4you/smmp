@@ -21,6 +21,7 @@ final class FeedViewModel: ObservableObject {
 
     private let postRepository: PostRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
+    private let followRepository: FollowRepositoryProtocol
     private let sessionService: SessionServiceProtocol
     private let onNavigate: (FeedRoute) -> Void
 
@@ -35,12 +36,14 @@ final class FeedViewModel: ObservableObject {
     init(
         postRepository: PostRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
+        followRepository: FollowRepositoryProtocol,
         networkMonitor: NetworkMonitor,
         sessionService: SessionServiceProtocol,
         onNavigate: @escaping (FeedRoute) -> Void = { _ in }
     ) {
         self.postRepository = postRepository
         self.profileRepository = profileRepository
+        self.followRepository = followRepository
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
         self.onNavigate = onNavigate
@@ -55,7 +58,7 @@ final class FeedViewModel: ObservableObject {
         guard let userId = sessionService.currentUser?.id else { return }
         currentUserId = userId
         isOffline = !networkMonitor.isConnected
-        postRepository.observeFeed(currentUserId: userId)
+        Task { await reloadFeed(userId: userId) }
     }
 
     func refresh() async {
@@ -65,7 +68,8 @@ final class FeedViewModel: ObservableObject {
         defer { isRefreshing = false }
 
         do {
-            try await postRepository.refreshFeed(currentUserId: userId)
+            let authorIds = await resolveFeedAuthorIds(for: userId)
+            try await postRepository.refreshFeed(currentUserId: userId, feedAuthorIds: authorIds)
         } catch {
             presentError(String(localized: .feedErrorRefresh))
         }
@@ -143,10 +147,20 @@ final class FeedViewModel: ObservableObject {
                 guard let self else { return }
                 self.isOffline = !isConnected
                 if isConnected, let userId = self.currentUserId {
-                    self.postRepository.observeFeed(currentUserId: userId)
+                    Task { await self.reloadFeed(userId: userId) }
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func reloadFeed(userId: String) async {
+        let authorIds = await resolveFeedAuthorIds(for: userId)
+        postRepository.observeFeed(currentUserId: userId, feedAuthorIds: authorIds)
+    }
+
+    private func resolveFeedAuthorIds(for userId: String) async -> [String] {
+        let followingIds = (try? await followRepository.followingIds(for: userId)) ?? []
+        return FeedAuthorIds.authorIds(currentUserId: userId, followingIds: followingIds)
     }
 
     private func handlePostsUpdate(_ newPosts: [Post]) async {

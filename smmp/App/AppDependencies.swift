@@ -43,12 +43,12 @@ final class AppDependencies: AppDependenciesProviding {
         )
         self.accountDeleter = auth
         self.authRepository = AuthRepository(authService: auth)
+        self.followRepository = FollowRepository(profileRepository: profileRepository)
         self.postRepository = PostRepository(
             networkMonitor: network,
             localRepository: localRepository,
             mediaService: media
         )
-        self.followRepository = FollowRepository(profileRepository: profileRepository)
         self.commentRepository = CommentRepository(
             networkMonitor: network,
             localRepository: localRepository,

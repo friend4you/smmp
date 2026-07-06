@@ -14,6 +14,7 @@ struct FeedViewModelTests {
     @Test func optimisticLikeRollsBackOnRepositoryError() async throws {
         let postRepository = MockPostRepository()
         let profileRepository = MockProfileRepository()
+        let followRepository = MockFeedFollowRepository()
         let sessionService = MockSessionService(currentUser: makeUser())
 
         let post = makePost(id: "post-like", likeCount: 2)
@@ -23,6 +24,7 @@ struct FeedViewModelTests {
         let viewModel = FeedViewModel(
             postRepository: postRepository,
             profileRepository: profileRepository,
+            followRepository: followRepository,
             networkMonitor: NetworkMonitor(),
             sessionService: sessionService
         )
@@ -62,13 +64,15 @@ private final class MockPostRepository: PostRepositoryProtocol {
         likedPostIdsSubject.eraseToAnyPublisher()
     }
 
-    func observeFeed(currentUserId: String) {}
+    func observeFeed(currentUserId: String, feedAuthorIds: [String]) {}
 
     func removeAllListeners() {}
 
-    func refreshFeed(currentUserId: String) async throws {}
+    func refreshFeed(currentUserId: String, feedAuthorIds: [String]) async throws {}
 
     func loadMorePosts(currentUserId: String) async throws -> Bool { false }
+
+    func fetchPosts(authorId: String) async throws -> [Post] { [] }
 
     func newPostId() -> String { "new-post-id" }
 
@@ -116,4 +120,16 @@ private struct MockProfileRepository: ProfileRepositoryProtocol {
     func searchUsers(prefix: String) async throws -> [User] {
         []
     }
+}
+
+private struct MockFeedFollowRepository: FollowRepositoryProtocol {
+    func follow(currentUserId: String, targetUserId: String) async throws {}
+
+    func unfollow(currentUserId: String, targetUserId: String) async throws {}
+
+    func isFollowing(currentUserId: String, targetUserId: String) async throws -> Bool { false }
+
+    func fetchFollowing(for userId: String) async throws -> [Follow] { [] }
+
+    func followingIds(for userId: String) async throws -> [String] { [] }
 }

@@ -14,6 +14,7 @@ struct FeedViewBuilder {
             viewModel: FeedViewModel(
                 postRepository: deps.postRepository,
                 profileRepository: deps.profileRepository,
+                followRepository: deps.followRepository,
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
                 onNavigate: onNavigate

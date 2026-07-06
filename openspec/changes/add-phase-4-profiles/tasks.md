@@ -41,11 +41,11 @@
 
 ## 7. PostRepository follow-scoped feed
 
-- [ ] 7.1 Add `fetchPosts(authorId:)` — query posts by author, cache to CoreData, return sorted list
-- [ ] 7.2 Replace `feedQuery()` with follow-scoped query using `authorId in [self + followingIds]` (max 30 following)
-- [ ] 7.3 Update offline feed path to filter cached posts by follow graph
-- [ ] 7.4 Update feed listener and pagination to load following IDs before query setup
-- [ ] 7.5 Add/update integration tests for follow-scoped feed filtering
+- [x] 7.1 Add `fetchPosts(authorId:)` — query posts by author, cache to CoreData, return sorted list
+- [x] 7.2 Replace `feedQuery()` with follow-scoped query using `authorId in [self + followingIds]` (max 30 following)
+- [x] 7.3 Update offline feed path to filter cached posts by follow graph
+- [x] 7.4 Update feed listener and pagination to load following IDs before query setup
+- [x] 7.5 Add/update integration tests for follow-scoped feed filtering
 
 ## 8. Shared profile UI components
 

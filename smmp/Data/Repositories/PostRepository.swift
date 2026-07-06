@@ -26,6 +26,7 @@ final class PostRepository: PostRepositoryProtocol {
     private var paginationCursor: DocumentSnapshot?
     private var hasMorePages = true
     private var observedUserId: String?
+    private var feedAuthorIds: [String] = []
 
     private let pageSize = 20
     private let maxTextLength = 280
@@ -53,13 +54,18 @@ final class PostRepository: PostRepositoryProtocol {
     
     // MARK: - Private feed helpers
 
-    private func feedQuery() -> Query {
+    private func normalizedFeedAuthorIds(currentUserId: String, feedAuthorIds: [String]) -> [String] {
+        feedAuthorIds.isEmpty ? [currentUserId] : feedAuthorIds
+    }
+
+    private func feedQuery(authorIds: [String]) -> Query {
         firestore.collection("posts")
+            .whereField("authorId", in: authorIds)
             .order(by: "createdAt", descending: true)
     }
 
-    private func attachFeedListener(currentUserId: String) {
-        let query = feedQuery().limit(to: pageSize)
+    private func attachFeedListener(currentUserId: String, authorIds: [String]) {
+        let query = feedQuery(authorIds: authorIds).limit(to: pageSize)
 
         let registration = query.addSnapshotListener { [weak self] snapshot, error in
             guard let self, error == nil, let snapshot else { return }
@@ -88,7 +94,9 @@ final class PostRepository: PostRepositoryProtocol {
     }
 
     private func loadOfflineFeed() async throws {
+        let authorIdSet = Set(feedAuthorIds)
         let posts = try await localRepository.fetchPosts()
+            .filter { authorIdSet.contains($0.authorId) }
         listenerPosts = []
         paginatedPosts = posts
         postsSubject.send(posts)
@@ -176,8 +184,9 @@ final class PostRepository: PostRepositoryProtocol {
 
 // MARK: - Feed observation
 extension PostRepository {
-    func observeFeed(currentUserId: String) {
+    func observeFeed(currentUserId: String, feedAuthorIds: [String]) {
         observedUserId = currentUserId
+        self.feedAuthorIds = normalizedFeedAuthorIds(currentUserId: currentUserId, feedAuthorIds: feedAuthorIds)
 
         guard networkMonitor.isConnected else {
             Task { try? await loadOfflineFeed() }
@@ -185,7 +194,7 @@ extension PostRepository {
         }
 
         resetPagination()
-        attachFeedListener(currentUserId: currentUserId)
+        attachFeedListener(currentUserId: currentUserId, authorIds: self.feedAuthorIds)
     }
 
     func removeAllListeners() {
@@ -199,12 +208,14 @@ extension PostRepository {
         paginationCursor = nil
         hasMorePages = true
         observedUserId = nil
+        feedAuthorIds = []
         postsSubject.send([])
         likedPostIdsSubject.send([])
     }
 
-    func refreshFeed(currentUserId: String) async throws {
+    func refreshFeed(currentUserId: String, feedAuthorIds: [String]) async throws {
         observedUserId = currentUserId
+        self.feedAuthorIds = normalizedFeedAuthorIds(currentUserId: currentUserId, feedAuthorIds: feedAuthorIds)
 
         guard networkMonitor.isConnected else {
             try await loadOfflineFeed()
@@ -213,19 +224,20 @@ extension PostRepository {
 
         resetPagination()
         removeListener(key: "feed")
-        attachFeedListener(currentUserId: currentUserId)
+        attachFeedListener(currentUserId: currentUserId, authorIds: self.feedAuthorIds)
     }
 
     @discardableResult
     func loadMorePosts(currentUserId: String) async throws -> Bool {
         guard networkMonitor.isConnected, hasMorePages else { return false }
+        guard !feedAuthorIds.isEmpty else { return false }
         
         guard let cursor = paginationCursor else {
             hasMorePages = false
             return false
         }
         
-        let snapshot = try await feedQuery()
+        let snapshot = try await feedQuery(authorIds: feedAuthorIds)
             .start(afterDocument: cursor)
             .limit(to: pageSize)
             .getDocuments()
@@ -249,6 +261,16 @@ extension PostRepository {
         publishMergedPosts()
         await refreshLikedState(for: newPosts, userId: currentUserId, mergeWithExisting: true)
         return hasMorePages
+    }
+
+    func fetchPosts(authorId: String) async throws -> [Post] {
+        let snapshot = try await firestore.collection("posts")
+            .whereField("authorId", isEqualTo: authorId)
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        let posts = snapshot.documents.compactMap { Post(document: $0) }
+        try await localRepository.savePosts(posts)
+        return posts
     }
 }
 
