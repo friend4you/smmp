@@ -9,6 +9,7 @@ import Foundation
 
 protocol AppDependenciesProviding {
     var networkMonitor: NetworkMonitor { get }
+    var hapticService: HapticServiceProtocol { get }
     var mediaService: MediaServiceProtocol { get }
     var sessionService: SessionService { get }
     var authRepository: AuthRepositoryProtocol { get }

@@ -5,19 +5,25 @@
 //  Created by Vladyslav Arseniuk on 4/3/26.
 //
 
-import Network
 import Combine
+import Network
 
 @MainActor
 final class NetworkMonitor: NetworkMonitorProtocol, ObservableObject {
     @Published private(set) var isConnected: Bool = true
     @Published private(set) var connectionType: ConnectionType = .unknown
 
+    var connectivityPublisher: AnyPublisher<Bool, Never> {
+        $isConnected.eraseToAnyPublisher()
+    }
+
     private let monitor: NWPathMonitor
     private let queue = DispatchQueue(label: "com.smmp.networkmonitor")
 
     init() {
         monitor = NWPathMonitor()
+        isConnected = monitor.currentPath.status == .satisfied
+        connectionType = type(from: monitor.currentPath)
         startMonitoring()
     }
 

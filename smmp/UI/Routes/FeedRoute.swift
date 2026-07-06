@@ -7,7 +7,7 @@ import Foundation
 
 enum FeedRoute: AppRoute {
     case feed
-    case userProfile(userId: String)
+    case userProfile(userId: String, stub: User?)
     case postDetail(FeedPostItem)
     case editProfile
     case following

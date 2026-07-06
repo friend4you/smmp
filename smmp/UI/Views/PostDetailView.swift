@@ -9,6 +9,10 @@ struct PostDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: PostDetailViewModel
 
+    init(viewModel: PostDetailViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
     init(
         item: FeedPostItem,
         currentUserId: String,
@@ -16,7 +20,8 @@ struct PostDetailView: View {
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
-        onAuthorTap: @escaping (String) -> Void = { _ in }
+        hapticService: HapticServiceProtocol = HapticService(),
+        onAuthorTap: @escaping (User) -> Void = { _ in }
     ) {
         _viewModel = StateObject(
             wrappedValue: PostDetailViewModel(
@@ -26,6 +31,7 @@ struct PostDetailView: View {
                 profileRepository: profileRepository,
                 postRepository: postRepository,
                 networkMonitor: networkMonitor,
+                hapticService: hapticService,
                 onAuthorTap: onAuthorTap
             )
         )
@@ -35,10 +41,14 @@ struct PostDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if viewModel.isOffline {
-                    offlineBanner
+                    OfflineBanner()
                 }
 
-                PostCardView(item: viewModel.postItem, imageDisplayStyle: .detail) {
+                PostCardView(
+                    item: viewModel.postItem,
+                    imageDisplayStyle: .detail,
+                    isLikeDisabled: viewModel.isOffline
+                ) {
                     Task { await viewModel.toggleLike() }
                 } onAuthorTap: {
                     viewModel.showAuthorProfile(authorId: viewModel.postItem.author.id)
@@ -58,6 +68,7 @@ struct PostDetailView: View {
                     } label: {
                         Image(systemName: "trash")
                     }
+                    .disabled(!viewModel.canDeletePost)
                 }
             }
         }
@@ -69,6 +80,12 @@ struct PostDetailView: View {
         }
         .task {
             await viewModel.loadComments()
+        }
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
         }
         .onChange(of: viewModel.shouldDismiss) { _, shouldDismiss in
             if shouldDismiss {
@@ -178,15 +195,5 @@ struct PostDetailView: View {
         }
         .padding()
         .background(.bar)
-    }
-
-    private var offlineBanner: some View {
-        Text(.feedOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

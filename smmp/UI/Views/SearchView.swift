@@ -21,8 +21,7 @@ struct SearchView: View {
             } else if viewModel.showsMinLengthHint {
                 minLengthContent
             } else if viewModel.isSearching && viewModel.results.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                searchSkeleton
             } else if viewModel.showsNoResults {
                 noResultsContent
             } else {
@@ -50,7 +49,7 @@ struct SearchView: View {
                 result: result,
                 isFollowDisabled: !viewModel.canToggleFollow(for: result),
                 isFollowInProgress: viewModel.followInProgressIds.contains(result.id),
-                onRowTap: { viewModel.openProfile(userId: result.id) },
+                onRowTap: { viewModel.openProfile(user: result.user) },
                 onFollowTap: {
                     Task { await viewModel.toggleFollow(for: result.id) }
                 }
@@ -58,11 +57,30 @@ struct SearchView: View {
         }
         .listStyle(.plain)
         .overlay(alignment: .top) {
-            if viewModel.isSearching {
+            if viewModel.isSearching && !viewModel.results.isEmpty {
                 ProgressView()
                     .padding(.top, 8)
             }
         }
+    }
+
+    private var searchSkeleton: some View {
+        List(0..<4, id: \.self) { _ in
+            SearchUserRowView(
+                result: SearchUserResult(
+                    user: User(id: "skeleton", displayName: "Loading User"),
+                    isFollowing: false,
+                    isSelf: false
+                ),
+                isFollowDisabled: true,
+                isFollowInProgress: false,
+                onRowTap: {},
+                onFollowTap: {}
+            )
+            .redacted(reason: .placeholder)
+            .allowsHitTesting(false)
+        }
+        .listStyle(.plain)
     }
 
     private var emptyContent: some View {
@@ -93,20 +111,11 @@ struct SearchView: View {
         ContentUnavailableView {
             Text(.searchTitle)
         } description: {
-            Text(.searchOffline)
+            Text(.searchRequiresConnection)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            offlineBanner
+            OfflineBanner()
         }
-    }
-
-    private var offlineBanner: some View {
-        Text(.profileOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
     }
 }
 

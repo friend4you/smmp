@@ -16,13 +16,11 @@ struct ProfileView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 if viewModel.isOffline {
-                    offlineBanner
+                    OfflineBanner()
                 }
 
-                if viewModel.isLoading && viewModel.user == nil {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 48)
+                if !viewModel.hasCompletedInitialLoad && viewModel.user == nil {
+                    profileSkeleton
                 } else if let user = viewModel.user {
                     ProfileHeaderView(
                         user: user,
@@ -32,6 +30,8 @@ struct ProfileView: View {
 
                     ProfilePostsListSection(
                         items: viewModel.items,
+                        isLoading: !viewModel.hasCompletedInitialLoad,
+                        isLikeDisabled: viewModel.isOffline,
                         onPostTapped: viewModel.showPostDetail,
                         onLikeTapped: { item in
                             Task { await viewModel.toggleLike(for: item) }
@@ -78,16 +78,25 @@ struct ProfileView: View {
         .task {
             await viewModel.load()
         }
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
     }
 
-    private var offlineBanner: some View {
-        Text(.profileOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+    private var profileSkeleton: some View {
+        VStack(spacing: 16) {
+            ProfileHeaderView(
+                user: User(id: "skeleton", displayName: "Loading Profile"),
+                isOwnProfile: true
+            )
+            .redacted(reason: .placeholder)
+
+            PostListSkeleton(count: 2)
+        }
+        .allowsHitTesting(false)
     }
 }
 

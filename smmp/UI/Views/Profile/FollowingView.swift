@@ -39,7 +39,7 @@ struct FollowingView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             if viewModel.isOffline {
-                offlineBanner
+                OfflineBanner()
             }
         }
         .refreshable {
@@ -65,15 +65,6 @@ struct FollowingView: View {
 
     private var emptyDescription: LocalizedStringResource {
         viewModel.isOffline ? .followListOffline : .followListPlaceholder
-    }
-
-    private var offlineBanner: some View {
-        Text(.profileOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
     }
 }
 

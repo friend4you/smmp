@@ -42,22 +42,24 @@ struct FeedView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    // TODO: Fix network service
                     if viewModel.isOffline {
-                        offlineBanner
+                        OfflineBanner()
                     }
 
-                    if viewModel.items.isEmpty {
+                    if !viewModel.hasCompletedInitialLoad && viewModel.items.isEmpty {
+                        PostListSkeleton()
+                    } else if viewModel.items.isEmpty {
                         emptyState
                     } else {
                         ForEach(viewModel.items) { item in
                             PostCardView(
                                 item: item,
+                                isLikeDisabled: viewModel.isOffline,
                                 onLikeTapped: {
                                     Task { await viewModel.toggleLike(for: item) }
                                 },
                                 onAuthorTap: {
-                                    viewModel.showAuthorProfile(authorId: item.author.id)
+                                    viewModel.showAuthorProfile(author: item.author)
                                 },
                                 onPostTap: {
                                     viewModel.showPostDetail(for: item)
@@ -93,16 +95,6 @@ struct FeedView: View {
                 }
             }
         }
-    }
-
-    private var offlineBanner: some View {
-        Text(.feedOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private var emptyState: some View {

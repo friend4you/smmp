@@ -18,7 +18,7 @@ struct NewPostView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if viewModel.isOffline {
-                offlineBanner
+                OfflineBanner()
             }
 
             ZStack(alignment: .topLeading) {
@@ -130,15 +130,6 @@ struct NewPostView: View {
         }
     }
 
-    private var offlineBanner: some View {
-        Text(.feedOfflineBanner)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.orange)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
 
     private func loadSelectedPhoto(_ item: PhotosPickerItem?) async {
         guard let item else {

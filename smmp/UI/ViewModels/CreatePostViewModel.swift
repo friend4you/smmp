@@ -15,6 +15,7 @@ final class CreatePostViewModel: ObservableObject {
     @Published var selectedImage: UIImage?
     @Published private(set) var isSubmitting = false
     @Published private(set) var uploadProgress: Double = 0
+    @Published private(set) var isOffline = false
     @Published var errorMessage: String?
     @Published var showError = false
 
@@ -23,8 +24,10 @@ final class CreatePostViewModel: ObservableObject {
     private let mediaService: MediaServiceProtocol
     private let sessionService: SessionServiceProtocol
     private let networkMonitor: NetworkMonitorProtocol
+    private let hapticService: HapticServiceProtocol
     private let onPostCreated: () -> Void
     private var progressCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     var trimmedText: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -47,11 +50,7 @@ final class CreatePostViewModel: ObservableObject {
     }
 
     var canSubmit: Bool {
-        isValid && !isSubmitting && networkMonitor.isConnected
-    }
-
-    var isOffline: Bool {
-        !networkMonitor.isConnected
+        isValid && !isSubmitting && !isOffline
     }
 
     init(
@@ -60,6 +59,7 @@ final class CreatePostViewModel: ObservableObject {
         mediaService: MediaServiceProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
+        hapticService: HapticServiceProtocol = HapticService(),
         onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository
@@ -67,7 +67,10 @@ final class CreatePostViewModel: ObservableObject {
         self.mediaService = mediaService
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
+        self.hapticService = hapticService
         self.onPostCreated = onPostCreated
+        isOffline = !networkMonitor.isConnected
+        bindConnectivity()
         progressCancellable = mediaService.uploadProgressPublisher
             .receive(on: DispatchQueue.main)
             .assign(to: \.uploadProgress, on: self)
@@ -83,7 +86,7 @@ final class CreatePostViewModel: ObservableObject {
         guard let authorId = sessionService.currentUser?.id else { return false }
         showError = false
 
-        guard networkMonitor.isConnected else {
+        guard !isOffline else {
             presentError(String(localized: .postErrorOffline))
             return false
         }
@@ -129,6 +132,7 @@ final class CreatePostViewModel: ObservableObject {
             try await postRepository.refreshFeed(currentUserId: authorId, feedAuthorIds: feedAuthorIds)
             text = ""
             selectedImage = nil
+            hapticService.playSuccess()
             onPostCreated()
             return true
         } catch {
@@ -137,6 +141,12 @@ final class CreatePostViewModel: ObservableObject {
             }
             presentError(PostErrorMapper.message(for: error, fallback: String(localized: .postErrorCreate)))
             return false
+        }
+    }
+
+    private func bindConnectivity() {
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, _ in
+            self?.isOffline = !isConnected
         }
     }
 

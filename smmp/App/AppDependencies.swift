@@ -12,6 +12,7 @@ import Combine
 final class AppDependencies: AppDependenciesProviding {
 
     let networkMonitor: NetworkMonitor
+    let hapticService: HapticServiceProtocol
 
     let mediaService: MediaServiceProtocol
     let sessionService: SessionService
@@ -31,6 +32,7 @@ final class AppDependencies: AppDependenciesProviding {
         let media = MediaService()
 
         self.networkMonitor = network
+        self.hapticService = HapticService()
         self.mediaService = media
         self.sessionService = SessionService()
 

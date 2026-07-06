@@ -11,6 +11,7 @@ final class PostDetailViewModel: ObservableObject {
     @Published var postItem: FeedPostItem
     @Published private(set) var commentItems: [CommentRowItem] = []
     @Published var commentText = ""
+    @Published private(set) var isOffline = false
     @Published private(set) var isLoadingComments = false
     @Published private(set) var isRefreshing = false
     @Published private(set) var isSubmittingComment = false
@@ -24,20 +25,23 @@ final class PostDetailViewModel: ObservableObject {
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
     private let networkMonitor: NetworkMonitorProtocol
-    private let onAuthorTap: (String) -> Void
+    private let hapticService: HapticServiceProtocol
+    private let onAuthorTap: (User) -> Void
     private var authorCache: [String: User] = [:]
     private let currentUserId: String
+    private var cancellables = Set<AnyCancellable>()
+    private var isScreenActive = false
 
     var isPostAuthor: Bool {
         postItem.post.authorId == currentUserId
     }
 
-    var isOffline: Bool {
-        !networkMonitor.isConnected
+    var canSubmitComment: Bool {
+        !trimmedCommentText.isEmpty && !isSubmittingComment && !isOffline
     }
 
-    var canSubmitComment: Bool {
-        !trimmedCommentText.isEmpty && !isSubmittingComment && networkMonitor.isConnected
+    var canDeletePost: Bool {
+        isPostAuthor && !isOffline
     }
 
     private var trimmedCommentText: String {
@@ -51,7 +55,8 @@ final class PostDetailViewModel: ObservableObject {
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
-        onAuthorTap: @escaping (String) -> Void = { _ in }
+        hapticService: HapticServiceProtocol = HapticService(),
+        onAuthorTap: @escaping (User) -> Void = { _ in }
     ) {
         self.postItem = item
         self.currentUserId = currentUserId
@@ -59,16 +64,28 @@ final class PostDetailViewModel: ObservableObject {
         self.profileRepository = profileRepository
         self.postRepository = postRepository
         self.networkMonitor = networkMonitor
+        self.hapticService = hapticService
         self.onAuthorTap = onAuthorTap
         authorCache[item.author.id] = item.author
+        isOffline = !networkMonitor.isConnected
+        bindConnectivity()
+    }
+
+    func onAppear() {
+        isScreenActive = true
+    }
+
+    func onDisappear() {
+        isScreenActive = false
     }
 
     func showAuthorProfile(authorId: String) {
-        onAuthorTap(authorId)
+        let user = authorCache[authorId] ?? User(id: authorId)
+        onAuthorTap(user)
     }
 
     func canDeleteComment(_ item: CommentRowItem) -> Bool {
-        item.comment.authorId == currentUserId
+        item.comment.authorId == currentUserId && !isOffline
     }
 
     func loadComments() async {
@@ -108,6 +125,8 @@ final class PostDetailViewModel: ObservableObject {
     }
 
     func deleteComment(_ item: CommentRowItem) async {
+        guard !isOffline else { return }
+
         do {
             try await commentRepository.deleteComment(
                 postId: item.comment.postId,
@@ -123,6 +142,8 @@ final class PostDetailViewModel: ObservableObject {
     }
 
     func deletePost() async {
+        guard !isOffline else { return }
+
         do {
             try await postRepository.deletePost(
                 id: postItem.post.id,
@@ -135,11 +156,14 @@ final class PostDetailViewModel: ObservableObject {
     }
 
     func toggleLike() async {
+        guard !isOffline else { return }
+
         let postId = postItem.post.id
         let wasLiked = postItem.isLikedByCurrentUser
         let previousCount = postItem.post.likeCount
 
         applyOptimisticLike(isLiked: !wasLiked)
+        hapticService.playLike()
 
         do {
             if wasLiked {
@@ -154,6 +178,16 @@ final class PostDetailViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func bindConnectivity() {
+        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+            guard let self else { return }
+            self.isOffline = !isConnected
+            if isConnected, !wasConnected, self.isScreenActive {
+                Task { await self.fetchComments() }
+            }
+        }
+    }
 
     private func fetchComments() async {
         do {

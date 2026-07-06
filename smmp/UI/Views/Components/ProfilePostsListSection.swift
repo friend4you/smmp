@@ -7,12 +7,16 @@ import SwiftUI
 
 struct ProfilePostsListSection: View {
     let items: [FeedPostItem]
+    var isLoading = false
+    var isLikeDisabled = false
     let onPostTapped: (FeedPostItem) -> Void
     let onLikeTapped: (FeedPostItem) -> Void
 
     var body: some View {
         Group {
-            if items.isEmpty {
+            if isLoading && items.isEmpty {
+                PostListSkeleton(count: 2)
+            } else if items.isEmpty {
                 ContentUnavailableView {
                     Text(.profilePostsEmptyTitle)
                 } description: {
@@ -26,7 +30,7 @@ struct ProfilePostsListSection: View {
                         Button {
                             onPostTapped(item)
                         } label: {
-                            PostCardView(item: item) {
+                            PostCardView(item: item, isLikeDisabled: isLikeDisabled) {
                                 onLikeTapped(item)
                             }
                         }
@@ -80,6 +84,16 @@ struct ProfilePostsListSection: View {
         )
         .padding()
     }
+}
+
+#Preview("Loading") {
+    ProfilePostsListSection(
+        items: [],
+        isLoading: true,
+        onPostTapped: { _ in },
+        onLikeTapped: { _ in }
+    )
+    .padding()
 }
 
 #Preview("Empty") {

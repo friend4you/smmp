@@ -25,8 +25,9 @@ struct FeedViewModelTests {
             postRepository: postRepository,
             profileRepository: profileRepository,
             followRepository: followRepository,
-            networkMonitor: NetworkMonitor(),
-            sessionService: sessionService
+            networkMonitor: NetworkMonitor(testConnection: true),
+            sessionService: sessionService,
+            hapticService: NoOpHapticService()
         )
         viewModel.start()
         try await Task.sleep(nanoseconds: 100_000_000)
@@ -42,6 +43,100 @@ struct FeedViewModelTests {
         #expect(viewModel.items.first?.post.likeCount == 2)
         #expect(viewModel.showError)
     }
+
+    @Test func offlineLikeDoesNotCallRepository() async throws {
+        let postRepository = MockPostRepository()
+        let profileRepository = MockProfileRepository()
+        let followRepository = MockFeedFollowRepository()
+        let sessionService = MockSessionService(currentUser: makeUser())
+        let networkMonitor = MockNetworkMonitor(isConnected: false)
+
+        let post = makePost(id: "post-offline", likeCount: 1)
+        postRepository.postsSubject.send([post])
+
+        let viewModel = FeedViewModel(
+            postRepository: postRepository,
+            profileRepository: profileRepository,
+            followRepository: followRepository,
+            networkMonitor: networkMonitor,
+            sessionService: sessionService,
+            hapticService: NoOpHapticService()
+        )
+        viewModel.start()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        guard let item = viewModel.items.first else {
+            Issue.record("Expected feed item before offline like toggle")
+            return
+        }
+
+        await viewModel.toggleLike(for: item)
+
+        #expect(postRepository.likeCallCount == 0)
+        #expect(postRepository.unlikeCallCount == 0)
+        #expect(viewModel.items.first?.isLikedByCurrentUser == false)
+        #expect(viewModel.items.first?.post.likeCount == 1)
+    }
+
+    @Test func reconnectTriggersFeedReload() async throws {
+        let postRepository = MockPostRepository()
+        let profileRepository = MockProfileRepository()
+        let followRepository = MockFeedFollowRepository()
+        let sessionService = MockSessionService(currentUser: makeUser())
+        let networkMonitor = MockNetworkMonitor(isConnected: false)
+
+        let viewModel = FeedViewModel(
+            postRepository: postRepository,
+            profileRepository: profileRepository,
+            followRepository: followRepository,
+            networkMonitor: networkMonitor,
+            sessionService: sessionService,
+            hapticService: NoOpHapticService()
+        )
+        viewModel.start()
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        let initialObserveCount = postRepository.observeFeedCallCount
+        networkMonitor.setConnected(true)
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(postRepository.observeFeedCallCount > initialObserveCount)
+    }
+
+    @Test func showsSkeletonUntilInitialPostsArrive() async throws {
+        let postRepository = MockPostRepository()
+        let viewModel = FeedViewModel(
+            postRepository: postRepository,
+            profileRepository: MockProfileRepository(),
+            followRepository: MockFeedFollowRepository(),
+            networkMonitor: MockNetworkMonitor(isConnected: true),
+            sessionService: MockSessionService(currentUser: makeUser()),
+            hapticService: NoOpHapticService()
+        )
+
+        #expect(!viewModel.hasCompletedInitialLoad)
+        #expect(viewModel.items.isEmpty)
+
+        viewModel.start()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(viewModel.hasCompletedInitialLoad)
+    }
+
+    @Test func isOfflineReflectsInitialConnectivity() {
+        let viewModel = FeedViewModel(
+            postRepository: MockPostRepository(),
+            profileRepository: MockProfileRepository(),
+            followRepository: MockFeedFollowRepository(),
+            networkMonitor: MockNetworkMonitor(isConnected: false),
+            sessionService: MockSessionService(currentUser: makeUser()),
+            hapticService: NoOpHapticService()
+        )
+
+        viewModel.start()
+
+        #expect(viewModel.isOffline)
+    }
 }
 
 @MainActor
@@ -55,6 +150,9 @@ private final class MockPostRepository: PostRepositoryProtocol {
     let likedPostIdsSubject = CurrentValueSubject<Set<String>, Never>([])
 
     var likePostError: Error?
+    private(set) var likeCallCount = 0
+    private(set) var unlikeCallCount = 0
+    private(set) var observeFeedCallCount = 0
 
     var postsPublisher: AnyPublisher<[Post], Never> {
         postsSubject.eraseToAnyPublisher()
@@ -64,7 +162,10 @@ private final class MockPostRepository: PostRepositoryProtocol {
         likedPostIdsSubject.eraseToAnyPublisher()
     }
 
-    func observeFeed(currentUserId: String, feedAuthorIds: [String]) {}
+    func observeFeed(currentUserId: String, feedAuthorIds: [String]) {
+        observeFeedCallCount += 1
+        postsSubject.send(postsSubject.value)
+    }
 
     func removeAllListeners() {}
 
@@ -86,12 +187,14 @@ private final class MockPostRepository: PostRepositoryProtocol {
     func deletePost(id: String, authorId: String) async throws {}
 
     func likePost(id: String, userId: String) async throws {
+        likeCallCount += 1
         if let likePostError {
             throw likePostError
         }
     }
 
     func unlikePost(id: String, userId: String) async throws {
+        unlikeCallCount += 1
         if let likePostError {
             throw likePostError
         }

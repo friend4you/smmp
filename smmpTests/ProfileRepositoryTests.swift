@@ -396,10 +396,19 @@ struct ProfileRepositoryTests {
 // MARK: - Mocks
 
 private final class MockNetworkMonitor: NetworkConnectivityProviding {
-    var isConnected: Bool
+    private let subject: CurrentValueSubject<Bool, Never>
+
+    var isConnected: Bool {
+        get { subject.value }
+        set { subject.send(newValue) }
+    }
+
+    var connectivityPublisher: AnyPublisher<Bool, Never> {
+        subject.eraseToAnyPublisher()
+    }
 
     init(isConnected: Bool) {
-        self.isConnected = isConnected
+        subject = CurrentValueSubject(isConnected)
     }
 }
 

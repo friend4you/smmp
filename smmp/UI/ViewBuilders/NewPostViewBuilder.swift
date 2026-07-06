@@ -17,6 +17,7 @@ struct NewPostViewBuilder {
                 mediaService: deps.mediaService,
                 sessionService: deps.sessionService,
                 networkMonitor: deps.networkMonitor,
+                hapticService: deps.hapticService,
                 onPostCreated: onPostCreated
             )
         )
