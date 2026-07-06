@@ -1105,6 +1105,28 @@
         }
       }
     },
+    "follow.list.error.load" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not load following list. Please try again."
+          }
+        }
+      }
+    },
+    "follow.list.offline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect to the internet to view people you follow."
+          }
+        }
+      }
+    },
     "follow.list.placeholder" : {
       "extractionState" : "manual",
       "localizations" : {

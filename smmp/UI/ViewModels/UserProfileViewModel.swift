@@ -77,6 +77,7 @@ final class UserProfileViewModel: ObservableObject {
         self.onFollowing = onFollowing
         bindNetworkMonitor()
         bindProfileUpdates()
+        bindFollowingUpdates()
     }
 
     func load() async {
@@ -206,6 +207,16 @@ final class UserProfileViewModel: ObservableObject {
 
     private func bindProfileUpdates() {
         NotificationCenter.default.publisher(for: .profileDidUpdate)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, self.isOwnProfile else { return }
+                Task { await self.load() }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindFollowingUpdates() {
+        NotificationCenter.default.publisher(for: .followingDidChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self, self.isOwnProfile else { return }

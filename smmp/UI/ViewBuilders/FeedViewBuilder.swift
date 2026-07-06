@@ -56,7 +56,7 @@ struct FeedViewBuilder {
     }
 
     private func buildFollowing() -> FollowingView {
-        FollowingView()
+        FollowingViewBuilder(deps: deps).build()
     }
 
     @ViewBuilder

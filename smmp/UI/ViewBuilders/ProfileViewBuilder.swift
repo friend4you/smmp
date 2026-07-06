@@ -28,7 +28,7 @@ struct ProfileViewBuilder {
     }
 
     private func buildFollowing() -> FollowingView {
-        FollowingView()
+        FollowingViewBuilder(deps: deps).build()
     }
 
     private func buildPostDetail(item: FeedPostItem) -> PostDetailView? {

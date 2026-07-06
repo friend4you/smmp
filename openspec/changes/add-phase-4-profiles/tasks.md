@@ -72,9 +72,9 @@
 
 ## 12. FollowingScreen
 
-- [ ] 12.1 Create `FollowingViewModel` — load following list, resolve users, unfollow per row
-- [ ] 12.2 Build `FollowingView` — user rows with avatar, name, Unfollow button
-- [ ] 12.3 Wire `ProfileRoute.following` push from profile header following count tap
+- [x] 12.1 Create `FollowingViewModel` — load following list, resolve users, unfollow per row
+- [x] 12.2 Build `FollowingView` — user rows with avatar, name, Unfollow button
+- [x] 12.3 Wire `ProfileRoute.following` push from profile header following count tap
 
 ## 13. SearchScreen
 
