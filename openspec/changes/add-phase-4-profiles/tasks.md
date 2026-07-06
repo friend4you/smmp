@@ -7,10 +7,10 @@
 
 ## 2. Models and mapping
 
-- [ ] 2.1 Extend `User` with `followerCount`, `followingCount`, and `displayNameLower`
-- [ ] 2.2 Extend `CDUser` entity and `LocalRepository` save/fetch mapping for new fields
-- [ ] 2.3 Update `User+Firestore` parser and writer for counts and `displayNameLower`
-- [ ] 2.4 Add unit tests for User Firestore parsing including new fields
+- [x] 2.1 Extend `User` with `followerCount`, `followingCount`, and `displayNameLower`
+- [x] 2.2 Extend `CDUser` entity and `LocalRepository` save/fetch mapping for new fields
+- [x] 2.3 Update `User+Firestore` parser and writer for counts and `displayNameLower`
+- [x] 2.4 Add unit tests for User Firestore parsing including new fields
 
 ## 3. Move createProfile to ProfileRepository
 

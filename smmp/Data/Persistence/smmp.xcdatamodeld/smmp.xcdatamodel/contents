@@ -21,7 +21,10 @@
         <attribute name="bio" optional="YES" attributeType="String"/>
         <attribute name="cachedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="displayName" optional="YES" attributeType="String"/>
+        <attribute name="displayNameLower" optional="YES" attributeType="String"/>
         <attribute name="email" optional="YES" attributeType="String"/>
+        <attribute name="followerCount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="followingCount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="photoURL" optional="YES" attributeType="String"/>
     </entity>
