@@ -8,8 +8,7 @@ import UIKit
 
 protocol MediaServiceProtocol: AnyObject {
     var uploadProgressPublisher: AnyPublisher<Double, Never> { get }
-
-    func resizeImage(_ image: UIImage) -> Data?
+    
     func uploadPostImage(_ imageData: Data, postId: String) async throws -> String
     func deletePostImage(postId: String) async throws
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String

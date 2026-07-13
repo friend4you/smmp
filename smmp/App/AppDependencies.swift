@@ -11,11 +11,11 @@ import Combine
 @MainActor
 final class AppDependencies: AppDependenciesProviding {
 
-    let networkMonitor: NetworkMonitor
+    let networkMonitor: NetworkMonitorProtocol
     let hapticService: HapticServiceProtocol
 
     let mediaService: MediaServiceProtocol
-    let sessionService: SessionService
+    let sessionService: SessionServiceProtocol
 
     let authRepository: AuthRepositoryProtocol
     let accountDeleter: AuthAccountDeleting

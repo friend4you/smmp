@@ -8,10 +8,10 @@
 import Foundation
 
 protocol AppDependenciesProviding {
-    var networkMonitor: NetworkMonitor { get }
+    var networkMonitor: NetworkMonitorProtocol { get }
     var hapticService: HapticServiceProtocol { get }
     var mediaService: MediaServiceProtocol { get }
-    var sessionService: SessionService { get }
+    var sessionService: SessionServiceProtocol { get }
     var authRepository: AuthRepositoryProtocol { get }
     var accountDeleter: AuthAccountDeleting { get }
     var localRepository: LocalRepositoryProtocol { get }

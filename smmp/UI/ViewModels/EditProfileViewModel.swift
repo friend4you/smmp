@@ -152,7 +152,7 @@ final class EditProfileViewModel: ObservableObject {
 
         var profileImageData: Data?
         if let selectedImage {
-            guard let imageData = mediaService.resizeImage(selectedImage) else {
+            guard let imageData = selectedImage.resizeImage() else {
                 presentError(String(localized: .postImageErrorResize))
                 return false
             }

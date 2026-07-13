@@ -28,21 +28,6 @@ final class MediaService: MediaServiceProtocol {
         self.storage = storage
     }
 
-    func resizeImage(_ image: UIImage) -> Data? {
-        let size = image.size
-        let longEdge = max(size.width, size.height)
-        guard longEdge > 0 else { return nil }
-
-        let scale = longEdge > Self.maxLongEdge ? Self.maxLongEdge / longEdge : 1
-        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
-
-        let renderer = UIGraphicsImageRenderer(size: newSize)
-        let resized = renderer.image { _ in
-            image.draw(in: CGRect(origin: .zero, size: newSize))
-        }
-        return resized.jpegData(compressionQuality: Self.jpegQuality)
-    }
-
     func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
         try await uploadImage(imageData, at: MediaPaths.postImage(postId: postId))
     }

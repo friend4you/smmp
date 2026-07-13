@@ -222,9 +222,11 @@ final class UserProfileViewModel: ObservableObject {
             presentError(String(localized: .feedErrorLike))
         }
     }
+}
 
-    // MARK: - Private
+// MARK: - Private
 
+extension UserProfileViewModel {
     private func bindNetworkMonitor() {
         ConnectivityBinding.bind(monitor: networkMonitor,
                                  cancellables: &cancellables) { [weak self] isConnected, wasConnected in

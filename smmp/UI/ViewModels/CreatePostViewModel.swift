@@ -104,7 +104,7 @@ final class CreatePostViewModel: ObservableObject {
         var uploadedImageURL: String?
 
         if let image = selectedImage {
-            guard let imageData = mediaService.resizeImage(image) else {
+            guard let imageData = image.resizeImage() else {
                 presentError(String(localized: .postImageErrorResize))
                 return false
             }
@@ -116,13 +116,17 @@ final class CreatePostViewModel: ObservableObject {
                 return false
             }
         }
-
+        
+        return await createPost(authorId: authorId, postId: postId, imageURL: uploadedImageURL)
+    }
+    
+    private func createPost(authorId: String, postId: String, imageURL: String?) async -> Bool {
         do {
             try await postRepository.createPost(
                 text: text,
                 authorId: authorId,
                 postId: postId,
-                imageURL: uploadedImageURL
+                imageURL: imageURL
             )
             let followingIds = (try? await followRepository.followingIds(for: authorId)) ?? []
             let feedAuthorIds = FeedAuthorIds.authorIds(
@@ -136,7 +140,7 @@ final class CreatePostViewModel: ObservableObject {
             onPostCreated()
             return true
         } catch {
-            if uploadedImageURL != nil {
+            if imageURL != nil {
                 try? await mediaService.deletePostImage(postId: postId)
             }
             presentError(PostErrorMapper.message(for: error, fallback: String(localized: .postErrorCreate)))

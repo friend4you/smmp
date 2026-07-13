@@ -7,7 +7,6 @@ import Combine
 import Foundation
 
 enum ConnectivityBinding {
-    /// Binds `connectivityPublisher` and invokes `onChange` with `(isConnected, wasConnected)`.
     static func bind(
         monitor: NetworkMonitorProtocol,
         cancellables: inout Set<AnyCancellable>,

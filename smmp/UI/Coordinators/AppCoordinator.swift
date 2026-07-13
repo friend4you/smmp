@@ -19,14 +19,19 @@ final class AppCoordinator: ObservableObject {
     @Published private(set) var mainCoordinator: MainCoordinator?
 
     private let deps: any AppDependenciesProviding
+    private let sessionService: SessionService
 
     init(deps: any AppDependenciesProviding) {
         self.deps = deps
+        guard let sessionService = deps.sessionService as? SessionService else {
+            preconditionFailure("AppCoordinator requires SessionService")
+        }
+        self.sessionService = sessionService
     }
 
     var rootView: some View {
         AppCoordinatorView(coordinator: self,
-                           sessionService: deps.sessionService)
+                           sessionService: sessionService)
     }
 
     func handleAuthenticationChange(authState: AuthSession) {

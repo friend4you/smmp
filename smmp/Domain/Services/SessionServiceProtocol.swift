@@ -13,7 +13,7 @@ enum AuthSession {
 }
 
 @MainActor
-protocol SessionServiceProtocol: AnyObject {
+protocol SessionServiceProtocol {
     var currentUser: User? { get }
     var sessionState: AuthSession { get }
     var isAuthenticated: Bool { get }
