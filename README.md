@@ -1,390 +1,142 @@
-# 📱 Social Media Mini-Platform — iOS
+# Social Media Mini-Platform (SMMP)
 
-> A portfolio-grade iOS application demonstrating real-time social interactions, media handling, offline caching, and fluid animations — built with Swift, SwiftUI, CoreData, and Firebase.
+A portfolio iOS application — a miniature social network with authentication, a real-time feed, profiles, user search, a follow graph, and offline support.
 
----
+Built to demonstrate production-style mobile engineering: layered MVVM architecture, coordinator-based navigation, Firebase backend integration, CoreData offline caching, reactive connectivity handling, localization, and broad unit test coverage.
 
-## Table of Contents
+**Stack:** Swift 5 · SwiftUI · Firebase (Auth, Firestore, Storage) · CoreData · async/await
 
-1. [User Requirements](#1-user-requirements)
-2. [Screens & Functionality](#2-screens--functionality)
-3. [Architecture](#3-architecture)
-4. [Development Plan](#4-development-plan)
-5. [Progress Tracker](#5-progress-tracker)
+**Status:** Core product complete (Phases 1–5). Release prep (TestFlight, Crashlytics, App Store assets) not started.
 
 ---
 
-## 1. User Requirements
+## Features
 
-This section describes the platform from the user's perspective — what a person can do when they open the app.
-
-### 1.1 Account & Identity
-
-- A user can **register** a new account using email and password.
-- A user can **log in** and **log out** securely.
-- A user can **view and edit** their profile: display name, bio, and profile photo.
-- A user can **delete** their account and all associated data.
-
-### 1.2 Feed & Content
-
-- A user can **view a chronological feed** of posts from people they follow, as well as their own posts.
-- A user can **create a new post** containing text and/or an image.
-- A user can **delete their own post**.
-- A user can **like** and **unlike** any post in the feed.
-- A user can **comment** on a post and **delete their own comments**.
-- The feed **updates in real time** when people they follow publish new content.
-
-### 1.3 Discovery & Social Graph
-
-- A user can **search for other users** by display name or username.
-- A user can **visit any public profile** to see that person's posts, follower count, and following count.
-- A user can **follow** or **unfollow** another user.
-- A user can **view their own followers list** and **following list**.
-
-### 1.4 Media
-
-- A user can **upload a photo** from the device camera roll when creating a post or updating their profile picture.
-- Images are displayed with **efficient cached loading** — no repeated downloads on revisit.
-
-### 1.5 Offline Mode
-
-- A user can **browse previously loaded content** (feed, profiles, posts) without an active internet connection.
-- A user receives a **clear visual indicator** when the app is running in offline mode.
-- Actions that require connectivity (posting, liking, commenting) are **gracefully disabled** offline, with an informative prompt.
+- **Authentication** — Email/password sign-in and registration, password reset, session persistence, splash while resolving auth state
+- **Feed** — Follow-scoped chronological feed with real-time updates, pull-to-refresh, pagination, and optimistic like/unlike
+- **Posts** — Create posts with text and images (client-side resize before upload); view post detail with comments
+- **Profiles** — View and edit profile (display name, bio, photo); follower/following counts
+- **Discovery** — Debounced user search with inline follow/unfollow
+- **Social graph** — Follow and unfollow users; dedicated following list
+- **Offline mode** — Browse cached feed and profiles without connectivity; writes disabled offline with clear UI feedback
+- **Polish** — Skeleton loading states, heart animation on like, haptic feedback, shared offline banner
 
 ---
 
-## 2. Screens & Functionality
+## Screenshots
 
-### 2.1 Splash / Launch Screen
+Add PNG captures to [`docs/screenshots/`](docs/screenshots/) using the filenames below.
 
-- App logo animation on startup.
-- Automatically routes to **Login** if no session exists, or **Feed** if the user is already authenticated.
+| Screen | File |
+|--------|------|
+| Feed | `feed.png` |
+| Create post | `create-post.png` |
+| Post detail | `post-detail.png` |
+| Profile | `profile.png` |
+| Search | `search.png` |
+| Offline mode | `offline.png` |
 
-### 2.2 Authentication Screens
-
-**Login Screen**
-- Email and password fields with inline validation.
-- "Forgot password" flow (email reset link).
-- Navigation to Register.
-
-**Register Screen**
-- Display name, email, and password fields.
-- Password strength indicator.
-- Account creation triggers profile setup.
-
-### 2.3 Main Feed Screen
-
-- Vertical scrolling list of post cards (infinite scroll / pagination).
-- Each post card shows: author avatar, display name, timestamp, post text, optional image, like count, comment count, and a like toggle button.
-- Pull-to-refresh for manual update.
-- Real-time listener appends new posts at the top with an animated "New posts" banner.
-- Offline banner displayed at the top when connectivity is lost.
-
-### 2.4 Create Post Screen
-
-- Multi-line text input (character counter, 280-character limit).
-- Image picker integration (photo library and camera).
-- Image preview with remove option.
-- Post button disabled while empty or uploading.
-- Upload progress indicator for images.
-
-### 2.5 Post Detail Screen
-
-- Full post view with larger image.
-- Comments section with chronological list.
-- Inline comment composer pinned to the keyboard.
-- Like button with animated heart icon.
-
-### 2.6 User Profile Screen
-
-- Header: profile photo, display name, bio, follower/following counts.
-- Follow / Unfollow button (hidden on own profile).
-- Grid or list toggle for the user's posts.
-- Tapping a post navigates to Post Detail.
-
-### 2.7 Edit Profile Screen
-
-- Change display name, bio, and profile photo.
-- Save/discard confirmation flow.
-
-### 2.8 Search / Discovery Screen
-
-- Search bar with debounced query.
-- Results list showing avatar, name, and a quick Follow button.
-- Empty state and no-results illustrations.
-
-### 2.9 Followers / Following Screen
-
-- Flat list of user cards.
-- Follow/Unfollow toggle on each row (for the following list).
-
-### 2.10 Notifications Screen *(stretch goal)*
-
-- Activity feed: new followers, likes, and comments on the user's posts.
-- Push notification deep-links to the relevant post or profile.
-
-### 2.11 Settings Screen
-
-- Log out.
-- Delete account (confirmation alert).
-- Toggle for push notifications *(stretch goal)*.
+<p align="center">
+  <img src="docs/screenshots/feed.png" width="240" alt="Feed screen" />
+  <img src="docs/screenshots/create-post.png" width="240" alt="Create post screen" />
+  <img src="docs/screenshots/post-detail.png" width="240" alt="Post detail screen" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/profile.png" width="240" alt="Profile screen" />
+  <img src="docs/screenshots/search.png" width="240" alt="Search screen" />
+  <img src="docs/screenshots/offline.png" width="240" alt="Offline mode" />
+</p>
 
 ---
 
-## 3. Architecture
+## Architecture
 
-### 3.1 Why MVVM + Clean Layers?
-
-The project follows **MVVM (Model–View–ViewModel)** with a clear separation into three additional layers: **Repository**, **Service**, and **Persistence**. This choice is justified by several factors specific to this project:
-
-- **SwiftUI is binding-native.** SwiftUI's `@StateObject`, `@ObservedObject`, and `@Published` map directly onto the ViewModel pattern. Fighting this with a different pattern (e.g., pure MVC) produces boilerplate and loses reactivity benefits.
-- **Testability.** Business logic lives in ViewModels and Repositories — both plain Swift classes with no UIKit or SwiftUI imports — making them trivially unit-testable with mock services.
-- **Multi-source data.** The app reads from three places simultaneously: Firebase Firestore (remote, real-time), Firebase Storage (media), and CoreData (local cache). A Repository layer acts as the single source of truth, deciding whether to serve cached or remote data and merging results transparently.
-- **Scalability.** New features (e.g., Stories, DMs) slot in as new Repository + ViewModel pairs without touching existing code.
-
-### 3.2 Layer Responsibilities
+The app follows **MVVM** with clean layers: Views → ViewModels → Repositories → Services / Persistence.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                      SwiftUI Views                      │  ← Render state, emit user actions
+│                      SwiftUI Views                      │
 ├────────────────────────────────────────────────────────┤
-│                      ViewModels                         │  ← Transform data, drive UI state
+│                      ViewModels                         │
 ├────────────────────────────────────────────────────────┤
-│                      Repositories                       │  ← Coordinate remote + local data
+│                      Repositories                       │
 ├──────────────────────┬─────────────────────────────────┤
-│   Firebase Services  │      CoreData Persistence        │  ← External / local data sources
-│  (Auth, Firestore,   │  (FeedCache, UserCache,          │
-│   Storage)           │   PostCache)                     │
+│   Firebase Services  │      CoreData Persistence        │
+│  (Auth, Firestore,   │  (User, Post, Comment cache)    │
+│   Storage)           │                                  │
 └──────────────────────┴─────────────────────────────────┘
 ```
 
-### 3.3 Data Models
+**Navigation** uses a coordinator–router–builder pattern: session-driven root flow (`AppCoordinator`), per-tab navigation stacks, and protocol-based routing for testability.
 
-#### Remote (Firestore Schema)
+**Data flow:** Repositories own Firestore listeners and CoreData writes. Reads serve from the network when online and fall back to cache offline. Writes go to Firestore; the real-time listener keeps the local cache in sync.
 
-| Collection | Document Fields |
-|---|---|
-| `users/{uid}` | `displayName`, `bio`, `photoURL`, `followerCount`, `followingCount`, `createdAt` |
-| `users/{uid}/following/{fid}` | `followedAt` |
-| `posts/{pid}` | `authorId`, `text`, `imageURL`, `likeCount`, `commentCount`, `createdAt` |
-| `posts/{pid}/likes/{uid}` | `likedAt` |
-| `posts/{pid}/comments/{cid}` | `authorId`, `text`, `createdAt` |
-
-#### Local (CoreData Entities)
-
-| Entity | Attributes | Purpose |
-|---|---|---|
-| `CDUser` | `id`, `displayName`, `bio`, `photoURL`, `cachedAt` | Profile offline cache (`id` maps to Firestore `users/{uid}`) |
-| `CDPost` | `id`, `authorId`, `text`, `imageURL`, `likeCount`, `commentCount`, `createdAt`, `cachedAt` | Feed offline cache |
-| `CDComment` | `id`, `postId`, `authorId`, `text`, `createdAt` | Comment offline cache |
-
-CoreData entities use **flat string IDs** that mirror the Firestore schema. Foreign keys (`authorId`, `postId`) are stored as attributes, not CoreData relationships — this keeps the mapping layer straightforward when syncing remote documents to local cache.
-
-### 3.4 Data Flow
-
-**Online path (read):**
-1. ViewModel calls Repository method (e.g., `fetchFeed()`).
-2. Repository opens a Firestore real-time listener.
-3. On snapshot arrival, Repository maps Firestore documents → Swift model structs.
-4. Repository writes/updates CoreData cache in a background context.
-5. Repository publishes updated array via a `CurrentValueSubject`.
-6. ViewModel receives the published value and updates `@Published` properties.
-7. SwiftUI View re-renders automatically.
-
-**Offline path (read):**
-1. `NetworkMonitor` (wrapping `NWPathMonitor`) publishes `isConnected = false`.
-2. Repository skips Firestore listener; fetches from CoreData using an `NSFetchRequest`.
-3. Remainder of the flow is identical from step 5 onwards.
-
-**Write path:**
-1. ViewModel calls Repository write method (e.g., `likePost(pid:)`).
-2. Repository writes to Firestore directly.
-3. On success, the existing real-time listener fires and updates the local cache automatically (no manual cache invalidation needed).
-4. On failure, ViewModel surfaces an error alert.
-
-### 3.5 Image Strategy
-
-- **Upload:** Images are resized client-side to a maximum of 1080px on the long edge before upload, using `UIGraphicsImageRenderer`. This keeps Storage costs low and upload speeds fast.
-- **Download & Caching:** `SDWebImageSwiftUI` (or `Kingfisher`) handles async image loading with a two-tier cache (in-memory LRU + disk). URLs stored in Firestore are CDN-backed Firebase Storage links with long-lived tokens.
-
-### 3.6 Real-Time Strategy
-
-Firestore `addSnapshotListener` is attached at the Repository level, not in Views. Listeners are stored in a `ListenerRegistration` dictionary keyed by scope (e.g., `"feed"`, `"post-\(pid)"`). On sign-out all listeners are removed to prevent data leaks.
-
-### 3.7 Localization
-
-User-facing copy lives in `smmp/Resources/Localizable.xcstrings`. Keys use semantic dot-notation (`auth.login.submit`, `tab.home`, `common.ok`). Production code references Xcode-generated symbols (e.g. `Text(.authLoginSubmit)`, `String(localized: .authValidationEmailInvalid)`), not inline English literals. SwiftLint's `hardcoded_ui_string` rule enforces this in `smmp/` sources.
-
-**Convention for new work (including Phase 2 auth):** add strings to the catalog under `auth.*` or `common.*` prefixes and use generated symbols in views and ViewModels.
-
-### 3.8 Dependency Injection & Session
-
-A lightweight `AppDependencies` container is instantiated at app entry and injected into the root View via SwiftUI's `.environmentObject`. ViewModels receive concrete service instances through their initializers, making them swappable with mocks during testing.
-
-**Auth split (pragmatic):**
-- `AuthRepository` — sign-in, register, sign-out, password reset (wraps `AuthService`)
-- `SessionService` — observes Firebase auth state, publishes `currentUser` and routes the app (Login vs. main tabs)
-- `LoginViewModel` / `RegistrationViewModel` — per-screen form state and validation (replaces a single shared `AuthViewModel`)
+**Dependency injection:** `AppDependencies` is created at app launch and passed into coordinators and view builders. ViewModels receive services through initializers, making mocks straightforward in tests.
 
 ---
 
-## 4. Development Plan
+## Project Structure
 
-The plan is broken into **6 phases**, each delivering a working vertical slice. Each phase ends with a testable build.
+```
+smmp/
+├── App/              App entry, dependency container
+├── Domain/           Models, protocols, shared utilities
+├── Data/             Repositories, Firebase services, CoreData, mappers
+└── UI/               Views, ViewModels, Coordinators, Routes, Navigation
 
-### Phase 1 — Project Foundation
+smmpTests/            Unit and integration tests (ViewModels, repos, coordinators)
 
-1. Create Xcode project with SwiftUI lifecycle.
-2. Add Swift Package dependencies: Firebase SDK, SDWebImageSwiftUI.
-3. Configure Firebase project (Authentication, Firestore, Storage).
-4. Set up folder structure: `Models/`, `ViewModels/`, `Views/`, `Repositories/`, `Services/`, `Persistence/`, `Utilities/`.
-5. Define all Swift model structs (`User`, `Post`, `Comment`).
-6. Implement `AppDependencies` container and root environment injection.
-7. Configure `CoreData` model (`.xcdatamodeld`) with all entities and attributes.
-8. Implement `PersistenceController` (singleton with background context for writes).
-9. Implement `NetworkMonitor` using `NWPathMonitor`.
-10. Write unit tests for the foundation layer (`LocalRepository`, `User` mapping, in-memory `PersistenceController`).
-
-> **Pragmatic note:** Firestore document parsing tests move to Phase 3 when `PostRepository` implements real mapping. Firebase Storage and SDWebImageSwiftUI are added when feed/media work begins (Phase 3), not upfront.
-
-### Phase 2 — Authentication
-
-1. Build Login screen (email/password fields, validation, error alerts).
-2. Build Register screen (display name, email, password, strength indicator).
-3. Implement `AuthService` wrapping `Firebase Auth` (sign-in, register, sign-out, password reset).
-4. Implement `AuthRepository` wrapping `AuthService`.
-5. Implement `SessionService` for auth-state observation and app routing.
-6. Implement `LoginViewModel` and `RegistrationViewModel` (per-screen form state).
-7. Add session persistence: app re-opens to Feed if already logged in.
-8. Write unit tests for login/register ViewModels with a mock `AuthService`.
-
-### Phase 3 — Feed & Posts
-
-1. Add Firebase Storage + SDWebImageSwiftUI dependencies.
-2. Implement `PostRepository` with Firestore listener, CoreData write, and offline fallback.
-3. Build `FeedViewModel` (pagination, refresh, real-time append).
-4. Build `PostCardView` (avatar, name, text, image, like button, comment count).
-5. Build `FeedScreen` with `LazyVStack`, pull-to-refresh, offline banner, and "New posts" banner.
-6. Implement like/unlike toggle (optimistic UI update with rollback on error).
-7. Build `CreatePostScreen` (text input, image picker, upload progress, character counter).
-8. Implement image upload to Firebase Storage via `MediaService`.
-9. Build `PostDetailScreen` with comments list and inline comment composer.
-10. Implement `CommentRepository` (fetch, add, delete).
-11. Write unit tests for Firestore → model parsing and integration tests for `PostRepository` offline path.
-
-### Phase 4 — Profiles & Social Graph
-
-1. Build `UserProfileScreen` (header, follow button, post grid/list toggle).
-2. Implement `ProfileRepository` (fetch user, update user, follow, unfollow).
-3. Build `EditProfileScreen` (fields, profile photo picker, save/discard).
-4. Build `SearchScreen` (debounced search bar, results list, inline follow button).
-5. Build `FollowersScreen` and `FollowingScreen`.
-6. Implement `FollowRepository` (fetch lists, follow/unfollow with Firestore batch write).
-7. Write unit tests for `ProfileViewModel` and `SearchViewModel`.
-
-### Phase 5 — Polish, Animations & Offline
-
-1. Add `matchedGeometryEffect` transitions for post card → post detail navigation.
-2. Animate heart icon on like (scale + color bounce using `withAnimation`).
-3. Add skeleton loading placeholders using redacted SwiftUI modifier.
-4. Add smooth scroll-to-top on new-posts banner tap.
-5. Add haptic feedback (like, follow, post submit).
-6. Implement full offline mode: CoreData-backed all screens, disabled write actions, offline banner.
-7. Audit and cap memory usage for image cache.
-8. Profile app with Instruments (Time Profiler, Allocations) and fix hotspots.
-9. Write UI tests for critical flows (login, post, like).
-
-### Phase 6 — Release Prep
-
-1. App icon and launch screen assets.
-2. Add `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription` permission strings.
-3. Enable Firebase Crashlytics and Analytics.
-4. App Store metadata: screenshots, description, keywords.
-5. Submit to TestFlight for external review.
-6. Address TestFlight feedback.
-7. (Optional) Submit to App Store public release.
+firebase/             Reference Firestore security rules
+openspec/             Formal capability specs (auth, feed, posts, profiles, …)
+```
 
 ---
 
-## 5. Progress Tracker
+## Testing
 
-Use this checklist to track implementation status. Items map to the Development Plan above, adjusted for the pragmatic path.
+The test suite (`smmpTests/`, 27 files) focuses on business logic and data layers rather than UI snapshots:
 
-### Phase 1 — Project Foundation
-- [x] Xcode project created with SwiftUI lifecycle
-- [x] Swift Package dependencies added (Firebase Auth, Firestore)
-- [ ] Firebase Storage + SDWebImageSwiftUI *(deferred to Phase 3; Storage added, AsyncImage used instead of SDWebImage)*
-- [x] Firebase project configured (Auth, Firestore, Storage)
-- [x] Folder structure set up
-- [x] Swift model structs defined (`User`, `Post`, `Comment`)
-- [x] `AppDependencies` container implemented
-- [x] CoreData model defined (flat string IDs matching Firestore)
-- [x] `PersistenceController` implemented
-- [x] `NetworkMonitor` implemented
-- [x] Unit tests for foundation layer written
+- **ViewModels** — Login, registration, feed, post detail, profile, search, user profile
+- **Repositories** — Posts, profiles, follows, local cache, offline paths
+- **Services** — Session, network monitor, media upload
+- **Navigation** — Router, coordinators, route builders
+- **Mapping** — Firestore document → domain model parsing
 
-### Phase 2 — Authentication
-- [x] Login screen built (validation, SecureField, loading state, error alerts)
-- [x] Register screen built (display name, SecureField, validation, password strength)
-- [x] Forgot Password screen and flow
-- [x] `AuthService` implemented (async/await, signOut, password reset)
-- [x] `AuthRepository` implemented (Firestore bootstrap, rollback on failure)
-- [x] `ProfileRepository.createProfile` for registration bootstrap
-- [x] `LoginViewModel` / `RegistrationViewModel` / `ForgotPasswordViewModel` implemented
-- [x] Session persistence working (`SessionService` → Feed when logged in)
-- [x] Splash screen during session resolution
-- [x] Sign-out routed through `AuthRepository`
-- [x] Unit tests for login/register ViewModels and `SessionService`
-
-### Phase 3 — Feed & Posts
-- [x] Firebase Storage added (AsyncImage for display; no SDWebImage)
-- [x] `PostRepository` implemented (Firestore + CoreData + offline)
-- [x] `FeedViewModel` implemented
-- [x] `PostCardView` built
-- [x] `FeedScreen` built (pull-to-refresh, offline banner, new-posts banner)
-- [x] Like/unlike with optimistic UI implemented
-- [x] `CreatePostScreen` built
-- [x] Image upload via `MediaService` implemented
-- [x] `PostDetailScreen` built
-- [x] `CommentRepository` implemented
-- [x] Unit tests for Firestore → model parsing
-- [x] Integration tests for offline path written
-
-### Phase 4 — Profiles & Social Graph
-- [x] `ProfileScreen` (own profile tab) built
-- [x] `UserProfileScreen` built (other users + self from Feed/Search)
-- [x] `ProfileRepository` extended (`createProfile`, `updateProfile`, `searchUsers`)
-- [x] `EditProfileScreen` built (fields, photo picker, save/discard)
-- [x] `SearchScreen` built (debounced prefix search, inline follow)
-- [x] `FollowingScreen` built
-- [ ] `FollowersScreen` built *(deferred — portfolio shortcut; follower count shown on profile only)*
-- [x] `FollowRepository` implemented (follow/unfollow batch writes, 30-following cap)
-- [x] Follow-scoped feed implemented
-- [x] Author avatar navigation (feed posts + comments → user profile)
-- [x] Localization keys for profile, search, and follow UI
-- [x] Unit tests for `ProfileViewModel`, `SearchViewModel`, `UserProfileViewModel`, and `FollowRepository` written
-
-### Phase 5 — Polish, Animations & Offline
-- [ ] `matchedGeometryEffect` transitions added *(out of scope — replaced by skeletons)*
-- [x] Heart animation on like implemented
-- [x] Skeleton loading placeholders added
-- [x] Scroll-to-top on new-posts banner implemented
-- [x] Haptic feedback added
-- [x] Full offline mode implemented and verified
-- [ ] Image cache memory audit done *(out of scope — AsyncImage, no SDWebImage)*
-- [ ] Instruments profiling completed and hotspots fixed *(out of scope)*
-- [ ] UI tests for critical flows written *(out of scope — unit/integration tests instead)*
-
-### Phase 6 — Release Prep
-- [ ] App icon and launch screen assets added
-- [ ] Permission usage description strings added
-- [ ] Firebase Crashlytics and Analytics enabled
-- [ ] App Store metadata prepared
-- [ ] TestFlight build submitted
-- [ ] TestFlight feedback addressed
-- [ ] App Store submission (optional)
+Tests use mock services and in-memory CoreData where appropriate.
 
 ---
 
-> **Last updated:** July 2026
+## Notable Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Flat CoreData IDs mirroring Firestore | Simpler sync mapping; no CoreData relationships across entities |
+| Coordinator–router–builder navigation | Separates routing from views; coordinators stay thin and testable |
+| Per-screen auth ViewModels | `LoginViewModel` / `RegistrationViewModel` instead of one shared auth VM |
+| AsyncImage for post images | Avoids an extra image-caching dependency for portfolio scope |
+| Follow-scoped feed | Feed shows posts from followed users plus own posts |
+| 30-following cap | Guardrail on follow graph size |
+| Followers list deferred | Follower count on profile; full followers screen out of scope |
+| Offline-first reads | CoreData cache backs feed and profiles; writes blocked when disconnected |
+| String Catalog localization | Semantic keys with generated symbols; SwiftLint enforces no hardcoded UI strings |
+
+---
+
+## Scope & Limitations
+
+**Included:** Auth, feed, posts, comments, likes, profiles, search, follow/unfollow, following list, offline browsing, UI polish (skeletons, haptics, animations).
+
+**Not included:**
+
+- Followers list screen (count only on profile)
+- Push notifications
+- `matchedGeometryEffect` post transitions
+- Instruments profiling pass
+- UI test suite (unit/integration tests instead)
+- App Store / TestFlight release prep
+
+---
+
+## Specs
+
+Detailed capability requirements live in [`openspec/specs/`](openspec/specs/) (authentication, feed, posts, comments, profiles, navigation, localization, security rules).
