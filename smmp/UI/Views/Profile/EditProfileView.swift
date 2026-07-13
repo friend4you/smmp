@@ -211,7 +211,6 @@ struct EditProfileView: View {
         .frame(maxWidth: .infinity)
     }
 
-
     private func loadSelectedPhoto(_ item: PhotosPickerItem?) async {
         guard let item else {
             return

@@ -130,7 +130,6 @@ struct NewPostView: View {
         }
     }
 
-
     private func loadSelectedPhoto(_ item: PhotosPickerItem?) async {
         guard let item else {
             viewModel.removeSelectedImage()
@@ -166,7 +165,7 @@ struct NewPostView: View {
     )
     let followRepository = FollowRepository(profileRepository: profileRepository)
 
-    return NavigationStack {
+    NavigationStack {
         NewPostView(
             viewModel: CreatePostViewModel(
                 postRepository: PostRepository(
@@ -177,7 +176,8 @@ struct NewPostView: View {
                 followRepository: followRepository,
                 mediaService: media,
                 sessionService: SessionService(),
-                networkMonitor: network
+                networkMonitor: network,
+                hapticService: HapticService()
             )
         )
     }

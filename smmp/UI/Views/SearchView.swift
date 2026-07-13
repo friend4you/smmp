@@ -203,13 +203,14 @@ private struct SearchUserRowView: View {
         authProfileUpdater: AuthService()
     )
 
-    return NavigationStack {
+    NavigationStack {
         SearchView(
             viewModel: SearchViewModel(
                 profileRepository: profileRepository,
                 followRepository: FollowRepository(profileRepository: profileRepository),
                 sessionService: SessionService(),
-                networkMonitor: network
+                networkMonitor: network,
+                hapticService: HapticService()
             )
         )
     }

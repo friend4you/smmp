@@ -59,7 +59,7 @@ final class CreatePostViewModel: ObservableObject {
         mediaService: MediaServiceProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository

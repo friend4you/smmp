@@ -41,7 +41,7 @@ final class FeedViewModel: ObservableObject {
         followRepository: FollowRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onNavigate: @escaping (FeedRoute) -> Void = { _ in }
     ) {
         self.postRepository = postRepository
@@ -154,7 +154,8 @@ final class FeedViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+        ConnectivityBinding.bind(monitor: networkMonitor,
+                                 cancellables: &cancellables) { [weak self] isConnected, wasConnected in
             guard let self else { return }
             self.isOffline = !isConnected
             if isConnected, !wasConnected, let userId = self.currentUserId {

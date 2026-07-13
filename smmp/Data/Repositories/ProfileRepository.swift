@@ -52,7 +52,7 @@ final class ProfileRepository: ProfileRepositoryProtocol {
     }
 
     func fetchUser(id: String) async throws -> User? {
-        if var cached = try await localRepository.fetchUser(id: id) {
+        if let cached = try await localRepository.fetchUser(id: id) {
             return await backfillDisplayNameLowerIfNeeded(user: cached, id: id)
         }
 

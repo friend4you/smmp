@@ -135,7 +135,7 @@ struct FeedView: View {
     )
     let followRepository = FollowRepository(profileRepository: profileRepository)
 
-    return NavigationStack {
+    NavigationStack {
         FeedView(
             viewModel: FeedViewModel(
                 postRepository: PostRepository(
@@ -146,7 +146,8 @@ struct FeedView: View {
                 profileRepository: profileRepository,
                 followRepository: followRepository,
                 networkMonitor: network,
-                sessionService: SessionService()
+                sessionService: SessionService(),
+                hapticService: HapticService()
             )
         )
     }

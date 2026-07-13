@@ -9,7 +9,7 @@ struct CommentRowView: View {
     let item: CommentRowItem
     let canDelete: Bool
     let onDeleteTapped: () -> Void
-    var onAuthorTap: (() -> Void)? = nil
+    var onAuthorTap: (() -> Void)?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {

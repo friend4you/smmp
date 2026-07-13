@@ -41,7 +41,7 @@ final class ProfileViewModel: ObservableObject {
         localRepository: LocalRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onNavigate: @escaping (ProfileRoute) -> Void = { _ in }
     ) {
         self.authRepository = authRepository
@@ -152,7 +152,8 @@ final class ProfileViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindNetworkMonitor() {
-        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+        ConnectivityBinding.bind(monitor: networkMonitor,
+                                 cancellables: &cancellables) { [weak self] isConnected, wasConnected in
             guard let self else { return }
             self.isOffline = !isConnected
             if isConnected, !wasConnected, self.isScreenActive {

@@ -105,7 +105,7 @@ struct ProfileView: View {
     let localRepository = LocalRepository(persistence: PersistenceController.shared)
     let media = MediaService()
 
-    return NavigationStack {
+    NavigationStack {
         ProfileView(
             viewModel: ProfileViewModel(
                 authRepository: AuthRepository(authService: AuthService()),
@@ -122,7 +122,8 @@ struct ProfileView: View {
                 ),
                 localRepository: localRepository,
                 networkMonitor: network,
-                sessionService: SessionService()
+                sessionService: SessionService(),
+                hapticService: HapticService()
             )
         )
     }

@@ -127,7 +127,7 @@ struct UserProfileView: View {
         authProfileUpdater: AuthService()
     )
 
-    return NavigationStack {
+    NavigationStack {
         UserProfileView(
             viewModel: UserProfileViewModel(
                 userId: "user-2",
@@ -141,6 +141,7 @@ struct UserProfileView: View {
                 localRepository: localRepository,
                 networkMonitor: network,
                 sessionService: SessionService(),
+                hapticService: HapticService(),
                 onPostDetail: { _ in },
                 onEditProfile: {},
                 onFollowing: {}

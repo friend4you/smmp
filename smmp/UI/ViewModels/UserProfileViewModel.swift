@@ -66,7 +66,7 @@ final class UserProfileViewModel: ObservableObject {
         localRepository: LocalRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onPostDetail: @escaping (FeedPostItem) -> Void,
         onEditProfile: @escaping () -> Void,
         onFollowing: @escaping () -> Void
@@ -226,7 +226,8 @@ final class UserProfileViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindNetworkMonitor() {
-        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+        ConnectivityBinding.bind(monitor: networkMonitor,
+                                 cancellables: &cancellables) { [weak self] isConnected, wasConnected in
             guard let self else { return }
             self.isOffline = !isConnected
             if isConnected, !wasConnected, self.isScreenActive {

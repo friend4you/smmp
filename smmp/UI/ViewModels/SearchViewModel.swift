@@ -43,7 +43,7 @@ final class SearchViewModel: ObservableObject {
         followRepository: FollowRepositoryProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onNavigate: @escaping (SearchRoute) -> Void = { _ in }
     ) {
         self.profileRepository = profileRepository

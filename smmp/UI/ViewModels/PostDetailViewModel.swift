@@ -55,7 +55,7 @@ final class PostDetailViewModel: ObservableObject {
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
-        hapticService: HapticServiceProtocol = HapticService(),
+        hapticService: HapticServiceProtocol,
         onAuthorTap: @escaping (User) -> Void = { _ in }
     ) {
         self.postItem = item
@@ -180,7 +180,8 @@ final class PostDetailViewModel: ObservableObject {
     // MARK: - Private
 
     private func bindConnectivity() {
-        ConnectivityBinding.bind(monitor: networkMonitor, cancellables: &cancellables) { [weak self] isConnected, wasConnected in
+        ConnectivityBinding.bind(monitor: networkMonitor,
+                                 cancellables: &cancellables) { [weak self] isConnected, wasConnected in
             guard let self else { return }
             self.isOffline = !isConnected
             if isConnected, !wasConnected, self.isScreenActive {
