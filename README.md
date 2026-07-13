@@ -21,22 +21,10 @@ Built to demonstrate production-style mobile engineering: layered MVVM architect
 
 ## Screenshots
 
-Add PNG captures to [`docs/screenshots/`](docs/screenshots/) using the filenames below.
-
-| Screen | File |
-|--------|------|
-| Feed | `feed.png` |
-| Create post | `create-post.png` |
-| Post detail | `post-detail.png` |
-| Profile | `profile.png` |
-| Search | `search.png` |
-
 <p align="center">
   <img src="docs/screenshots/feed.png" width="240" alt="Feed screen" />
   <img src="docs/screenshots/create-post.png" width="240" alt="Create post screen" />
   <img src="docs/screenshots/post-detail.png" width="240" alt="Post detail screen" />
-</p>
-<p align="center">
   <img src="docs/screenshots/profile.png" width="240" alt="Profile screen" />
   <img src="docs/screenshots/search.png" width="240" alt="Search screen" />
 </p>
