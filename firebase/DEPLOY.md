@@ -28,13 +28,27 @@ In the Console: **Firestore Database** → **Indexes** → **Single-field** (or 
 
 Post images now live at `posts/{authorId}/{postId}/image.jpg`. Writes are allowed only when `authorId == request.auth.uid`. Redeploy Storage rules **before** shipping the new upload path.
 
+## Legal pages (Firebase Hosting)
+
+Privacy Policy and Terms of Use are static pages in `firebase/hosting/public/`. After login:
+
+```bash
+npx firebase-tools use smmp-b0138
+npx firebase-tools deploy --only hosting
+```
+
+Live URLs (also set in `LegalConfiguration.swift`):
+
+- https://smmp-b0138.web.app/privacy
+- https://smmp-b0138.web.app/terms
+
 ## Option B — Firebase CLI
 
 ```bash
 npm install -g firebase-tools   # or: npx firebase-tools
 firebase login
 cd /path/to/smmp
-firebase deploy --only firestore:rules,firestore:indexes,storage
+firebase deploy --only firestore:rules,firestore:indexes,storage,hosting
 ```
 
 ## Verify on device — Phase 3

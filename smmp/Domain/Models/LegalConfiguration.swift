@@ -22,9 +22,9 @@ struct LegalConfiguration: Equatable, Sendable {
     }
 
     static let current = LegalConfiguration(
-        privacyPolicyURL: URL(string: "https://example.com/privacy")!,
-        termsOfUseURL: URL(string: "https://example.com/terms")!,
-        supportEmail: "support@example.com"
+        privacyPolicyURL: URL(string: "https://smmp-b0138.web.app/privacy")!,
+        termsOfUseURL: URL(string: "https://smmp-b0138.web.app/terms")!,
+        supportEmail: "vlad.arsenyuk@gmail.com"
     )
 
     var supportMailtoURL: URL? {
