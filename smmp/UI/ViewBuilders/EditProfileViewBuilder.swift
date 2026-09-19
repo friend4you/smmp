@@ -16,6 +16,7 @@ struct EditProfileViewBuilder {
                 mediaService: deps.mediaService,
                 sessionService: deps.sessionService,
                 networkMonitor: deps.networkMonitor,
+                contentFilter: deps.contentFilter,
                 onSaved: onSaved
             )
         )

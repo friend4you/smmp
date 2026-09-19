@@ -8,7 +8,9 @@ import SwiftUI
 struct CommentRowView: View {
     let item: CommentRowItem
     let canDelete: Bool
+    let canReport: Bool
     let onDeleteTapped: () -> Void
+    var onReportTapped: (() -> Void)? = nil
     var onAuthorTap: (() -> Void)?
 
     var body: some View {
@@ -34,6 +36,13 @@ struct CommentRowView: View {
                                 .font(.caption)
                         }
                         .buttonStyle(.plain)
+                    } else if canReport {
+                        Button(action: { onReportTapped?() }) {
+                            Image(systemName: "exclamationmark.bubble")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(.reportAction))
                     }
                 }
 

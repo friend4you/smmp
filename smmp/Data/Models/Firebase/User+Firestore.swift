@@ -36,8 +36,8 @@ extension User {
         self.displayNameLower = User.displayNameLower(from: firebaseUser.displayName)
     }
 
-    /// Fields written to `users/{uid}` on profile create or update.
-    func firestoreWriteData(includeEmail: Bool = false) -> [String: Any] {
+    /// Fields written to `users/{uid}` on profile create or update. Email is never written.
+    func firestoreWriteData() -> [String: Any] {
         var data: [String: Any] = [
             "followerCount": followerCount,
             "followingCount": followingCount
@@ -56,9 +56,6 @@ extension User {
             data["photoURL"] = photoURL
         } else {
             data["photoURL"] = ""
-        }
-        if includeEmail, let email {
-            data["email"] = email
         }
 
         return data

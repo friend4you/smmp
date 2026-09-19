@@ -15,11 +15,13 @@ class RegistrationViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var repeatPassword: String = ""
+    @Published var hasAcceptedLegalTerms: Bool = false
 
     @Published var isDisplayNameValid: Bool = true
     @Published var isEmailValid: Bool = true
     @Published var isPasswordValid: Bool = true
     @Published var isRepeatPasswordValid: Bool = true
+    @Published var isLegalAcceptedValid: Bool = true
     @Published var passwordStrength: FormValidation.PasswordStrength?
     @Published var shouldShowErrorMessage: Bool = false
     @Published var errorMessage: String = ""
@@ -29,19 +31,26 @@ class RegistrationViewModel: ObservableObject {
     private let profileRepository: ProfileRepositoryProtocol
     private let accountDeleter: AuthAccountDeleting
     private let localRepository: LocalRepositoryProtocol
+    private let contentFilter: ContentFiltering
     private let onNavigate: (AuthRoute) -> Void
+
+    var canSubmit: Bool {
+        hasAcceptedLegalTerms && !isSubmitting
+    }
 
     init(
         authRepository: AuthRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         accountDeleter: AuthAccountDeleting,
         localRepository: LocalRepositoryProtocol,
+        contentFilter: ContentFiltering = ContentFilter.default,
         onNavigate: @escaping (AuthRoute) -> Void = { _ in }
     ) {
         self.authRepository = authRepository
         self.profileRepository = profileRepository
         self.accountDeleter = accountDeleter
         self.localRepository = localRepository
+        self.contentFilter = contentFilter
         self.onNavigate = onNavigate
     }
 
@@ -96,9 +105,14 @@ class RegistrationViewModel: ObservableObject {
         isEmailValid = FormValidation.isValidEmail(normalizedEmail)
         isPasswordValid = FormValidation.isValidPassword(password)
         isRepeatPasswordValid = password == repeatPassword
+        isLegalAcceptedValid = hasAcceptedLegalTerms
 
         if !isDisplayNameValid {
             errorMessage = String(localized: .authValidationDisplayNameRequired)
+            return false
+        }
+        if contentFilter.containsDeniedContent(normalizedDisplayName) {
+            errorMessage = String(localized: .contentFilterError)
             return false
         }
         if !isEmailValid {
@@ -111,6 +125,10 @@ class RegistrationViewModel: ObservableObject {
         }
         if !isRepeatPasswordValid {
             errorMessage = String(localized: .authValidationPasswordMismatch)
+            return false
+        }
+        if !isLegalAcceptedValid {
+            errorMessage = String(localized: .legalRegisterRequired)
             return false
         }
         return true

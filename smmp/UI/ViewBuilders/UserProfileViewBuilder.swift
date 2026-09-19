@@ -23,6 +23,8 @@ struct UserProfileViewBuilder {
                 profileRepository: deps.profileRepository,
                 postRepository: deps.postRepository,
                 followRepository: deps.followRepository,
+                blockRepository: deps.blockRepository,
+                reportRepository: deps.reportRepository,
                 localRepository: deps.localRepository,
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,

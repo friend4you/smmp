@@ -19,8 +19,11 @@ struct PostDetailView: View {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
+        reportRepository: ReportRepositoryProtocol,
+        blockRepository: BlockRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         hapticService: HapticServiceProtocol = HapticService(),
+        contentFilter: ContentFiltering = ContentFilter.default,
         onAuthorTap: @escaping (User) -> Void = { _ in }
     ) {
         _viewModel = StateObject(
@@ -30,8 +33,11 @@ struct PostDetailView: View {
                 commentRepository: commentRepository,
                 profileRepository: profileRepository,
                 postRepository: postRepository,
+                reportRepository: reportRepository,
+                blockRepository: blockRepository,
                 networkMonitor: networkMonitor,
                 hapticService: hapticService,
+                contentFilter: contentFilter,
                 onAuthorTap: onAuthorTap
             )
         )
@@ -69,6 +75,15 @@ struct PostDetailView: View {
                         Image(systemName: "trash")
                     }
                     .disabled(!viewModel.canDeletePost)
+                }
+            } else {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.showReportSheet = true
+                    } label: {
+                        Label(.reportAction, systemImage: "exclamationmark.bubble")
+                    }
+                    .disabled(!viewModel.canReportPost)
                 }
             }
         }
@@ -141,6 +156,31 @@ struct PostDetailView: View {
         } message: { message in
             Text(message)
         }
+        .sheet(isPresented: $viewModel.showReportSheet) {
+            ReportSheetView(isOffline: viewModel.isOffline) { reason in
+                await viewModel.reportPost(reason: reason)
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { viewModel.commentPendingReport != nil },
+            set: { if !$0 { viewModel.commentPendingReport = nil } }
+        )) {
+            ReportSheetView(isOffline: viewModel.isOffline) { reason in
+                if let comment = viewModel.commentPendingReport {
+                    await viewModel.reportComment(comment, reason: reason)
+                }
+            }
+        }
+        .alert(
+            Text(.reportSuccessTitle),
+            isPresented: $viewModel.showReportConfirmation
+        ) {
+            Button { viewModel.showReportConfirmation = false } label: {
+                Text(.commonOk)
+            }
+        } message: {
+            Text(.reportSuccessMessage)
+        }
     }
 
     @ViewBuilder
@@ -163,9 +203,12 @@ struct PostDetailView: View {
                 ForEach(viewModel.commentItems) { comment in
                     CommentRowView(
                         item: comment,
-                        canDelete: viewModel.canDeleteComment(comment)
+                        canDelete: viewModel.canDeleteComment(comment),
+                        canReport: viewModel.canReportComment(comment)
                     ) {
                         viewModel.commentPendingDelete = comment
+                    } onReportTapped: {
+                        viewModel.commentPendingReport = comment
                     } onAuthorTap: {
                         viewModel.showAuthorProfile(authorId: comment.author.id)
                     }

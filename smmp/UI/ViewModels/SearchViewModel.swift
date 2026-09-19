@@ -30,6 +30,7 @@ final class SearchViewModel: ObservableObject {
 
     private let profileRepository: ProfileRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
+    private let blockRepository: BlockRepositoryProtocol
     private let sessionService: SessionServiceProtocol
     private let networkMonitor: NetworkMonitorProtocol
     private let hapticService: HapticServiceProtocol
@@ -41,6 +42,7 @@ final class SearchViewModel: ObservableObject {
     init(
         profileRepository: ProfileRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
+        blockRepository: BlockRepositoryProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
         hapticService: HapticServiceProtocol,
@@ -48,6 +50,7 @@ final class SearchViewModel: ObservableObject {
     ) {
         self.profileRepository = profileRepository
         self.followRepository = followRepository
+        self.blockRepository = blockRepository
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
         self.hapticService = hapticService
@@ -177,7 +180,8 @@ final class SearchViewModel: ObservableObject {
             }
 
             var searchResults: [SearchUserResult] = []
-            for user in users {
+            let blockedIds = (try? await blockRepository.blockedIds(for: currentUserId)) ?? []
+            for user in users where !blockedIds.contains(user.id) {
                 let isSelf = user.id == currentUserId
                 let isFollowing: Bool
                 if isSelf {

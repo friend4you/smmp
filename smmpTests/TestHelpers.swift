@@ -99,3 +99,87 @@ final class MockNetworkMonitor: NetworkMonitorProtocol {
         subject.send(connected)
     }
 }
+
+final class MockBlockRepository: BlockRepositoryProtocol {
+    var blockedIdsValue = Set<String>()
+    var blockError: Error?
+    private(set) var blockCalls: [(String, String)] = []
+    private(set) var unblockCalls: [(String, String)] = []
+    private(set) var deleteAllCallCount = 0
+
+    func block(currentUserId: String, targetUserId: String) async throws {
+        if let blockError { throw blockError }
+        guard currentUserId != targetUserId else { throw BlockRepositoryError.cannotBlockSelf }
+        blockCalls.append((currentUserId, targetUserId))
+        blockedIdsValue.insert(targetUserId)
+    }
+
+    func unblock(currentUserId: String, targetUserId: String) async throws {
+        if let blockError { throw blockError }
+        unblockCalls.append((currentUserId, targetUserId))
+        blockedIdsValue.remove(targetUserId)
+    }
+
+    func isBlocked(currentUserId: String, targetUserId: String) async throws -> Bool {
+        blockedIdsValue.contains(targetUserId)
+    }
+
+    func blockedIds(for userId: String) async throws -> Set<String> {
+        blockedIdsValue
+    }
+
+    func deleteAllBlocks(for userId: String) async throws {
+        deleteAllCallCount += 1
+        blockedIdsValue.removeAll()
+    }
+}
+
+final class MockReportRepository: ReportRepositoryProtocol {
+    var createError: Error?
+    private(set) var createdDrafts: [ReportDraft] = []
+
+    func createReport(_ draft: ReportDraft) async throws -> Report {
+        if let createError { throw createError }
+        guard draft.reporterId != draft.targetOwnerId else {
+            throw ReportRepositoryError.cannotReportOwnContent
+        }
+        createdDrafts.append(draft)
+        return Report(
+            id: "report-\(createdDrafts.count)",
+            reporterId: draft.reporterId,
+            targetType: draft.targetType,
+            targetId: draft.targetId,
+            targetOwnerId: draft.targetOwnerId,
+            parentPostId: draft.parentPostId,
+            reason: draft.reason
+        )
+    }
+}
+
+final class MockAuthReauthenticator: AuthReauthenticating {
+    var error: Error?
+    private(set) var passwords: [String] = []
+
+    func reauthenticate(password: String) async throws {
+        passwords.append(password)
+        if let error { throw error }
+    }
+}
+
+final class MockAccountDeletionService: AccountDeleting {
+    var error: Error?
+    private(set) var deletedUserIds: [String] = []
+
+    func deleteAccount(userId: String) async throws {
+        if let error { throw error }
+        deletedUserIds.append(userId)
+    }
+}
+
+struct DenyingContentFilter: ContentFiltering {
+    func containsDeniedContent(_ text: String) -> Bool { true }
+}
+
+struct AllowingContentFilter: ContentFiltering {
+    func containsDeniedContent(_ text: String) -> Bool { false }
+}

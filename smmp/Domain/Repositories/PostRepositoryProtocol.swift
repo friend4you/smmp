@@ -23,4 +23,9 @@ protocol PostRepositoryProtocol: AnyObject {
     func likePost(id: String, userId: String) async throws
     func unlikePost(id: String, userId: String) async throws
     func likedPostIds(for postIds: [String], userId: String) async -> Set<String>
+    func deleteLikes(byUserId userId: String) async throws
+}
+
+extension PostRepositoryProtocol {
+    func deleteLikes(byUserId userId: String) async throws {}
 }

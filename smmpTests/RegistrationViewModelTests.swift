@@ -36,6 +36,7 @@ struct RegistrationViewModelTests {
         viewModel.email = "alice@example.com"
         viewModel.password = "secret123"
         viewModel.repeatPassword = "secret123"
+        viewModel.hasAcceptedLegalTerms = true
         await viewModel.register()
 
         #expect(viewModel.authRepository.registerCallCount == 1)
@@ -57,6 +58,7 @@ struct RegistrationViewModelTests {
         viewModel.email = "bob@example.com"
         viewModel.password = "secret123"
         viewModel.repeatPassword = "secret123"
+        viewModel.hasAcceptedLegalTerms = true
         await viewModel.register()
 
         #expect(viewModel.authRepository.registerCallCount == 1)
@@ -64,6 +66,21 @@ struct RegistrationViewModelTests {
         #expect(viewModel.accountDeleter.deleteCallCount == 1)
         #expect(viewModel.localRepository.savedUsers.isEmpty)
         #expect(viewModel.shouldShowErrorMessage)
+    }
+
+    @Test func uncheckedLegalTermsDoesNotCallRegister() async {
+        let viewModel = makeViewModel()
+        viewModel.displayName = "Alice"
+        viewModel.email = "alice@example.com"
+        viewModel.password = "secret123"
+        viewModel.repeatPassword = "secret123"
+        viewModel.hasAcceptedLegalTerms = false
+        await viewModel.register()
+
+        #expect(viewModel.authRepository.registerCallCount == 0)
+        #expect(viewModel.profileRepository.createProfileCallCount == 0)
+        #expect(viewModel.shouldShowErrorMessage)
+        #expect(!viewModel.isLegalAcceptedValid)
     }
 
     // MARK: - Helpers

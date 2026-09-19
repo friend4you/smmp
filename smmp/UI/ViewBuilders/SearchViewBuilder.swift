@@ -18,6 +18,7 @@ struct SearchViewBuilder {
             viewModel: SearchViewModel(
                 profileRepository: deps.profileRepository,
                 followRepository: deps.followRepository,
+                blockRepository: deps.blockRepository,
                 sessionService: deps.sessionService,
                 networkMonitor: deps.networkMonitor,
                 hapticService: deps.hapticService,
@@ -52,8 +53,11 @@ struct SearchViewBuilder {
             commentRepository: deps.commentRepository,
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
+            reportRepository: deps.reportRepository,
+            blockRepository: deps.blockRepository,
             networkMonitor: deps.networkMonitor,
             hapticService: deps.hapticService,
+            contentFilter: deps.contentFilter,
             onAuthorTap: { user in
                 onNavigate(.userProfile(userId: user.id, stub: user))
             }

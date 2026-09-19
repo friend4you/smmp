@@ -322,7 +322,7 @@ extension PostRepository {
             throw PostRepositoryError.unauthorizedDelete
         }
 
-        try? await mediaService.deletePostImage(postId: id)
+        try? await mediaService.deletePostImage(postId: id, authorId: authorId)
 
         try await deleteCollection(postRef.collection("likes"))
         try await deleteCollection(postRef.collection("comments"))
@@ -336,7 +336,13 @@ extension PostRepository {
         let postRef = firestore.collection("posts").document(id)
         let likeRef = postRef.collection("likes").document(userId)
         let batch = firestore.batch()
-        batch.setData(["likedAt": FieldValue.serverTimestamp()], forDocument: likeRef)
+        batch.setData(
+            [
+                "likedAt": FieldValue.serverTimestamp(),
+                "userId": userId
+            ],
+            forDocument: likeRef
+        )
         batch.updateData(["likeCount": FieldValue.increment(Int64(1))], forDocument: postRef)
         try await batch.commit()
 
@@ -360,6 +366,20 @@ extension PostRepository {
 
     func likedPostIds(for postIds: [String], userId: String) async -> Set<String> {
         await fetchLikedPostIds(for: postIds, userId: userId)
+    }
+
+    func deleteLikes(byUserId userId: String) async throws {
+        let snapshot = try await firestore.collectionGroup("likes")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments()
+
+        for document in snapshot.documents {
+            guard let postRef = document.reference.parent.parent else { continue }
+            let batch = firestore.batch()
+            batch.deleteDocument(document.reference)
+            batch.updateData(["likeCount": FieldValue.increment(Int64(-1))], forDocument: postRef)
+            try await batch.commit()
+        }
     }
 }
 

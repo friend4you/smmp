@@ -7,7 +7,12 @@
 
 import FirebaseAuth
 
-class AuthService: AuthServiceProtocol, AuthAccountDeleting, AuthProfileUpdating {
+enum AuthServiceError: Error {
+    case missingAuthResult
+    case missingCurrentUser
+}
+
+class AuthService: AuthServiceProtocol, AuthAccountDeleting, AuthProfileUpdating, AuthReauthenticating {
     func login(email: String, password: String) async throws -> User {
         let authResult = try await performAuthOperation { completion in
             Auth.auth().signIn(withEmail: email, password: password, completion: completion)
@@ -43,6 +48,22 @@ class AuthService: AuthServiceProtocol, AuthAccountDeleting, AuthProfileUpdating
         }
     }
     
+    func reauthenticate(password: String) async throws {
+        guard let user = Auth.auth().currentUser, let email = user.email else {
+            throw AuthServiceError.missingCurrentUser
+        }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            user.reauthenticate(with: credential) { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
     func deleteCurrentUser() async throws {
         guard let user = Auth.auth().currentUser else { return }
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -119,6 +140,3 @@ class AuthService: AuthServiceProtocol, AuthAccountDeleting, AuthProfileUpdating
     }
 }
 
-private enum AuthServiceError: Error {
-    case missingAuthResult
-}

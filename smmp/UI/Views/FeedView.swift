@@ -145,6 +145,7 @@ struct FeedView: View {
                 ),
                 profileRepository: profileRepository,
                 followRepository: followRepository,
+                blockRepository: BlockRepository(),
                 networkMonitor: network,
                 sessionService: SessionService(),
                 hapticService: HapticService()

@@ -29,6 +29,13 @@ struct FirestoreUserDocumentRepository: UserDocumentProtocol {
             .updateData(data)
     }
 
+    func deleteUserDocument(id: String) async throws {
+        try await Firestore.firestore()
+            .collection("users")
+            .document(id)
+            .delete()
+    }
+
     func searchUsers(prefix: String, limit: Int) async throws -> [User] {
         let end = prefix + "\u{f8ff}"
         let snapshot = try await Firestore.firestore()

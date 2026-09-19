@@ -26,6 +26,7 @@ struct AuthViewBuilder {
                 profileRepository: deps.profileRepository,
                 accountDeleter: deps.accountDeleter,
                 localRepository: deps.localRepository,
+                contentFilter: deps.contentFilter,
                 onNavigate: onNavigate
             )
         )

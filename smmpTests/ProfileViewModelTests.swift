@@ -4,6 +4,7 @@
 //
 
 import Combine
+import Foundation
 import Testing
 @testable import smmp
 
@@ -112,8 +113,8 @@ struct ProfileViewModelTests {
         profileRepository: ProfileRepositoryProtocol = MockProfileViewProfileRepository(user: makeUser()),
         postRepository: PostRepositoryProtocol = MockProfileViewPostRepository(),
         localRepository: LocalRepositoryProtocol = MockLocalRepository(),
-        sessionService: MockSessionService = MockSessionService(currentUser: makeUser()),
-        networkMonitor: NetworkMonitor = NetworkMonitor(testConnection: true),
+        sessionService: MockSessionService? = nil,
+        networkMonitor: NetworkMonitorProtocol? = nil,
         onNavigate: @escaping (ProfileRoute) -> Void = { _ in }
     ) -> ProfileViewModel {
         ProfileViewModel(
@@ -121,8 +122,11 @@ struct ProfileViewModelTests {
             profileRepository: profileRepository,
             postRepository: postRepository,
             localRepository: localRepository,
-            networkMonitor: networkMonitor,
-            sessionService: sessionService,
+            networkMonitor: networkMonitor ?? NetworkMonitor(testConnection: true),
+            sessionService: sessionService ?? MockSessionService(currentUser: makeUser()),
+            hapticService: NoOpHapticService(),
+            authReauthenticator: MockAuthReauthenticator(),
+            accountDeletionService: MockAccountDeletionService(),
             onNavigate: onNavigate
         )
     }

@@ -28,12 +28,12 @@ final class MediaService: MediaServiceProtocol {
         self.storage = storage
     }
 
-    func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
-        try await uploadImage(imageData, at: MediaPaths.postImage(postId: postId))
+    func uploadPostImage(_ imageData: Data, postId: String, authorId: String) async throws -> String {
+        try await uploadImage(imageData, at: MediaPaths.postImage(authorId: authorId, postId: postId))
     }
 
-    func deletePostImage(postId: String) async throws {
-        try await deleteStorageObject(at: MediaPaths.postImage(postId: postId))
+    func deletePostImage(postId: String, authorId: String) async throws {
+        try await deleteStorageObject(at: MediaPaths.postImage(authorId: authorId, postId: postId))
     }
 
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String {

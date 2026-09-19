@@ -7,7 +7,6 @@ import PhotosUI
 import SwiftUI
 
 struct NewPostView: View {
-//    @EnvironmentObject private var sessionService: SessionService
     @StateObject private var viewModel: CreatePostViewModel
     @State private var selectedPhotoItem: PhotosPickerItem?
 

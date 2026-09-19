@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @Environment(\.openURL) private var openURL
     @StateObject private var viewModel: ProfileViewModel
 
     init(viewModel: ProfileViewModel) {
@@ -63,6 +64,37 @@ struct ProfileView: View {
                     Label(.profileLogout, systemImage: "rectangle.portrait.and.arrow.right")
                 }
             }
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    viewModel.openPrivacyPolicy()
+                } label: {
+                    Label(.legalPrivacyPolicy, systemImage: "hand.raised")
+                }
+            }
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    viewModel.openTermsOfUse()
+                } label: {
+                    Label(.legalTermsOfUse, systemImage: "doc.text")
+                }
+            }
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    if let url = viewModel.supportMailtoURL {
+                        openURL(url)
+                    }
+                } label: {
+                    Label(.legalContact, systemImage: "envelope")
+                }
+            }
+            ToolbarItem(placement: .secondaryAction) {
+                Button(role: .destructive) {
+                    viewModel.requestDeleteAccount()
+                } label: {
+                    Label(.accountDeleteAction, systemImage: "trash")
+                }
+                .disabled(!viewModel.canDeleteAccount)
+            }
         }
         .alert(
             Text(.commonErrorTitle),
@@ -74,6 +106,48 @@ struct ProfileView: View {
             }
         } message: { message in
             Text(message)
+        }
+        .confirmationDialog(
+            Text(.accountDeleteConfirmTitle),
+            isPresented: $viewModel.showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                viewModel.confirmDeleteAccount()
+            } label: {
+                Text(.accountDeleteConfirmAction)
+            }
+            Button(role: .cancel) {
+                viewModel.cancelDeleteAccount()
+            } label: {
+                Text(.commonCancel)
+            }
+        } message: {
+            Text(.accountDeleteConfirmMessage)
+        }
+        .alert(
+            Text(.accountDeletePasswordTitle),
+            isPresented: $viewModel.showDeletePasswordPrompt
+        ) {
+            SecureField(
+                String(localized: .accountDeletePasswordPlaceholder),
+                text: $viewModel.deletePassword
+            )
+            Button(role: .destructive) {
+                Task { await viewModel.performDeleteAccount() }
+            } label: {
+                Text(.accountDeleteConfirmAction)
+            }
+            Button(role: .cancel) {
+                viewModel.cancelDeleteAccount()
+            } label: {
+                Text(.commonCancel)
+            }
+        } message: {
+            Text(.accountDeletePasswordMessage)
+        }
+        .sheet(item: $viewModel.presentedLegalURL) { item in
+            SafariView(url: item.url)
         }
         .task {
             await viewModel.load()
@@ -123,7 +197,31 @@ struct ProfileView: View {
                 localRepository: localRepository,
                 networkMonitor: network,
                 sessionService: SessionService(),
-                hapticService: HapticService()
+                hapticService: HapticService(),
+                authReauthenticator: AuthService(),
+                accountDeletionService: AccountDeletionService(
+                    postRepository: PostRepository(
+                        networkMonitor: network,
+                        localRepository: localRepository,
+                        mediaService: media
+                    ),
+                    commentRepository: CommentRepository(
+                        networkMonitor: network,
+                        localRepository: localRepository,
+                        mediaService: media
+                    ),
+                    followRepository: FollowRepository(profileRepository: ProfileRepository(
+                        networkMonitor: network,
+                        localRepository: localRepository,
+                        mediaService: media,
+                        authProfileUpdater: AuthService()
+                    )),
+                    blockRepository: BlockRepository(),
+                    mediaService: media,
+                    userDocuments: FirestoreUserDocumentRepository(),
+                    accountDeleter: AuthService(),
+                    authRepository: AuthRepository(authService: AuthService())
+                )
             )
         )
     }

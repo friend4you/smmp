@@ -4,6 +4,7 @@
 //
 
 import Combine
+import Foundation
 import Testing
 @testable import smmp
 
@@ -163,8 +164,8 @@ struct UserProfileViewModelTests {
         postRepository: PostRepositoryProtocol = MockUserProfilePostRepository(),
         followRepository: FollowRepositoryProtocol = MockUserProfileFollowRepository(),
         localRepository: LocalRepositoryProtocol = MockLocalRepository(),
-        sessionService: MockSessionService = MockSessionService(currentUser: makeUser()),
-        networkMonitor: NetworkMonitor = NetworkMonitor(testConnection: true),
+        sessionService: MockSessionService? = nil,
+        networkMonitor: NetworkMonitorProtocol? = nil,
         onPostDetail: @escaping (FeedPostItem) -> Void = { _ in },
         onEditProfile: @escaping () -> Void = {},
         onFollowing: @escaping () -> Void = {}
@@ -175,9 +176,12 @@ struct UserProfileViewModelTests {
             profileRepository: profileRepository,
             postRepository: postRepository,
             followRepository: followRepository,
+            blockRepository: MockBlockRepository(),
+            reportRepository: MockReportRepository(),
             localRepository: localRepository,
-            networkMonitor: networkMonitor,
-            sessionService: sessionService,
+            networkMonitor: networkMonitor ?? NetworkMonitor(testConnection: true),
+            sessionService: sessionService ?? MockSessionService(currentUser: makeUser()),
+            hapticService: NoOpHapticService(),
             onPostDetail: onPostDetail,
             onEditProfile: onEditProfile,
             onFollowing: onFollowing

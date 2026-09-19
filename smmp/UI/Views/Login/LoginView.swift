@@ -10,6 +10,7 @@ import SwiftUI
 struct LoginView: View {
 
     @StateObject private var viewModel: LoginViewModel
+    @State private var presentedLegalURL: SafariItem?
 
     init(viewModel: LoginViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -96,6 +97,8 @@ struct LoginView: View {
             }
             .disabled(viewModel.isSubmitting)
 
+            legalFooter
+
             Spacer()
         }
         .padding()
@@ -104,6 +107,26 @@ struct LoginView: View {
         } message: {
             Text(viewModel.errorMessage)
         }
+        .sheet(item: $presentedLegalURL) { item in
+            SafariView(url: item.url)
+        }
+    }
+
+    private var legalFooter: some View {
+        HStack(spacing: 16) {
+            Button {
+                presentedLegalURL = SafariItem(url: LegalConfiguration.current.privacyPolicyURL)
+            } label: {
+                Text(.legalPrivacyPolicy)
+            }
+            Button {
+                presentedLegalURL = SafariItem(url: LegalConfiguration.current.termsOfUseURL)
+            } label: {
+                Text(.legalTermsOfUse)
+            }
+        }
+        .font(.footnote)
+        .disabled(viewModel.isSubmitting)
     }
 }
 

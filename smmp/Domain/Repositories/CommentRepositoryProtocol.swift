@@ -9,4 +9,9 @@ protocol CommentRepositoryProtocol: AnyObject {
     func fetchComments(postId: String) async throws -> [Comment]
     func addComment(postId: String, text: String, authorId: String) async throws
     func deleteComment(postId: String, commentId: String, authorId: String) async throws
+    func deleteCommentsAuthored(by userId: String) async throws
+}
+
+extension CommentRepositoryProtocol {
+    func deleteCommentsAuthored(by userId: String) async throws {}
 }

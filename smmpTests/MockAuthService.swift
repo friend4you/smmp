@@ -57,6 +57,8 @@ final class MockAuthService: AuthServiceProtocol {
             throw sendPasswordResetError
         }
     }
+
+    func reauthenticate(password: String) async throws {}
 }
 
 enum MockAuthError: Error {

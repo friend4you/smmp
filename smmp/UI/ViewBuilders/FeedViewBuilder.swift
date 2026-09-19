@@ -19,6 +19,7 @@ struct FeedViewBuilder {
                 postRepository: deps.postRepository,
                 profileRepository: deps.profileRepository,
                 followRepository: deps.followRepository,
+                blockRepository: deps.blockRepository,
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
                 hapticService: deps.hapticService,
@@ -53,8 +54,11 @@ struct FeedViewBuilder {
             commentRepository: deps.commentRepository,
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
+            reportRepository: deps.reportRepository,
+            blockRepository: deps.blockRepository,
             networkMonitor: deps.networkMonitor,
             hapticService: deps.hapticService,
+            contentFilter: deps.contentFilter,
             onAuthorTap: { user in
                 onNavigate(.userProfile(userId: user.id, stub: user))
             }

@@ -23,6 +23,9 @@ struct ProfileViewBuilder {
                 networkMonitor: deps.networkMonitor,
                 sessionService: deps.sessionService,
                 hapticService: deps.hapticService,
+                legalConfiguration: deps.legalConfiguration,
+                authReauthenticator: deps.authReauthenticator,
+                accountDeletionService: deps.accountDeletionService,
                 onNavigate: onNavigate
             )
         )
@@ -48,8 +51,11 @@ struct ProfileViewBuilder {
             commentRepository: deps.commentRepository,
             profileRepository: deps.profileRepository,
             postRepository: deps.postRepository,
+            reportRepository: deps.reportRepository,
+            blockRepository: deps.blockRepository,
             networkMonitor: deps.networkMonitor,
             hapticService: deps.hapticService,
+            contentFilter: deps.contentFilter,
             onAuthorTap: { user in
                 onNavigate(.userProfile(userId: user.id, stub: user))
             }

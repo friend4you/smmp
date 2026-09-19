@@ -63,6 +63,21 @@ service cloud.firestore {
         allow read: if isSignedIn();
         allow create, delete: if isOwner(userId);
       }
+
+      match /blocked/{blockedId} {
+        allow read: if isSignedIn();
+        allow create, delete: if isOwner(userId) && blockedId != userId;
+      }
+    }
+
+    // ── reports/{reportId} ───────────────────────────────────────────────────
+
+    match /reports/{reportId} {
+      allow create: if isSignedIn()
+        && request.resource.data.reporterId == request.auth.uid;
+      allow read: if isSignedIn()
+        && resource.data.reporterId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // ── posts/{pid} ──────────────────────────────────────────────────────────

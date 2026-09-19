@@ -27,6 +27,7 @@ final class EditProfileViewModel: ObservableObject {
     private let mediaService: MediaServiceProtocol
     private let sessionService: SessionServiceProtocol
     private let networkMonitor: NetworkMonitorProtocol
+    private let contentFilter: ContentFiltering
     private let onSaved: () -> Void
     private var progressCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
@@ -79,12 +80,14 @@ final class EditProfileViewModel: ObservableObject {
         mediaService: MediaServiceProtocol,
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
+        contentFilter: ContentFiltering = ContentFilter.default,
         onSaved: @escaping () -> Void = {}
     ) {
         self.profileRepository = profileRepository
         self.mediaService = mediaService
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
+        self.contentFilter = contentFilter
         self.onSaved = onSaved
         isOffline = !networkMonitor.isConnected
         bindConnectivity()
@@ -142,6 +145,12 @@ final class EditProfileViewModel: ObservableObject {
 
         guard isValid else { return false }
         guard hasUnsavedChanges else { return true }
+
+        if contentFilter.containsDeniedContent(trimmedDisplayName)
+            || contentFilter.containsDeniedContent(trimmedBio) {
+            presentError(String(localized: .contentFilterError))
+            return false
+        }
 
         isSaving = true
         uploadProgress = 0

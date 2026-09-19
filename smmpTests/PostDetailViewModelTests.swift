@@ -4,6 +4,7 @@
 //
 
 import Combine
+import Foundation
 import Testing
 @testable import smmp
 
@@ -88,7 +89,7 @@ struct PostDetailViewModelTests {
         #expect(viewModel.commentItems.count == 1)
     }
 
-    @Test func isOfflineUpdatesFromConnectivityPublisher() {
+    @Test func isOfflineUpdatesFromConnectivityPublisher() async {
         let networkMonitor = MockNetworkMonitor(isConnected: true)
         let viewModel = makeViewModel(
             item: makeFeedPostItem(),
@@ -98,6 +99,7 @@ struct PostDetailViewModelTests {
         #expect(viewModel.isOffline == false)
 
         networkMonitor.setConnected(false)
+        try? await Task.sleep(nanoseconds: 50_000_000)
 
         #expect(viewModel.isOffline == true)
     }
@@ -107,18 +109,20 @@ struct PostDetailViewModelTests {
     private func makeViewModel(
         item: FeedPostItem,
         currentUserId: String = "me",
-        commentRepository: CommentRepositoryProtocol = MockPostDetailCommentRepository(),
+        commentRepository: CommentRepositoryProtocol? = nil,
         profileRepository: ProfileRepositoryProtocol = MockPostDetailProfileRepository(),
         postRepository: PostRepositoryProtocol = MockPostDetailPostRepository(),
-        networkMonitor: MockNetworkMonitor = MockNetworkMonitor(isConnected: true)
+        networkMonitor: MockNetworkMonitor? = nil
     ) -> PostDetailViewModel {
         PostDetailViewModel(
             item: item,
             currentUserId: currentUserId,
-            commentRepository: commentRepository,
+            commentRepository: commentRepository ?? MockPostDetailCommentRepository(),
             profileRepository: profileRepository,
             postRepository: postRepository,
-            networkMonitor: networkMonitor,
+            reportRepository: MockReportRepository(),
+            blockRepository: MockBlockRepository(),
+            networkMonitor: networkMonitor ?? MockNetworkMonitor(isConnected: true),
             hapticService: NoOpHapticService()
         )
     }
@@ -171,15 +175,15 @@ private final class MockPostDetailPostRepository: PostRepositoryProtocol {
 }
 
 private final class MockPostDetailCommentRepository: CommentRepositoryProtocol {
-    private let comments: [Comment]
+    private let comments: [smmp.Comment]
     private(set) var addCommentCallCount = 0
     private(set) var deleteCommentCallCount = 0
 
-    init(comments: [Comment] = []) {
+    init(comments: [smmp.Comment] = []) {
         self.comments = comments
     }
 
-    func fetchComments(postId: String) async throws -> [Comment] { comments }
+    func fetchComments(postId: String) async throws -> [smmp.Comment] { comments }
 
     func addComment(postId: String, text: String, authorId: String) async throws {
         addCommentCallCount += 1

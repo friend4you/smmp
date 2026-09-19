@@ -208,6 +208,7 @@ private struct SearchUserRowView: View {
             viewModel: SearchViewModel(
                 profileRepository: profileRepository,
                 followRepository: FollowRepository(profileRepository: profileRepository),
+                blockRepository: BlockRepository(),
                 sessionService: SessionService(),
                 networkMonitor: network,
                 hapticService: HapticService()

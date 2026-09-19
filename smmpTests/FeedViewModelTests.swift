@@ -24,8 +24,9 @@ struct FeedViewModelTests {
         let viewModel = FeedViewModel(
             postRepository: postRepository,
             profileRepository: profileRepository,
-            followRepository: followRepository,
-            networkMonitor: NetworkMonitor(testConnection: true),
+                followRepository: followRepository,
+                blockRepository: MockBlockRepository(),
+                networkMonitor: NetworkMonitor(testConnection: true),
             sessionService: sessionService,
             hapticService: NoOpHapticService()
         )
@@ -57,8 +58,9 @@ struct FeedViewModelTests {
         let viewModel = FeedViewModel(
             postRepository: postRepository,
             profileRepository: profileRepository,
-            followRepository: followRepository,
-            networkMonitor: networkMonitor,
+                followRepository: followRepository,
+                blockRepository: MockBlockRepository(),
+                networkMonitor: networkMonitor,
             sessionService: sessionService,
             hapticService: NoOpHapticService()
         )
@@ -88,8 +90,9 @@ struct FeedViewModelTests {
         let viewModel = FeedViewModel(
             postRepository: postRepository,
             profileRepository: profileRepository,
-            followRepository: followRepository,
-            networkMonitor: networkMonitor,
+                followRepository: followRepository,
+                blockRepository: MockBlockRepository(),
+                networkMonitor: networkMonitor,
             sessionService: sessionService,
             hapticService: NoOpHapticService()
         )
@@ -109,6 +112,7 @@ struct FeedViewModelTests {
             postRepository: postRepository,
             profileRepository: MockProfileRepository(),
             followRepository: MockFeedFollowRepository(),
+            blockRepository: MockBlockRepository(),
             networkMonitor: MockNetworkMonitor(isConnected: true),
             sessionService: MockSessionService(currentUser: makeUser()),
             hapticService: NoOpHapticService()
@@ -128,6 +132,7 @@ struct FeedViewModelTests {
             postRepository: MockPostRepository(),
             profileRepository: MockProfileRepository(),
             followRepository: MockFeedFollowRepository(),
+            blockRepository: MockBlockRepository(),
             networkMonitor: MockNetworkMonitor(isConnected: false),
             sessionService: MockSessionService(currentUser: makeUser()),
             hapticService: NoOpHapticService()

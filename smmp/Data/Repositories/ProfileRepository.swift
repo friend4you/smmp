@@ -43,7 +43,7 @@ final class ProfileRepository: ProfileRepositoryProtocol {
         user.followingCount = 0
         user.displayNameLower = User.displayNameLower(from: displayName)
 
-        var data = user.firestoreWriteData(includeEmail: true)
+        var data = user.firestoreWriteData()
         data["createdAt"] = FieldValue.serverTimestamp()
 
         try await userDocumentFetcher.createUserDocument(id: uid, data: data)

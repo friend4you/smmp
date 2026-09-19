@@ -16,6 +16,10 @@ final class UserProfileViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var isRefreshing = false
     @Published private(set) var isFollowActionInProgress = false
+    @Published private(set) var isBlockActionInProgress = false
+    @Published private(set) var isBlocked = false
+    @Published var showReportSheet = false
+    @Published var showReportConfirmation = false
     @Published var errorMessage: String?
     @Published var showError = false
 
@@ -25,6 +29,8 @@ final class UserProfileViewModel: ObservableObject {
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
+    private let blockRepository: BlockRepositoryProtocol
+    private let reportRepository: ReportRepositoryProtocol
     private let localRepository: LocalRepositoryProtocol
     private let networkMonitor: NetworkMonitorProtocol
     private let sessionService: SessionServiceProtocol
@@ -42,7 +48,19 @@ final class UserProfileViewModel: ObservableObject {
     }
 
     var showsFollowButton: Bool {
+        !isOwnProfile && !isBlocked
+    }
+
+    var showsBlockButton: Bool {
         !isOwnProfile
+    }
+
+    var canReportProfile: Bool {
+        !isOwnProfile && !isOffline
+    }
+
+    var canToggleBlock: Bool {
+        !isOwnProfile && !isOffline && !isBlockActionInProgress
     }
 
     var showsEditButton: Bool {
@@ -63,6 +81,8 @@ final class UserProfileViewModel: ObservableObject {
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
+        blockRepository: BlockRepositoryProtocol,
+        reportRepository: ReportRepositoryProtocol,
         localRepository: LocalRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
@@ -76,6 +96,8 @@ final class UserProfileViewModel: ObservableObject {
         self.profileRepository = profileRepository
         self.postRepository = postRepository
         self.followRepository = followRepository
+        self.blockRepository = blockRepository
+        self.reportRepository = reportRepository
         self.localRepository = localRepository
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
@@ -128,10 +150,14 @@ final class UserProfileViewModel: ObservableObject {
                         currentUserId: currentUserId,
                         targetUserId: userId
                     )
+                    isBlocked = try await blockRepository.isBlocked(
+                        currentUserId: currentUserId,
+                        targetUserId: userId
+                    )
                 }
             }
 
-            rebuildItems(posts: posts)
+            rebuildItems(posts: isBlocked ? [] : posts)
         } catch {
             if isOffline, user == nil {
                 user = userStub
@@ -198,6 +224,69 @@ final class UserProfileViewModel: ObservableObject {
                     fallback: String(localized: .followErrorGeneric)
                 )
             )
+        }
+    }
+
+    func toggleBlock() async {
+        guard canToggleBlock,
+              let currentUserId = sessionService.currentUser?.id else {
+            if isOffline {
+                presentError(String(localized: .blockErrorOffline))
+            }
+            return
+        }
+
+        isBlockActionInProgress = true
+        defer { isBlockActionInProgress = false }
+
+        do {
+            if isBlocked {
+                try await blockRepository.unblock(
+                    currentUserId: currentUserId,
+                    targetUserId: userId
+                )
+                isBlocked = false
+            } else {
+                try await blockRepository.block(
+                    currentUserId: currentUserId,
+                    targetUserId: userId
+                )
+                isBlocked = true
+                items = []
+            }
+            NotificationCenter.default.post(name: .blockedUsersDidChange, object: nil)
+        } catch {
+            if error as? BlockRepositoryError == .cannotBlockSelf {
+                presentError(String(localized: .blockErrorSelf))
+            } else {
+                presentError(String(localized: .blockErrorGeneric))
+            }
+        }
+    }
+
+    func reportUser(reason: ReportReason) async {
+        guard canReportProfile,
+              let currentUserId = sessionService.currentUser?.id else {
+            if isOffline {
+                presentError(String(localized: .reportErrorOffline))
+            }
+            return
+        }
+
+        do {
+            _ = try await reportRepository.createReport(
+                ReportDraft(
+                    reporterId: currentUserId,
+                    targetType: .user,
+                    targetId: userId,
+                    targetOwnerId: userId,
+                    parentPostId: nil,
+                    reason: reason
+                )
+            )
+            showReportConfirmation = true
+        } catch {
+            presentError(String(localized: .reportErrorGeneric))
         }
     }
 

@@ -105,12 +105,12 @@ struct UserFirestoreMappingTests {
         #expect(data["displayNameLower"] as? String == "eve")
     }
 
-    @Test func firestoreWriteDataCanIncludeEmail() {
+    @Test func firestoreWriteDataOmitsEmail() {
         let user = makeUser(email: "alice@example.com")
 
-        let data = user.firestoreWriteData(includeEmail: true)
+        let data = user.firestoreWriteData()
 
-        #expect(data["email"] as? String == "alice@example.com")
+        #expect(data["email"] == nil)
     }
 
     @Test func displayNameLowerHelperLowercases() {

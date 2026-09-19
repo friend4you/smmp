@@ -10,6 +10,7 @@ import SwiftUI
 struct RegistrationView: View {
 
     @StateObject var viewModel: RegistrationViewModel
+    @State private var presentedLegalURL: SafariItem?
 
     init(viewModel: RegistrationViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -94,6 +95,8 @@ struct RegistrationView: View {
                     }
                 }
 
+                legalAcceptanceSection
+
                 Button {
                     Task {
                         await viewModel.register()
@@ -110,7 +113,7 @@ struct RegistrationView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
-                .disabled(viewModel.isSubmitting)
+                .disabled(viewModel.isSubmitting || !viewModel.hasAcceptedLegalTerms)
             }
             .padding()
         }
@@ -120,6 +123,43 @@ struct RegistrationView: View {
             Button(String(localized: .commonOk), role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
+        }
+        .sheet(item: $presentedLegalURL) { item in
+            SafariView(url: item.url)
+        }
+    }
+
+    private var legalAcceptanceSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(isOn: $viewModel.hasAcceptedLegalTerms) {
+                Text(.legalRegisterCheckbox)
+                    .font(.footnote)
+            }
+            .disabled(viewModel.isSubmitting)
+            .onChange(of: viewModel.hasAcceptedLegalTerms) {
+                viewModel.isLegalAcceptedValid = true
+            }
+
+            HStack(spacing: 16) {
+                Button {
+                    presentedLegalURL = SafariItem(url: LegalConfiguration.current.privacyPolicyURL)
+                } label: {
+                    Text(.legalPrivacyPolicy)
+                }
+                Button {
+                    presentedLegalURL = SafariItem(url: LegalConfiguration.current.termsOfUseURL)
+                } label: {
+                    Text(.legalTermsOfUse)
+                }
+            }
+            .font(.footnote)
+            .disabled(viewModel.isSubmitting)
+
+            if !viewModel.isLegalAcceptedValid {
+                Text(.legalRegisterRequired)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
         }
     }
 

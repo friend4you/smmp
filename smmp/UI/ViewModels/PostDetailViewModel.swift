@@ -20,15 +20,22 @@ final class PostDetailViewModel: ObservableObject {
     @Published var showDeletePostConfirmation = false
     @Published var commentPendingDelete: CommentRowItem?
     @Published private(set) var shouldDismiss = false
+    @Published var showReportSheet = false
+    @Published var commentPendingReport: CommentRowItem?
+    @Published var showReportConfirmation = false
 
     private let commentRepository: CommentRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let postRepository: PostRepositoryProtocol
+    private let reportRepository: ReportRepositoryProtocol
+    private let blockRepository: BlockRepositoryProtocol
     private let networkMonitor: NetworkMonitorProtocol
     private let hapticService: HapticServiceProtocol
+    private let contentFilter: ContentFiltering
     private let onAuthorTap: (User) -> Void
     private var authorCache: [String: User] = [:]
     private let currentUserId: String
+    private var blockedIds = Set<String>()
     private var cancellables = Set<AnyCancellable>()
     private var isScreenActive = false
 
@@ -44,6 +51,15 @@ final class PostDetailViewModel: ObservableObject {
         isPostAuthor && !isOffline
     }
 
+    var canReportPost: Bool {
+        !isPostAuthor && !isOffline
+    }
+
+    var showReportCommentSheet: Bool {
+        get { commentPendingReport != nil }
+        set { if !newValue { commentPendingReport = nil } }
+    }
+
     private var trimmedCommentText: String {
         commentText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -54,8 +70,11 @@ final class PostDetailViewModel: ObservableObject {
         commentRepository: CommentRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         postRepository: PostRepositoryProtocol,
+        reportRepository: ReportRepositoryProtocol,
+        blockRepository: BlockRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         hapticService: HapticServiceProtocol,
+        contentFilter: ContentFiltering = ContentFilter.default,
         onAuthorTap: @escaping (User) -> Void = { _ in }
     ) {
         self.postItem = item
@@ -63,8 +82,11 @@ final class PostDetailViewModel: ObservableObject {
         self.commentRepository = commentRepository
         self.profileRepository = profileRepository
         self.postRepository = postRepository
+        self.reportRepository = reportRepository
+        self.blockRepository = blockRepository
         self.networkMonitor = networkMonitor
         self.hapticService = hapticService
+        self.contentFilter = contentFilter
         self.onAuthorTap = onAuthorTap
         authorCache[item.author.id] = item.author
         isOffline = !networkMonitor.isConnected
@@ -88,6 +110,10 @@ final class PostDetailViewModel: ObservableObject {
         item.comment.authorId == currentUserId && !isOffline
     }
 
+    func canReportComment(_ item: CommentRowItem) -> Bool {
+        item.comment.authorId != currentUserId && !isOffline
+    }
+
     func loadComments() async {
         guard !isLoadingComments else { return }
 
@@ -106,6 +132,11 @@ final class PostDetailViewModel: ObservableObject {
 
     func addComment() async {
         guard canSubmitComment else { return }
+
+        if contentFilter.containsDeniedContent(trimmedCommentText) {
+            presentError(String(localized: .contentFilterError))
+            return
+        }
 
         isSubmittingComment = true
         defer { isSubmittingComment = false }
@@ -138,6 +169,57 @@ final class PostDetailViewModel: ObservableObject {
             commentPendingDelete = nil
         } catch {
             presentError(CommentErrorMapper.message(for: error, fallback: String(localized: .commentErrorDelete)))
+        }
+    }
+
+    func reportPost(reason: ReportReason) async {
+        guard canReportPost else {
+            if isOffline {
+                presentError(String(localized: .reportErrorOffline))
+            }
+            return
+        }
+
+        do {
+            _ = try await reportRepository.createReport(
+                ReportDraft(
+                    reporterId: currentUserId,
+                    targetType: .post,
+                    targetId: postItem.post.id,
+                    targetOwnerId: postItem.post.authorId,
+                    parentPostId: nil,
+                    reason: reason
+                )
+            )
+            showReportConfirmation = true
+        } catch {
+            presentError(reportErrorMessage(for: error))
+        }
+    }
+
+    func reportComment(_ item: CommentRowItem, reason: ReportReason) async {
+        guard canReportComment(item) else {
+            if isOffline {
+                presentError(String(localized: .reportErrorOffline))
+            }
+            return
+        }
+
+        do {
+            _ = try await reportRepository.createReport(
+                ReportDraft(
+                    reporterId: currentUserId,
+                    targetType: .comment,
+                    targetId: item.comment.id,
+                    targetOwnerId: item.comment.authorId,
+                    parentPostId: item.comment.postId,
+                    reason: reason
+                )
+            )
+            commentPendingReport = nil
+            showReportConfirmation = true
+        } catch {
+            presentError(reportErrorMessage(for: error))
         }
     }
 
@@ -191,11 +273,15 @@ final class PostDetailViewModel: ObservableObject {
     }
 
     private func fetchComments() async {
+        if networkMonitor.isConnected {
+            blockedIds = (try? await blockRepository.blockedIds(for: currentUserId)) ?? blockedIds
+        }
+
         do {
             let comments = try await commentRepository.fetchComments(postId: postItem.post.id)
             var items: [CommentRowItem] = []
 
-            for comment in comments {
+            for comment in comments where !blockedIds.contains(comment.authorId) {
                 let author = await resolveAuthor(id: comment.authorId)
                 items.append(CommentRowItem(comment: comment, author: author))
             }
@@ -233,5 +319,12 @@ final class PostDetailViewModel: ObservableObject {
     private func presentError(_ message: String) {
         errorMessage = message
         showError = true
+    }
+
+    private func reportErrorMessage(for error: Error) -> String {
+        if error as? ReportRepositoryError == .cannotReportOwnContent {
+            return String(localized: .reportErrorGeneric)
+        }
+        return String(localized: .reportErrorGeneric)
     }
 }

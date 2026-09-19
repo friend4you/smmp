@@ -20,7 +20,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -37,7 +37,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher(user: makeUser(id: "author-2"))
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: false),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: false),
             fetcher: fetcher
         )
 
@@ -54,7 +54,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher(user: remoteUser)
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -75,7 +75,7 @@ struct ProfileRepositoryTests {
         )
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -94,7 +94,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -114,7 +114,7 @@ struct ProfileRepositoryTests {
         #expect(fetcher.lastCreateId == "user-new")
         #expect(fetcher.lastCreateData?["displayName"] as? String == "Alice")
         #expect(fetcher.lastCreateData?["displayNameLower"] as? String == "alice")
-        #expect(fetcher.lastCreateData?["email"] as? String == "alice@example.com")
+        #expect(fetcher.lastCreateData?["email"] == nil)
 
         let cached = try await localRepository.fetchUser(id: "user-new")
         #expect(cached?.displayName == "Alice")
@@ -128,7 +128,7 @@ struct ProfileRepositoryTests {
         fetcher.createError = MockAuthError.notConfigured
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -160,7 +160,7 @@ struct ProfileRepositoryTests {
         let mediaService = MockProfileMediaService()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher,
             authUpdater: authUpdater,
             mediaService: mediaService
@@ -200,7 +200,7 @@ struct ProfileRepositoryTests {
         let mediaService = MockProfileMediaService()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher,
             authUpdater: authUpdater,
             mediaService: mediaService
@@ -235,7 +235,7 @@ struct ProfileRepositoryTests {
         let mediaService = MockProfileMediaService()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: MockUserDocumentFetcher(),
             mediaService: mediaService
         )
@@ -259,7 +259,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: false),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: false),
             fetcher: fetcher
         )
 
@@ -280,7 +280,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -301,7 +301,7 @@ struct ProfileRepositoryTests {
         )
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -321,7 +321,7 @@ struct ProfileRepositoryTests {
         )
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: false),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: false),
             fetcher: fetcher
         )
 
@@ -339,7 +339,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher(user: remoteUser)
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -363,7 +363,7 @@ struct ProfileRepositoryTests {
         let fetcher = MockUserDocumentFetcher()
         let repository = makeRepository(
             localRepository: localRepository,
-            networkMonitor: MockNetworkMonitor(isConnected: true),
+            networkMonitor: MockProfileNetworkMonitor(isConnected: true),
             fetcher: fetcher
         )
 
@@ -378,7 +378,7 @@ struct ProfileRepositoryTests {
 
     private func makeRepository(
         localRepository: LocalRepository,
-        networkMonitor: MockNetworkMonitor,
+        networkMonitor: MockProfileNetworkMonitor,
         fetcher: MockUserDocumentFetcher,
         authUpdater: MockAuthProfileUpdater = MockAuthProfileUpdater(),
         mediaService: MockProfileMediaService = MockProfileMediaService()
@@ -395,7 +395,7 @@ struct ProfileRepositoryTests {
 
 // MARK: - Mocks
 
-private final class MockNetworkMonitor: NetworkConnectivityProviding {
+private final class MockProfileNetworkMonitor: NetworkConnectivityProviding {
     private let subject: CurrentValueSubject<Bool, Never>
 
     var isConnected: Bool {
@@ -496,11 +496,11 @@ private final class MockProfileMediaService: MediaServiceProtocol {
         image.jpegData(compressionQuality: 0.8)
     }
 
-    func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
+    func uploadPostImage(_ imageData: Data, postId: String, authorId: String) async throws -> String {
         ""
     }
 
-    func deletePostImage(postId: String) async throws {}
+    func deletePostImage(postId: String, authorId: String) async throws {}
 
     func uploadProfileImage(_ imageData: Data, userId: String) async throws -> String {
         uploadedUserIds.append(userId)

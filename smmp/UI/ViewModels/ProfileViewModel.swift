@@ -4,6 +4,7 @@
 //
 
 import Combine
+import FirebaseAuth
 import Foundation
 
 @MainActor
@@ -16,6 +17,11 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var isRefreshing = false
     @Published var errorMessage: String?
     @Published var showError = false
+    @Published var presentedLegalURL: SafariItem?
+    @Published var showDeleteConfirmation = false
+    @Published var showDeletePasswordPrompt = false
+    @Published var deletePassword = ""
+    @Published private(set) var isDeletingAccount = false
 
     private let authRepository: AuthRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
@@ -24,6 +30,9 @@ final class ProfileViewModel: ObservableObject {
     private let networkMonitor: NetworkMonitorProtocol
     private let sessionService: SessionServiceProtocol
     private let hapticService: HapticServiceProtocol
+    private let legalConfiguration: LegalConfiguration
+    private let authReauthenticator: AuthReauthenticating
+    private let accountDeletionService: AccountDeleting
     private let onNavigate: (ProfileRoute) -> Void
 
     private var likedPostIds = Set<String>()
@@ -34,6 +43,14 @@ final class ProfileViewModel: ObservableObject {
         !isOffline
     }
 
+    var canDeleteAccount: Bool {
+        !isOffline && !isDeletingAccount
+    }
+
+    var supportMailtoURL: URL? {
+        legalConfiguration.supportMailtoURL
+    }
+
     init(
         authRepository: AuthRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
@@ -42,6 +59,9 @@ final class ProfileViewModel: ObservableObject {
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
         hapticService: HapticServiceProtocol,
+        legalConfiguration: LegalConfiguration = .current,
+        authReauthenticator: AuthReauthenticating,
+        accountDeletionService: AccountDeleting,
         onNavigate: @escaping (ProfileRoute) -> Void = { _ in }
     ) {
         self.authRepository = authRepository
@@ -51,6 +71,9 @@ final class ProfileViewModel: ObservableObject {
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
         self.hapticService = hapticService
+        self.legalConfiguration = legalConfiguration
+        self.authReauthenticator = authReauthenticator
+        self.accountDeletionService = accountDeletionService
         self.onNavigate = onNavigate
         bindNetworkMonitor()
         bindProfileUpdates()
@@ -125,6 +148,51 @@ final class ProfileViewModel: ObservableObject {
 
     func logout() async {
         try? await authRepository.signOut()
+    }
+
+    func openPrivacyPolicy() {
+        presentedLegalURL = SafariItem(url: legalConfiguration.privacyPolicyURL)
+    }
+
+    func openTermsOfUse() {
+        presentedLegalURL = SafariItem(url: legalConfiguration.termsOfUseURL)
+    }
+
+    func requestDeleteAccount() {
+        guard canDeleteAccount else {
+            presentError(String(localized: .accountDeleteErrorOffline))
+            return
+        }
+        showDeleteConfirmation = true
+    }
+
+    func confirmDeleteAccount() {
+        deletePassword = ""
+        showDeletePasswordPrompt = true
+    }
+
+    func cancelDeleteAccount() {
+        showDeleteConfirmation = false
+        showDeletePasswordPrompt = false
+        deletePassword = ""
+    }
+
+    func performDeleteAccount() async {
+        guard canDeleteAccount, let userId = sessionService.currentUser?.id else {
+            presentError(String(localized: .accountDeleteErrorOffline))
+            return
+        }
+
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+
+        do {
+            try await authReauthenticator.reauthenticate(password: deletePassword)
+            try await accountDeletionService.deleteAccount(userId: userId)
+            deletePassword = ""
+        } catch {
+            presentError(deleteAccountErrorMessage(for: error))
+        }
     }
 
     func toggleLike(for item: FeedPostItem) async {
@@ -222,5 +290,15 @@ final class ProfileViewModel: ObservableObject {
     private func presentError(_ message: String) {
         errorMessage = message
         showError = true
+    }
+
+    private func deleteAccountErrorMessage(for error: Error) -> String {
+        let nsError = error as NSError
+        if nsError.domain == AuthErrorDomain,
+           let code = AuthErrorCode(rawValue: nsError.code),
+           code == .wrongPassword || code == .invalidCredential {
+            return String(localized: .accountDeleteErrorWrongPassword)
+        }
+        return String(localized: .accountDeleteErrorFailed)
     }
 }

@@ -6,14 +6,17 @@ Built to demonstrate production-style mobile engineering: layered MVVM architect
 
 **Stack:** Swift 6 · SwiftUI · Firebase (Auth, Firestore, Storage) · CoreData · async/await
 
+**Status:** App Store **code** prep is in progress (UGC filter/report/block, in-app account deletion, privacy/terms links, privacy manifest, iPhone-only build settings). App Store Connect listing, screenshots, and a demo account are still out of scope.
+
 ---
 
 ## Features
 
-- **Authentication** — Email/password sign-in and registration, password reset, session persistence
+- **Authentication** — Email/password sign-in and registration, password reset, session persistence; Terms and Privacy acceptance at register
 - **Feed** — Follow-scoped chronological feed with real-time updates, pull-to-refresh, pagination, like/unlike
 - **Posts** — Create posts with text and images (client-side resize before upload); view post detail with comments
-- **Profiles** — View and edit profile (display name, bio, photo); follower/following counts
+- **Profiles** — View and edit profile (display name, bio, photo); follower/following counts; in-app account deletion
+- **Safety** — Client-side text filter, report, block/unblock, and in-app contact
 - **Discovery** — Debounced user search with inline follow/unfollow
 - **Offline mode** — Browse cached feed and profiles without connectivity
 

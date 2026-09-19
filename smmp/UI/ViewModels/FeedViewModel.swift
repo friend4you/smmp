@@ -22,6 +22,7 @@ final class FeedViewModel: ObservableObject {
     private let postRepository: PostRepositoryProtocol
     private let profileRepository: ProfileRepositoryProtocol
     private let followRepository: FollowRepositoryProtocol
+    private let blockRepository: BlockRepositoryProtocol
     private let sessionService: SessionServiceProtocol
     private let hapticService: HapticServiceProtocol
     private let onNavigate: (FeedRoute) -> Void
@@ -30,6 +31,7 @@ final class FeedViewModel: ObservableObject {
     private var posts: [Post] = []
     private var likedPostIds = Set<String>()
     private var authorCache: [String: User] = [:]
+    private var blockedIds = Set<String>()
     private var currentUserId: String?
     private var isAtTop = true
     private var acknowledgedTopPostId: String?
@@ -39,6 +41,7 @@ final class FeedViewModel: ObservableObject {
         postRepository: PostRepositoryProtocol,
         profileRepository: ProfileRepositoryProtocol,
         followRepository: FollowRepositoryProtocol,
+        blockRepository: BlockRepositoryProtocol,
         networkMonitor: NetworkMonitorProtocol,
         sessionService: SessionServiceProtocol,
         hapticService: HapticServiceProtocol,
@@ -47,11 +50,13 @@ final class FeedViewModel: ObservableObject {
         self.postRepository = postRepository
         self.profileRepository = profileRepository
         self.followRepository = followRepository
+        self.blockRepository = blockRepository
         self.networkMonitor = networkMonitor
         self.sessionService = sessionService
         self.hapticService = hapticService
         self.onNavigate = onNavigate
         bindPublishers()
+        bindBlockUpdates()
     }
 
     func showPostDetail(for item: FeedPostItem) {
@@ -164,6 +169,16 @@ final class FeedViewModel: ObservableObject {
         }
     }
 
+    private func bindBlockUpdates() {
+        NotificationCenter.default.publisher(for: .blockedUsersDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, let userId = self.currentUserId else { return }
+                Task { await self.reloadFeed(userId: userId) }
+            }
+            .store(in: &cancellables)
+    }
+
     private func reloadFeed(userId: String) async {
         let authorIds = await resolveFeedAuthorIds(for: userId)
         postRepository.observeFeed(currentUserId: userId, feedAuthorIds: authorIds)
@@ -171,7 +186,9 @@ final class FeedViewModel: ObservableObject {
 
     private func resolveFeedAuthorIds(for userId: String) async -> [String] {
         let followingIds = (try? await followRepository.followingIds(for: userId)) ?? []
+        blockedIds = (try? await blockRepository.blockedIds(for: userId)) ?? []
         return FeedAuthorIds.authorIds(currentUserId: userId, followingIds: followingIds)
+            .filter { !blockedIds.contains($0) }
     }
 
     private func handlePostsUpdate(_ newPosts: [Post]) async {
@@ -200,7 +217,7 @@ final class FeedViewModel: ObservableObject {
     private func rebuildItems() async {
         var newItems: [FeedPostItem] = []
 
-        for post in posts {
+        for post in posts where !blockedIds.contains(post.authorId) {
             let author = await resolveAuthor(id: post.authorId)
             let isLiked = likedPostIds.contains(post.id)
             newItems.append(

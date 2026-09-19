@@ -82,6 +82,21 @@ final class CommentRepository: CommentRepositoryProtocol {
         try await localRepository.deleteComment(id: commentId)
     }
 
+    func deleteCommentsAuthored(by userId: String) async throws {
+        let snapshot = try await firestore.collectionGroup("comments")
+            .whereField("authorId", isEqualTo: userId)
+            .getDocuments()
+
+        for document in snapshot.documents {
+            guard let postRef = document.reference.parent.parent else { continue }
+            let batch = firestore.batch()
+            batch.deleteDocument(document.reference)
+            batch.updateData(["commentCount": FieldValue.increment(Int64(-1))], forDocument: postRef)
+            try await batch.commit()
+            try await localRepository.deleteComment(id: document.documentID)
+        }
+    }
+
     // MARK: - Private
 
     private func commentsQuery(postId: String) -> Query {

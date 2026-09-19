@@ -11,10 +11,9 @@ import UIKit
 struct MediaServiceTests {
 
     @Test func resizeScalesLandscapeImageToMaxLongEdge() {
-        let service = MediaService()
         let image = makeTestImage(width: 2160, height: 1080)
 
-        let data = service.resizeImage(image)
+        let data = image.resizeImage()
         let resized = UIImage(data: data!)
 
         #expect(data != nil)
@@ -25,10 +24,9 @@ struct MediaServiceTests {
     }
 
     @Test func resizeScalesPortraitImageToMaxLongEdge() {
-        let service = MediaService()
         let image = makeTestImage(width: 800, height: 1600)
 
-        let data = service.resizeImage(image)
+        let data = image.resizeImage()
         let resized = UIImage(data: data!)
 
         #expect(data != nil)
@@ -37,18 +35,17 @@ struct MediaServiceTests {
     }
 
     @Test func resizeKeepsSmallImagesUnscaled() {
-        let service = MediaService()
         let image = makeTestImage(width: 400, height: 300)
 
-        let data = service.resizeImage(image)
+        let data = image.resizeImage()
         let resized = UIImage(data: data!)
 
         #expect(resized!.size.width == 400)
         #expect(resized!.size.height == 300)
     }
 
-    @Test func postImagePathUsesExpectedStorageLocation() {
-        #expect(MediaPaths.postImage(postId: "abc123") == "posts/abc123/image.jpg")
+    @Test func postImagePathUsesAuthorScopedStorageLocation() {
+        #expect(MediaPaths.postImage(authorId: "user-1", postId: "abc123") == "posts/user-1/abc123/image.jpg")
     }
 
     @Test func profileImagePathUsesExpectedStorageLocation() {
@@ -58,10 +55,11 @@ struct MediaServiceTests {
     @Test func mockMediaServiceRecordsUploadAndDeletePaths() async throws {
         let mock = MockMediaService()
 
-        _ = try await mock.uploadPostImage(Data([0xFF, 0xD8, 0xFF]), postId: "post-1")
-        try await mock.deletePostImage(postId: "post-1")
+        _ = try await mock.uploadPostImage(Data([0xFF, 0xD8, 0xFF]), postId: "post-1", authorId: "user-1")
+        try await mock.deletePostImage(postId: "post-1", authorId: "user-1")
 
         #expect(mock.uploadedPostIds == ["post-1"])
+        #expect(mock.uploadedAuthorIds == ["user-1"])
         #expect(mock.deletedPostIds == ["post-1"])
         #expect(mock.uploadProgressPublisher.value == 1)
     }
@@ -94,6 +92,7 @@ private final class MockMediaService: MediaServiceProtocol {
     private let progressSubject = CurrentValueSubject<Double, Never>(0)
 
     private(set) var uploadedPostIds: [String] = []
+    private(set) var uploadedAuthorIds: [String] = []
     private(set) var deletedPostIds: [String] = []
     private(set) var uploadedProfileUserIds: [String] = []
     private(set) var deletedProfileUserIds: [String] = []
@@ -106,13 +105,14 @@ private final class MockMediaService: MediaServiceProtocol {
         image.jpegData(compressionQuality: 0.8)
     }
 
-    func uploadPostImage(_ imageData: Data, postId: String) async throws -> String {
+    func uploadPostImage(_ imageData: Data, postId: String, authorId: String) async throws -> String {
         uploadedPostIds.append(postId)
+        uploadedAuthorIds.append(authorId)
         progressSubject.send(1)
-        return "https://example.com/\(postId)/image.jpg"
+        return "https://example.com/\(authorId)/\(postId)/image.jpg"
     }
 
-    func deletePostImage(postId: String) async throws {
+    func deletePostImage(postId: String, authorId: String) async throws {
         deletedPostIds.append(postId)
     }
 

@@ -25,6 +25,7 @@ final class CreatePostViewModel: ObservableObject {
     private let sessionService: SessionServiceProtocol
     private let networkMonitor: NetworkMonitorProtocol
     private let hapticService: HapticServiceProtocol
+    private let contentFilter: ContentFiltering
     private let onPostCreated: () -> Void
     private var progressCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
@@ -60,6 +61,7 @@ final class CreatePostViewModel: ObservableObject {
         sessionService: SessionServiceProtocol,
         networkMonitor: NetworkMonitorProtocol,
         hapticService: HapticServiceProtocol,
+        contentFilter: ContentFiltering = ContentFilter.default,
         onPostCreated: @escaping () -> Void = {}
     ) {
         self.postRepository = postRepository
@@ -68,6 +70,7 @@ final class CreatePostViewModel: ObservableObject {
         self.sessionService = sessionService
         self.networkMonitor = networkMonitor
         self.hapticService = hapticService
+        self.contentFilter = contentFilter
         self.onPostCreated = onPostCreated
         isOffline = !networkMonitor.isConnected
         bindConnectivity()
@@ -93,6 +96,11 @@ final class CreatePostViewModel: ObservableObject {
 
         guard isValid else { return false }
 
+        if contentFilter.containsDeniedContent(trimmedText) {
+            presentError(String(localized: .contentFilterError))
+            return false
+        }
+
         isSubmitting = true
         uploadProgress = 0
         defer {
@@ -110,7 +118,11 @@ final class CreatePostViewModel: ObservableObject {
             }
 
             do {
-                uploadedImageURL = try await mediaService.uploadPostImage(imageData, postId: postId)
+                uploadedImageURL = try await mediaService.uploadPostImage(
+                    imageData,
+                    postId: postId,
+                    authorId: authorId
+                )
             } catch {
                 presentError(String(localized: .postImageErrorUpload))
                 return false
@@ -141,7 +153,7 @@ final class CreatePostViewModel: ObservableObject {
             return true
         } catch {
             if imageURL != nil {
-                try? await mediaService.deletePostImage(postId: postId)
+                try? await mediaService.deletePostImage(postId: postId, authorId: authorId)
             }
             presentError(PostErrorMapper.message(for: error, fallback: String(localized: .postErrorCreate)))
             return false

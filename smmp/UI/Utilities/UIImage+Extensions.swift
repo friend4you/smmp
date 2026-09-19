@@ -16,7 +16,9 @@ extension UIImage {
         let scale = longEdge > MediaService.maxLongEdge ? MediaService.maxLongEdge / longEdge : 1
         let newSize = CGSize(width: size.width * scale, height: size.height * scale)
 
-        let renderer = UIGraphicsImageRenderer(size: newSize)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
         let resized = renderer.image { _ in
             self.draw(in: CGRect(origin: .zero, size: newSize))
         }

@@ -10,4 +10,5 @@ protocol AuthServiceProtocol {
     func register(displayName: String, email: String, password: String) async throws -> User
     func signOut() async throws
     func sendPasswordReset(email: String) async throws
+    func reauthenticate(password: String) async throws
 }
