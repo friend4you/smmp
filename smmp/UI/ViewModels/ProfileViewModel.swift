@@ -18,6 +18,8 @@ final class ProfileViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var showError = false
     @Published var presentedLegalURL: SafariItem?
+    @Published var showMailComposer = false
+    @Published var showContactFallback = false
     @Published var showDeleteConfirmation = false
     @Published var showDeletePasswordPrompt = false
     @Published var deletePassword = ""
@@ -45,6 +47,14 @@ final class ProfileViewModel: ObservableObject {
 
     var canDeleteAccount: Bool {
         !isOffline && !isDeletingAccount
+    }
+
+    var supportEmail: String {
+        legalConfiguration.supportEmail
+    }
+
+    var contactFallbackMessage: String {
+        String(localized: .legalContactUnavailableMessage(supportEmail))
     }
 
     var supportMailtoURL: URL? {
@@ -156,6 +166,27 @@ final class ProfileViewModel: ObservableObject {
 
     func openTermsOfUse() {
         presentedLegalURL = SafariItem(url: legalConfiguration.termsOfUseURL)
+    }
+
+    /// Opens in-app mail when available; otherwise returns a `mailto:` URL for the view to try.
+    @discardableResult
+    func prepareContact(canSendMail: Bool) -> URL? {
+        showContactFallback = false
+
+        if canSendMail {
+            showMailComposer = true
+            return nil
+        }
+
+        return supportMailtoURL
+    }
+
+    func showContactFallbackAlert() {
+        showContactFallback = true
+    }
+
+    func dismissMailComposer() {
+        showMailComposer = false
     }
 
     func requestDeleteAccount() {

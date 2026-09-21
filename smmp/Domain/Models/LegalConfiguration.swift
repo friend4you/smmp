@@ -28,9 +28,6 @@ struct LegalConfiguration: Equatable, Sendable {
     )
 
     var supportMailtoURL: URL? {
-        var components = URLComponents()
-        components.scheme = "mailto"
-        components.path = supportEmail
-        return components.url
+        URL(string: "mailto:\(supportEmail)")
     }
 }

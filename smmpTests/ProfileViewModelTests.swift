@@ -82,6 +82,34 @@ struct ProfileViewModelTests {
         #expect(!viewModel.canEditProfile)
     }
 
+    @Test func prepareContactShowsMailComposerWhenMailAvailable() {
+        let viewModel = makeViewModel()
+
+        let mailtoURL = viewModel.prepareContact(canSendMail: true)
+
+        #expect(mailtoURL == nil)
+        #expect(viewModel.showMailComposer)
+        #expect(!viewModel.showContactFallback)
+    }
+
+    @Test func prepareContactReturnsMailtoWhenMailUnavailable() {
+        let viewModel = makeViewModel()
+
+        let mailtoURL = viewModel.prepareContact(canSendMail: false)
+
+        #expect(mailtoURL?.absoluteString == "mailto:vlad.arsenyuk@gmail.com")
+        #expect(!viewModel.showMailComposer)
+        #expect(!viewModel.showContactFallback)
+    }
+
+    @Test func showContactFallbackAlertSetsFlag() {
+        let viewModel = makeViewModel()
+
+        viewModel.showContactFallbackAlert()
+
+        #expect(viewModel.showContactFallback)
+    }
+
     @Test func loadUsesCachedPostsWhenOffline() async {
         let user = makeUser(id: "me")
         let cachedPost = makePost(id: "cached-post", authorId: "me")

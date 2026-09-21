@@ -894,6 +894,50 @@
         }
       }
     },
+    "legal.contact.copyEmail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Email"
+          }
+        }
+      }
+    },
+    "legal.contact.mailSubject": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SMMP Support"
+          }
+        }
+      }
+    },
+    "legal.contact.unavailable.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send your message to %@. You can copy the address if Mail is not set up on this device."
+          }
+        }
+      }
+    },
+    "legal.contact.unavailable.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail Unavailable"
+          }
+        }
+      }
+    },
     "legal.privacyPolicy": {
       "extractionState": "manual",
       "localizations": {

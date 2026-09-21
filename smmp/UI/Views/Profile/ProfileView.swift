@@ -3,7 +3,9 @@
 //  smmp
 //
 
+import MessageUI
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @Environment(\.openURL) private var openURL
@@ -14,6 +16,25 @@ struct ProfileView: View {
     }
 
     var body: some View {
+        scrollContent
+            .refreshable {
+                await viewModel.refresh()
+            }
+            .navigationTitle(Text(.tabProfile))
+            .toolbar { profileToolbar }
+            .modifier(ProfileDialogsModifier(viewModel: viewModel))
+            .task {
+                await viewModel.load()
+            }
+            .onAppear {
+                viewModel.onAppear()
+            }
+            .onDisappear {
+                viewModel.onDisappear()
+            }
+    }
+
+    private var scrollContent: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 if viewModel.isOffline {
@@ -42,121 +63,67 @@ struct ProfileView: View {
             }
             .padding()
         }
-        .refreshable {
-            await viewModel.refresh()
+    }
+
+    @ToolbarContentBuilder
+    private var profileToolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                viewModel.editProfileTapped()
+            } label: {
+                Text(.profileEdit)
+            }
+            .disabled(!viewModel.canEditProfile)
         }
-        .navigationTitle(Text(.tabProfile))
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    viewModel.editProfileTapped()
-                } label: {
-                    Text(.profileEdit)
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                Task {
+                    await viewModel.logout()
                 }
-                .disabled(!viewModel.canEditProfile)
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    Task {
-                        await viewModel.logout()
-                    }
-                } label: {
-                    Label(.profileLogout, systemImage: "rectangle.portrait.and.arrow.right")
-                }
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    viewModel.openPrivacyPolicy()
-                } label: {
-                    Label(.legalPrivacyPolicy, systemImage: "hand.raised")
-                }
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    viewModel.openTermsOfUse()
-                } label: {
-                    Label(.legalTermsOfUse, systemImage: "doc.text")
-                }
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                Button {
-                    if let url = viewModel.supportMailtoURL {
-                        openURL(url)
-                    }
-                } label: {
-                    Label(.legalContact, systemImage: "envelope")
-                }
-            }
-            ToolbarItem(placement: .secondaryAction) {
-                Button(role: .destructive) {
-                    viewModel.requestDeleteAccount()
-                } label: {
-                    Label(.accountDeleteAction, systemImage: "trash")
-                }
-                .disabled(!viewModel.canDeleteAccount)
+            } label: {
+                Label(.profileLogout, systemImage: "rectangle.portrait.and.arrow.right")
             }
         }
-        .alert(
-            Text(.commonErrorTitle),
-            isPresented: $viewModel.showError,
-            presenting: viewModel.errorMessage
-        ) { _ in
-            Button { viewModel.showError = false } label: {
-                Text(.commonOk)
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                viewModel.openPrivacyPolicy()
+            } label: {
+                Label(.legalPrivacyPolicy, systemImage: "hand.raised")
             }
-        } message: { message in
-            Text(message)
         }
-        .confirmationDialog(
-            Text(.accountDeleteConfirmTitle),
-            isPresented: $viewModel.showDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                viewModel.openTermsOfUse()
+            } label: {
+                Label(.legalTermsOfUse, systemImage: "doc.text")
+            }
+        }
+        ToolbarItem(placement: .secondaryAction) {
+            Button {
+                contactTapped()
+            } label: {
+                Label(.legalContact, systemImage: "envelope")
+            }
+        }
+        ToolbarItem(placement: .secondaryAction) {
             Button(role: .destructive) {
-                viewModel.confirmDeleteAccount()
+                viewModel.requestDeleteAccount()
             } label: {
-                Text(.accountDeleteConfirmAction)
+                Label(.accountDeleteAction, systemImage: "trash")
             }
-            Button(role: .cancel) {
-                viewModel.cancelDeleteAccount()
-            } label: {
-                Text(.commonCancel)
-            }
-        } message: {
-            Text(.accountDeleteConfirmMessage)
+            .disabled(!viewModel.canDeleteAccount)
         }
-        .alert(
-            Text(.accountDeletePasswordTitle),
-            isPresented: $viewModel.showDeletePasswordPrompt
+    }
+
+    private func contactTapped() {
+        if let mailtoURL = viewModel.prepareContact(
+            canSendMail: MFMailComposeViewController.canSendMail()
         ) {
-            SecureField(
-                String(localized: .accountDeletePasswordPlaceholder),
-                text: $viewModel.deletePassword
-            )
-            Button(role: .destructive) {
-                Task { await viewModel.performDeleteAccount() }
-            } label: {
-                Text(.accountDeleteConfirmAction)
+            openURL(mailtoURL) { accepted in
+                if !accepted {
+                    viewModel.showContactFallbackAlert()
+                }
             }
-            Button(role: .cancel) {
-                viewModel.cancelDeleteAccount()
-            } label: {
-                Text(.commonCancel)
-            }
-        } message: {
-            Text(.accountDeletePasswordMessage)
-        }
-        .sheet(item: $viewModel.presentedLegalURL) { item in
-            SafariView(url: item.url)
-        }
-        .task {
-            await viewModel.load()
-        }
-        .onAppear {
-            viewModel.onAppear()
-        }
-        .onDisappear {
-            viewModel.onDisappear()
         }
     }
 
@@ -171,6 +138,89 @@ struct ProfileView: View {
             PostListSkeleton(count: 2)
         }
         .allowsHitTesting(false)
+    }
+}
+
+private struct ProfileDialogsModifier: ViewModifier {
+    @ObservedObject var viewModel: ProfileViewModel
+
+    func body(content: Content) -> some View {
+        content
+            .alert(
+                Text(.commonErrorTitle),
+                isPresented: $viewModel.showError,
+                presenting: viewModel.errorMessage
+            ) { _ in
+                Button { viewModel.showError = false } label: {
+                    Text(.commonOk)
+                }
+            } message: { message in
+                Text(message)
+            }
+            .confirmationDialog(
+                Text(.accountDeleteConfirmTitle),
+                isPresented: $viewModel.showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button(role: .destructive) {
+                    viewModel.confirmDeleteAccount()
+                } label: {
+                    Text(.accountDeleteConfirmAction)
+                }
+                Button(role: .cancel) {
+                    viewModel.cancelDeleteAccount()
+                } label: {
+                    Text(.commonCancel)
+                }
+            } message: {
+                Text(.accountDeleteConfirmMessage)
+            }
+            .alert(
+                Text(.accountDeletePasswordTitle),
+                isPresented: $viewModel.showDeletePasswordPrompt
+            ) {
+                SecureField(
+                    String(localized: .accountDeletePasswordPlaceholder),
+                    text: $viewModel.deletePassword
+                )
+                Button(role: .destructive) {
+                    Task { await viewModel.performDeleteAccount() }
+                } label: {
+                    Text(.accountDeleteConfirmAction)
+                }
+                Button(role: .cancel) {
+                    viewModel.cancelDeleteAccount()
+                } label: {
+                    Text(.commonCancel)
+                }
+            } message: {
+                Text(.accountDeletePasswordMessage)
+            }
+            .alert(
+                Text(.legalContactUnavailableTitle),
+                isPresented: $viewModel.showContactFallback
+            ) {
+                Button {
+                    UIPasteboard.general.string = viewModel.supportEmail
+                } label: {
+                    Text(.legalContactCopyEmail)
+                }
+                Button(role: .cancel) {
+                    viewModel.showContactFallback = false
+                } label: {
+                    Text(.commonOk)
+                }
+            } message: {
+                Text(viewModel.contactFallbackMessage)
+            }
+            .sheet(item: $viewModel.presentedLegalURL) { item in
+                SafariView(url: item.url)
+            }
+            .sheet(isPresented: $viewModel.showMailComposer) {
+                MailComposeView(recipient: viewModel.supportEmail) {
+                    viewModel.dismissMailComposer()
+                }
+            }
     }
 }
 
