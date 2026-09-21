@@ -37,8 +37,9 @@ npx firebase-tools use smmp-b0138
 npx firebase-tools deploy --only hosting
 ```
 
-Live URLs (also set in `LegalConfiguration.swift`):
+Live URLs (privacy/terms also set in `LegalConfiguration.swift`):
 
+- https://smmp-b0138.web.app/support
 - https://smmp-b0138.web.app/privacy
 - https://smmp-b0138.web.app/terms
 
